@@ -1,1 +1,57 @@
-/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+@use './styles/theme-colors' as cutepet;
+@use './styles/tokens';
+
+html {
+  height: 100%;
+  color-scheme: light;
+
+  @include mat.theme(
+    (
+      color: (
+        primary: cutepet.$primary-palette,
+        tertiary: cutepet.$tertiary-palette,
+      ),
+      typography: (
+        plain-family: 'Nunito Variable',
+        brand-family: 'Fredoka',
+      ),
+      density: 0,
+    )
+  );
+
+  // Rounder, softer Material look (less "Google")
+  @include mat.theme-overrides(
+    (
+      corner-medium: 16px,
+      corner-large: 24px,
+    )
+  );
+}
+
+body {
+  margin: 0;
+  height: 100%;
+  background-color: var(--cp-bg);
+  color: var(--cp-ink);
+  font: var(--mat-sys-body-large);
+  font-family: var(--cp-font-body);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--cp-font-display);
+  font-weight: 500;
+}
+
+// Main purchase button: the only element that uses the cherry color.
+.cp-cta.mat-mdc-unelevated-button {
+  --mat-button-filled-container-color: var(--cp-cta);
+  --mat-button-filled-label-text-color: var(--cp-on-cta);
+}
+
+:focus-visible {
+  outline: 3px solid var(--cp-ink);
+  outline-offset: 2px;
+}

@@ -1,0 +1,23 @@
+<a class="skip-link" href="#contenido">Saltar al contenido</a>
+
+<mat-toolbar class="header">
+  <a class="brand" routerLink="/">CutePet</a>
+
+  <nav class="nav" aria-label="Principal">
+    @for (link of links; track link.path) {
+      <a mat-button [routerLink]="link.path" routerLinkActive="active">{{ link.label }}</a>
+    }
+  </nav>
+
+  <a mat-icon-button routerLink="/carrito" aria-label="Ver carrito">
+    <mat-icon>shopping_bag</mat-icon>
+  </a>
+</mat-toolbar>
+
+<main id="contenido" class="content">
+  <router-outlet />
+</main>
+
+<footer class="footer">
+  <span>CutePet - Ropa para mascotas hecha a mano en La Paz</span>
+</footer>

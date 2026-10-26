@@ -1,0 +1,38 @@
+// CutePet design tokens. Components use ONLY these variables or Material's --mat-sys-*.
+
+:root {
+  // Palette
+  --cp-cream: #fff4e6; // base background
+  --cp-pink: #f2b8c6; // brand: header, highlighted sections
+  --cp-lavender: #c9b6e4; // secondary
+  --cp-sky: #a9dceb; // secondary
+  --cp-candy-green: #9bd94e; // success / confirmations
+  --cp-cherry: #d9343f; // ONLY the main buy button
+  --cp-chocolate: #5b3a29; // text and borders
+
+  // Semantic aliases (use these in components)
+  --cp-bg: var(--cp-cream);
+  --cp-brand: var(--cp-pink);
+  --cp-ink: var(--cp-chocolate);
+  --cp-cta: var(--cp-cherry);
+  --cp-on-cta: #ffffff;
+  --cp-success: var(--cp-candy-green);
+
+  // Shape
+  --cp-radius: 16px;
+  --cp-border: 2px solid var(--cp-chocolate);
+
+  // Typography
+  --cp-font-display: 'Fredoka', 'Nunito Variable', sans-serif;
+  --cp-font-body: 'Nunito Variable', sans-serif;
+
+  // Spacing (8px scale)
+  --cp-space-xs: 4px;
+  --cp-space-sm: 8px;
+  --cp-space-md: 16px;
+  --cp-space-lg: 24px;
+  --cp-space-xl: 48px;
+
+  // Layout
+  --cp-content-width: 1120px;
+}
