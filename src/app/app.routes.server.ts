@@ -10,7 +10,6 @@ export const serverRoutes: ServerRoute[] = [
   { path: '', renderMode: RenderMode.Server },
   { path: 'catalogo', renderMode: RenderMode.Server },
   { path: 'catalogo/:slug', renderMode: RenderMode.Server },
-  { path: 'vendidos', renderMode: RenderMode.Server },
   { path: 'guia-de-tallas', renderMode: RenderMode.Server },
   { path: 'personalizado', renderMode: RenderMode.Prerender },
   { path: '**', renderMode: RenderMode.Client },

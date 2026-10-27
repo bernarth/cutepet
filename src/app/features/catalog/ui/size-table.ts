@@ -43,7 +43,7 @@ import { Size } from '../models/size';
   styles: `
     .scroll {
       overflow-x: auto;
-      border: var(--cp-border);
+      border: var(--cp-border-soft);
       border-radius: var(--cp-radius);
     }
     caption {

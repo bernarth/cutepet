@@ -1,12 +1,7 @@
-import { Database } from '@core/supabase/database.types';
-
-export type Availability = Database['public']['Enums']['availability'];
-
 export interface CatalogFilters {
   readonly petType: string | null;
   readonly category: string | null;
   readonly size: string | null;
-  readonly availability: Availability | null;
 }
 
 export type CatalogFilterKey = keyof CatalogFilters;
@@ -22,29 +17,16 @@ export interface FilterGroup {
   readonly options: readonly FilterOption[];
 }
 
+export interface ActiveFilter {
+  readonly key: CatalogFilterKey;
+  readonly label: string;
+}
+
 /** Query param names are Spanish because they are part of the URL the customer shares */
 export const FILTER_PARAMS: Readonly<Record<CatalogFilterKey, string>> = {
   petType: 'mascota',
   category: 'categoria',
   size: 'talla',
-  availability: 'disponibilidad',
-};
-
-const AVAILABILITY_PARAMS: Readonly<Record<Availability, string>> = {
-  in_stock: 'en-stock',
-  made_to_order: 'a-pedido',
-};
-
-export const AVAILABILITY_OPTIONS: readonly FilterOption[] = [
-  { value: AVAILABILITY_PARAMS.in_stock, label: 'Lista para llevar' },
-  { value: AVAILABILITY_PARAMS.made_to_order, label: 'Hecha a pedido' },
-];
-
-export const NO_FILTERS: CatalogFilters = {
-  petType: null,
-  category: null,
-  size: null,
-  availability: null,
 };
 
 export function filtersFromParams(params: Readonly<Record<string, unknown>>): CatalogFilters {
@@ -52,23 +34,16 @@ export function filtersFromParams(params: Readonly<Record<string, unknown>>): Ca
     const value = params[FILTER_PARAMS[key]];
     return typeof value === 'string' && value.trim() !== '' ? value.trim() : null;
   };
-  const availabilityParam = read('availability');
-  const availability =
-    (Object.keys(AVAILABILITY_PARAMS) as Availability[]).find(
-      (key) => AVAILABILITY_PARAMS[key] === availabilityParam,
-    ) ?? null;
-
-  return { petType: read('petType'), category: read('category'), size: read('size'), availability };
+  return { petType: read('petType'), category: read('category'), size: read('size') };
 }
 
-/** Values as they appear in the URL. null removes the param */
-export function filterParamValues(
+/** One entry per selected filter, labelled with the option name, for the removable chips */
+export function activeFilters(
+  groups: readonly FilterGroup[],
   filters: CatalogFilters,
-): Record<CatalogFilterKey, string | null> {
-  return {
-    petType: filters.petType,
-    category: filters.category,
-    size: filters.size,
-    availability: filters.availability ? AVAILABILITY_PARAMS[filters.availability] : null,
-  };
+): ActiveFilter[] {
+  return groups.flatMap((group) => {
+    const option = group.options.find((item) => item.value === filters[group.key]);
+    return option ? [{ key: group.key, label: `${group.label}: ${option.label}` }] : [];
+  });
 }

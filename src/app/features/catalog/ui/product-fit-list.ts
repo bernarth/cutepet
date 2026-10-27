@@ -2,29 +2,32 @@ import { Component, computed, input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 
-import { fitIssueText } from '../models/measurements-text';
-import { VARIANT_AVAILABILITY_SUFFIX } from '../models/product';
-import { ProductFit, VariantFit } from '../models/size-calculator';
+import { fitIssuesText } from '../models/measurements-text';
+import { ProductFit, VariantFit, closestVariant } from '../models/size-calculator';
 
 @Component({
   selector: 'cp-product-fit-list',
   imports: [MatIconModule, RouterLink],
   template: `
-    <ul>
-      @for (fit of result().variants; track fit.variant.id) {
-        <li [class.fits]="fit.fits">
-          <mat-icon aria-hidden="true">{{ fit.fits ? 'check_circle' : 'info' }}</mat-icon>
-          <span>
-            Talla {{ fit.variant.sizeLabel }}{{ availabilitySuffix[fit.variant.availability] }}:
-            {{ fit.fits ? 'le queda' : issuesText(fit) }}
-          </span>
-        </li>
-      }
-    </ul>
-    @if (noneFits()) {
+    @if (closest(); as fit) {
+      <p class="headline">La más cercana: Talla {{ fit.variant.sizeLabel }}</p>
+      <p>{{ issuesText(fit) }}.</p>
       <p>
-        Ninguna talla le queda. <a routerLink="/personalizado">Pide una prenda personalizada</a>.
+        ¿Prefieres una a su medida?
+        <a routerLink="/personalizado">Pide una prenda personalizada</a>.
       </p>
+    } @else {
+      <ul>
+        @for (fit of result().variants; track fit.variant.id) {
+          <li [class.fits]="fit.fits">
+            <mat-icon aria-hidden="true">{{ fit.fits ? 'check_circle' : 'info' }}</mat-icon>
+            <span>
+              Talla {{ fit.variant.sizeLabel }}:
+              {{ fit.fits ? 'le queda' : issuesText(fit) }}
+            </span>
+          </li>
+        }
+      </ul>
     }
   `,
   styles: `
@@ -47,15 +50,17 @@ import { ProductFit, VariantFit } from '../models/size-calculator';
     p {
       margin: 0 0 var(--cp-space-xs);
     }
+    .headline {
+      font: var(--mat-sys-title-medium);
+    }
   `,
 })
 export class ProductFitList {
   readonly result = input.required<ProductFit>();
 
-  protected readonly noneFits = computed(() => this.result().variants.every((fit) => !fit.fits));
-  protected readonly availabilitySuffix = VARIANT_AVAILABILITY_SUFFIX;
+  protected readonly closest = computed(() => closestVariant(this.result()));
 
   protected issuesText(fit: VariantFit): string {
-    return fit.issues.map(fitIssueText).join(' y ');
+    return fitIssuesText(fit.issues);
   }
 }

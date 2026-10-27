@@ -33,13 +33,12 @@ Always use these names. Do not invent synonyms.
 | Encomienda por flota  | bus parcel shipping  |
 | Guía de envío         | shipping receipt     |
 | Pedido personalizado  | custom request       |
-| Ya vendidos           | sold gallery         |
 | Mis mascotas          | my pets              |
 | Guía de tallas        | size guide           |
 | Canal de notificación | notification channel |
 | Motivo                | reason               |
 
-Order statuses live in English in the database (`pending_payment`, `proof_uploaded`, `confirmed`, `in_production`, `ready_for_pickup`, `shipped`, `delivered`, `cancelled`). Their Spanish labels are defined in **one** place in the code and reused everywhere.
+Order statuses live in English in the database (`pending_payment`, `proof_uploaded`, `confirmed`, `ready_for_pickup`, `shipped`, `delivered`, `cancelled`). Their Spanish labels are defined in **one** place in the code and reused everywhere.
 
 ## Commands
 
@@ -84,6 +83,7 @@ Order statuses live in English in the database (`pending_payment`, `proof_upload
 - A feature never imports another feature (ESLint blocks it).
 - Feature layout: `pages/` (smart, routed) · `ui/` (dumb, only `input()`/`output()`) · `data-access/` (repository + store) · `models/`.
 - Styles only through `--cp-*` tokens or `--mat-sys-*`; never a hex value in a component. `.cp-cta` is only for the main buy button.
+- **Mobile first.** Most customers arrive from WhatsApp on a phone. Design at 360px first, then scale up with `min-width` media queries. Check every page at 360px, 768px and 1280px with no horizontal overflow.
 - SSR: no `window`/`document`/`localStorage` without `isPlatformBrowser` or `afterNextRender`.
 
 ## TypeScript

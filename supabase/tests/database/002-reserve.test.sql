@@ -1,11 +1,10 @@
 begin;
-select plan(24);
+select plan(22);
 
 select tests.set_settings('{"qr_checkout_enabled": true}');
 select tests.create_variant(price => 100) as unique_variant \gset
 select tests.create_variant(price => 50) as second_variant \gset
 select tests.create_variant(stock => 0) as sold_variant \gset
-select tests.create_variant(stock => 0, availability => 'made_to_order') as made_to_order_variant \gset
 select tests.create_variant(is_active => false) as inactive_variant \gset
 select tests.create_user('a@test.bo') as customer_a \gset
 select tests.create_user('b@test.bo') as customer_b \gset
@@ -65,13 +64,6 @@ select tests.reserve(:'customer_c', tests.items(:second_variant)) as second_orde
 select is((tests.order_row(:'first_order_c')).cancel_reason, 'replaced_by_new_order',
   'a new reservation cancels the previous pending order of the same customer');
 select is((tests.order_row(:'second_order_c')).status, 'pending_payment', 'the new reservation can take the same item');
-
-select tests.reserve(:'customer_a', tests.items(:made_to_order_variant)) as made_to_order_order \gset
-
-select is((tests.order_row(:'made_to_order_order')).status, 'pending_payment', 'made to order items skip the stock check');
-select is(
-  (select oi.is_made_to_order from public.order_items oi where oi.order_id = :'made_to_order_order'),
-  true, 'the made to order flag is stored on the item');
 
 update public.products set price = 999, name = 'Otro nombre'
 where id = (select product_id from public.variants where id = :second_variant);

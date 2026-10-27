@@ -26,6 +26,10 @@ const NUMBER_MESSAGE = 'Escribe solo números, por ejemplo 38 o 38,5';
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: var(--cp-space-sm);
     }
+    .intro {
+      margin: 0 0 var(--cp-space-sm);
+      font: var(--mat-sys-body-medium);
+    }
     .note {
       margin: 0;
       color: var(--mat-sys-on-surface-variant);
@@ -39,7 +43,7 @@ export class SizeCalculator {
 
   private readonly model = signal({ chest: '', neck: '', backLength: '' });
   protected readonly measurementsForm = form(this.model, (path) => {
-    required(path.chest, { message: 'El pecho es obligatorio' });
+    required(path.backLength, { message: 'El largo es obligatorio' });
     pattern(path.chest, CENTIMETERS, { message: NUMBER_MESSAGE });
     pattern(path.neck, CENTIMETERS, { message: NUMBER_MESSAGE });
     pattern(path.backLength, CENTIMETERS, { message: NUMBER_MESSAGE });
@@ -52,7 +56,7 @@ export class SizeCalculator {
       neck: parseMeasurement(neck),
       backLength: parseMeasurement(backLength),
     };
-    return this.measurementsForm().valid() && parsed.chest !== undefined ? parsed : null;
+    return this.measurementsForm().valid() && parsed.backLength !== undefined ? parsed : null;
   });
 
   protected readonly tableResult = computed(() => {

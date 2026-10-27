@@ -1,9 +1,9 @@
 import { Component, effect, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 import { PageMeta } from '@core/seo/page-meta';
 import { EmptyState } from '@shared/ui/empty-state';
+import { LoadingBar } from '@shared/ui/loading-bar';
 import { PageHeader } from '@shared/ui/page-header';
 import { CatalogStore } from '../data-access/catalog.store';
 import { FilterBar, FilterChange } from '../ui/filter-bar';
@@ -11,23 +11,19 @@ import { ProductGrid } from '../ui/product-grid';
 
 @Component({
   selector: 'cp-catalog-page',
-  imports: [PageHeader, EmptyState, FilterBar, ProductGrid, MatButtonModule, MatProgressBarModule],
+  imports: [PageHeader, EmptyState, FilterBar, ProductGrid, MatButtonModule, LoadingBar],
   providers: [CatalogStore],
   template: `
-    <cp-page-header
-      title="Catálogo"
-      subtitle="Prendas hechas a mano, listas para llevar o a pedido"
-    />
+    <cp-page-header title="Catálogo" subtitle="Prendas únicas hechas a mano, listas para llevar" />
     <cp-filter-bar
       [groups]="store.filterGroups()"
-      [selected]="store.selectedValues()"
+      [selected]="store.filters()"
+      [active]="store.activeFilters()"
       [hasFilters]="store.hasFilters()"
       (changed)="onFilterChange($event)"
       (cleared)="store.clearFilters()"
     />
-    @if (store.isLoading()) {
-      <mat-progress-bar mode="indeterminate" aria-label="Cargando prendas" />
-    }
+    <cp-loading-bar [active]="store.isLoading()" label="Cargando prendas" />
     @if (store.hasError()) {
       <cp-empty-state icon="info" message="No pudimos cargar el catálogo.">
         <button mat-button type="button" (click)="store.reload()">Reintentar</button>

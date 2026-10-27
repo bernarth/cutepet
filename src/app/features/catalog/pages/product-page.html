@@ -1,30 +1,30 @@
-@if (store.isLoading()) {
-  <mat-progress-bar mode="indeterminate" aria-label="Cargando prenda" />
-}
+<cp-loading-bar [active]="store.isLoading()" label="Cargando prenda" />
 
 @if (store.product(); as product) {
   <article class="layout">
-    <cp-photo-gallery [photos]="product.photos" />
+    <cp-photo-gallery [photos]="product.photos" [class.reserved]="product.status === 'reserved'" />
 
     <div class="info">
       <h1>{{ product.name }}</h1>
-      @if (badge(); as text) {
-        <span class="badge">{{ text }}</span>
+      <p class="price">{{ product.price | price }}</p>
+
+      @if (product.status === 'reserved') {
+        <p class="notice" role="status">
+          Alguien está comprando esta prenda. Si no completa su compra, volverá a estar disponible
+          en unos minutos.
+        </p>
       }
 
-      @if (product.status === 'sold_out') {
-        <div class="sold">
-          <p>Esta prenda ya fue vendida</p>
-          <a mat-flat-button routerLink="/personalizado">Pide una parecida</a>
-        </div>
-      } @else {
-        <p class="price">{{ product.price | currency }}</p>
+      <cp-size-picker [variants]="product.variants" [(selectedId)]="selectedVariantId" />
+      @if (hasReservedSize()) {
+        <p class="hint">Las tallas desactivadas las está comprando alguien en este momento.</p>
+      }
+      @if (measurements(); as text) {
+        <p class="measurements">{{ text }}</p>
       }
 
       <p class="meta">{{ product.petTypeName }} · {{ product.categoryName }}</p>
       <p class="description">{{ product.description }}</p>
-
-      <cp-variant-list [variants]="product.variants" />
 
       <section class="calculator" aria-labelledby="calculator-title">
         <h2 id="calculator-title">¿Cuál es su talla?</h2>
@@ -36,8 +36,15 @@
       </section>
     </div>
   </article>
+} @else if (store.isSoldOut()) {
+  <cp-empty-state icon="favorite" message="Esta prenda ya no está disponible.">
+    <div class="actions">
+      <a mat-flat-button routerLink="/catalogo">Ver catálogo</a>
+      <a mat-stroked-button routerLink="/personalizado">Pide una prenda personalizada</a>
+    </div>
+  </cp-empty-state>
 } @else if (store.notFound()) {
-  <cp-empty-state message="No encontramos esta prenda. Puede que ya no esté disponible.">
+  <cp-empty-state message="No encontramos esta prenda.">
     <a mat-button routerLink="/catalogo">Ver catálogo</a>
   </cp-empty-state>
 } @else if (store.hasError()) {

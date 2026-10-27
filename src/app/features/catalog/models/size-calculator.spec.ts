@@ -1,6 +1,6 @@
 import { Variant } from './product';
 import { Size } from './size';
-import { fitProduct, parseMeasurement, recommendSize } from './size-calculator';
+import { closestVariant, fitProduct, parseMeasurement, recommendSize } from './size-calculator';
 
 function size(id: number, label: string, [neck, chest, back]: number[][]): Size {
   return {
@@ -36,7 +36,7 @@ function variant(overrides: Partial<Variant>): Variant {
     id: 1,
     sizeId: 2,
     sizeLabel: '00',
-    availability: 'available',
+    isReserved: false,
     exactMeasurements: null,
     toleranceCm: null,
     ...overrides,
@@ -131,5 +131,30 @@ describe('fitProduct', () => {
     );
     expect(result.variants.map((fit) => fit.fits)).toEqual([true, false]);
     expect(result.approximate).toBe(true);
+  });
+});
+
+describe('closestVariant', () => {
+  it('picks the size with the smallest total difference when none fits', () => {
+    const result = fitProduct(
+      [
+        variant({ id: 1, exactMeasurements: { backLength: 20 } }),
+        variant({ id: 2, exactMeasurements: { backLength: 26 } }),
+      ],
+      SIZES,
+      { backLength: 30 },
+      2,
+    );
+    expect(closestVariant(result)?.variant.id).toBe(2);
+  });
+
+  it('returns null when some size fits', () => {
+    const result = fitProduct(
+      [variant({ exactMeasurements: { backLength: 30 } })],
+      SIZES,
+      { backLength: 31 },
+      2,
+    );
+    expect(closestVariant(result)).toBeNull();
   });
 });

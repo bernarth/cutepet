@@ -1,17 +1,14 @@
-import { ProductDetail } from './product';
+import { formatPrice } from '@shared/pipes/price';
 
-const bolivianos = new Intl.NumberFormat('es-BO', { style: 'currency', currency: 'BOB' });
+import { ProductDetail } from './product';
 
 /** Link preview text. WhatsApp ignores product:price, so the price goes here */
 export function productMetaDescription(product: ProductDetail): string {
-  if (product.status === 'sold_out') {
-    return `Ya vendida. Pide una parecida a tu medida. ${product.description}`.trim();
-  }
   const labels = product.variants
-    .filter((variant) => variant.availability === 'available')
+    .filter((variant) => !variant.isReserved)
     .map((variant) => variant.sizeLabel);
   const sizes = labels.length === 1 ? `Talla ${labels[0]}` : `Tallas ${joinSpanish(labels)}`;
-  const parts = [bolivianos.format(product.price), labels.length ? sizes : 'Reservada'];
+  const parts = [formatPrice(product.price), labels.length ? sizes : 'Alguien la está comprando'];
   return `${parts.join(' · ')}. ${product.description}`.trim();
 }
 

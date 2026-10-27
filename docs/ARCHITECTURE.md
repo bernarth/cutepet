@@ -76,11 +76,11 @@ orders (status → proof_uploaded) ──trigger/webhook──▶ Edge Function 
 - Angular Material components first. Before building a custom component, check that Material does not already have it.
 - Colors, spacing, radius and fonts only through `--cp-*` tokens (`src/styles/_tokens.scss`) or `--mat-sys-*` variables. Never a hex value inside a component.
 - Cherry red (`.cp-cta`) only for the main buy button.
-- Mobile first: most customers buy from their phone.
+- Mobile first: most customers buy from their phone. Design at 360px first, then scale up (see `CLAUDE.md`).
 
 ## SSR
 
-- Home, catalog, product and sold gallery are rendered on the server so WhatsApp link previews and Google show real content. Set `Title`/`Meta` (Open Graph: image, name, price) from product data.
+- Home, catalog, product and size guide are rendered on the server so WhatsApp link previews and Google show real content. Set `Title`/`Meta` (Open Graph: image, name, price) from product data.
 - Never use `window`, `document` or `localStorage` directly: guard with `isPlatformBrowser` or `afterNextRender`.
 - On the server the Supabase client has no session: public data only.
 - Angular SSR only answers hosts listed in `NG_ALLOWED_HOSTS` (SSRF protection).
@@ -91,4 +91,4 @@ orders (status → proof_uploaded) ──trigger/webhook──▶ Edge Function 
 - Angular 2025 file naming: `catalog-page.ts` → class `CatalogPage`.
 - Selector prefix: `cp-`.
 - Path aliases: `@core/*`, `@shared/*`, `@features/*`, `@env/*`. Never `../../..`.
-- Currency: `currency` pipe (locale `es-BO` and currency `BOB` are already configured).
+- Prices: `price` pipe or `formatPrice()` from `@shared/pipes/price` ("Bs 120", "Bs 120,50"). Never the `currency` pipe or a hand-written format.

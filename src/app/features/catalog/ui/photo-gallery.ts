@@ -41,7 +41,7 @@ import { Photo } from '../models/product';
       position: relative;
       aspect-ratio: 4 / 5;
       overflow: hidden;
-      border: var(--cp-border);
+      border: var(--cp-border-soft);
       border-radius: var(--cp-radius);
       background: var(--mat-sys-surface-container);
     }

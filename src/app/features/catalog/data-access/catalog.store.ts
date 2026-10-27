@@ -1,15 +1,15 @@
-import { Service, computed, inject, resource } from '@angular/core';
+import { Service, computed, inject, linkedSignal, resource } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import {
-  AVAILABILITY_OPTIONS,
   CatalogFilterKey,
   FILTER_PARAMS,
   FilterGroup,
-  filterParamValues,
+  activeFilters,
   filtersFromParams,
 } from '../models/catalog-filters';
+import { ProductSummary } from '../models/product';
 import { LookupRepository } from './lookup.repository';
 import { ProductRepository } from './product.repository';
 
@@ -26,9 +26,8 @@ export class CatalogStore {
   });
 
   readonly filters = computed(() => filtersFromParams(this.queryParams()));
-  readonly selectedValues = computed(() => filterParamValues(this.filters()));
   readonly hasFilters = computed(() =>
-    Object.values(this.selectedValues()).some((value) => value !== null),
+    Object.values(this.filters()).some((value) => value !== null),
   );
 
   private readonly options = resource({
@@ -51,11 +50,14 @@ export class CatalogStore {
         petType: filters.petType,
         category: filters.category,
         sizeId: sizes.find((size) => size.label === filters.size)?.id ?? null,
-        availability: filters.availability,
       }),
   });
 
-  readonly items = computed(() => (this.productList.hasValue() ? this.productList.value() : []));
+  /** Keeps the previous items while new filters load, so the page does not collapse and jump */
+  readonly items = linkedSignal<ProductSummary[] | undefined, ProductSummary[]>({
+    source: () => (this.productList.hasValue() ? this.productList.value() : undefined),
+    computation: (current, previous) => current ?? previous?.value ?? [],
+  });
   readonly isLoading = computed(() => this.productList.isLoading());
   readonly hasError = computed(() => this.productList.status() === 'error');
 
@@ -69,9 +71,10 @@ export class CatalogStore {
         label: 'Talla',
         options: (options?.sizes ?? []).map((size) => ({ value: size.label, label: size.label })),
       },
-      { key: 'availability', label: 'Disponibilidad', options: AVAILABILITY_OPTIONS },
     ];
   });
+
+  readonly activeFilters = computed(() => activeFilters(this.filterGroups(), this.filters()));
 
   setFilter(key: CatalogFilterKey, value: string | null): void {
     void this.router.navigate([], {

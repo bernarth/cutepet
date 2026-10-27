@@ -8,7 +8,7 @@
 Online store for handmade pet clothing based in La Paz, Bolivia. Customers buy in two ways: paying with a bank QR code and uploading the payment proof, or sending the order through WhatsApp.
 
 - Informal, early-stage business (Bs 200 to Bs 2,000 per month). Payments go to a personal bank account through Bolivia's interoperable QR ("QR Simple"); there is no payment gateway.
-- 95% of sales are ready-made items. Today every model is unique (stock 1), but the system tracks stock per size.
+- CutePet sells ready-made items only (no made to order). Today every model is unique (stock 1), but the system tracks stock per size. Pieces made to measure go through custom requests.
 - Low volume. The owner validates payments manually.
 - **Zero cost:** only the domain is paid. Supabase free plan; the owner hosts the site on her own server.
 - Principle: minimal for the customer; nothing is deleted, everything can be corrected, everything is audited.
@@ -36,13 +36,12 @@ Online store for handmade pet clothing based in La Paz, Bolivia. Customers buy i
 | Route             | Page                                                     | Render    |
 | ----------------- | -------------------------------------------------------- | --------- |
 | `/`               | Home: hero photo, categories, featured products          | Server    |
-| `/catalogo`       | Grid with filters (pet type, size, availability)         | Server    |
+| `/catalogo`       | Grid with filters (pet type, category, size)             | Server    |
 | `/catalogo/:slug` | Product: photos, size, "¿Cuál es su talla?", add to cart | Server    |
 | `/carrito`        | Summary + "Pagar con QR" / "Pedir por WhatsApp"          | Client    |
 | `/pagar`          | QR, amount, order code, countdown, upload proof          | Client    |
 | `/guia-de-tallas` | How to measure + size table + size calculator            | Server    |
 | `/personalizado`  | Custom request form                                      | Prerender |
-| `/vendidos`       | Sold gallery                                             | Server    |
 | `/mi-cuenta`      | Orders, order status by link, my pets                    | Client    |
 | `/admin`          | Admin panel                                              | Client    |
 
@@ -50,10 +49,10 @@ Online store for handmade pet clothing based in La Paz, Bolivia. Customers buy i
 
 ## Catalog and stock
 
-- **Product:** name, slug, description, pet type, category, photos, price (BOB), availability (in stock / made to order with days), active.
+- **Product:** name, slug, description, pet type, category, photos, price (BOB), active.
 - **Variant:** size, measurements (neck, chest, back length in cm), stock, `reserved_until` (internal; the customer never fills it).
 - **Available** = stock not sold and no active reservation. Computed on read; no cleanup job.
-- **Sold out** = hidden from the catalog and shown in the sold gallery.
+- **Sold out** (no stock left) = hidden from customers, still visible in the admin. A stock adjustment (with a reason) makes it visible again.
 
 ## Purchase flows
 
@@ -76,20 +75,18 @@ Online store for handmade pet clothing based in La Paz, Bolivia. Customers buy i
 
 ## Order statuses
 
-`pending_payment` → `proof_uploaded` → `confirmed` → (`in_production`) → `ready_for_pickup` | `shipped` → `delivered`; `cancelled` from any status before delivery.
+`pending_payment` → `proof_uploaded` → `confirmed` → `ready_for_pickup` | `shipped` → `delivered`; `cancelled` from any status before delivery.
 
 | Status             | UI label (es)      | Stock                  |
 | ------------------ | ------------------ | ---------------------- |
 | `pending_payment`  | Pendiente de pago  | Reserved for N minutes |
 | `proof_uploaded`   | Comprobante subido | Locked, no expiry      |
 | `confirmed`        | Confirmado         | Sold                   |
-| `in_production`    | En confección      | Sold                   |
 | `ready_for_pickup` | Listo para recoger | Sold                   |
 | `shipped`          | Enviado            | Sold                   |
 | `delivered`        | Entregado          | Sold                   |
 | `cancelled`        | Cancelado          | Released               |
 
-- `in_production` only for made-to-order or custom requests.
 - **Cancel** releases stock; the order is never deleted.
 - **Restore** a cancelled order takes the items again; if any is no longer free, the system warns and never sells it twice.
 - **Revert** a step: back to the previous status with a required reason.
@@ -135,7 +132,7 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
 
 1. ~~Base project~~ (done)
 2. ~~Supabase schema: migrations, RLS, audit triggers, atomic reservation (RPC)~~ (done)
-3. Catalog, product, size guide, sold gallery (with Open Graph)
+3. ~~Catalog, product, size guide (with Open Graph)~~ (done)
 4. Cart + WhatsApp order
 5. Admin panel: products, quick sale, orders, settings, audit log
 6. Full QR checkout
@@ -156,7 +153,6 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
 - Stock goes down only when an order becomes `confirmed` (or when a quick sale is created). Cancelling a sold order puts the stock back.
 - Every availability check locks the variant rows (`select ... for update`, always ordered by id) inside the same transaction that writes the order, so two orders can never take the same unique item.
 - Expiry: expired `pending_payment` orders are cancelled lazily at the start of the order RPCs **and** by a `pg_cron` job every 5 minutes, so the admin list is always accurate.
-- Made-to-order variants skip the stock check and the reservation. Their orders go through `in_production`.
 - A user can have at most **one** active `pending_payment` order.
 
 ### Order flow
@@ -175,11 +171,10 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
 - **Revert** uses a fixed backward map, not the history:
   - `proof_uploaded` → `pending_payment`
   - `confirmed` → `proof_uploaded` (web orders only)
-  - `in_production` → `confirmed`
-  - `ready_for_pickup` / `shipped` → `in_production` if the order has made-to-order items, otherwise `confirmed`
+  - `ready_for_pickup` / `shipped` → `confirmed`
   - `delivered` → `ready_for_pickup` or `shipped`, depending on the delivery method
 - **Restore into `pending_payment`** gets a fresh reservation window, and fails if the customer already has another pending order.
-- `order_items` stores snapshots of the unit price, the product name and whether the item is made to order, so editing a product never changes past orders.
+- `order_items` stores snapshots of the unit price and the product name, so editing a product never changes past orders.
 - Double-booking under real concurrency is tested by a script that opens two database sessions at once (`pnpm db:test:concurrency`), in addition to the pgTAP tests.
 
 ### Catalog
@@ -229,43 +224,55 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
 - Development uses the local Supabase stack (`supabase start` / `supabase db reset`) with pgTAP tests for RLS and every RPC rule (double-booking, restore conflicts, permissions).
 - The remote Supabase project is never touched without asking the owner first.
 
-### Step 3: catalog, product page, size guide and sold gallery
+### Step 3: catalog, product page and size guide
 
-> Recorded on 2026-10-26 while planning step 3.
+> Recorded on 2026-10-26 while planning step 3, and revised the same day: ready-made items only, no sold gallery, mobile first. Calculator, price format and card style revised on 2026-10-27.
 
-**Catalog status.** A `security_invoker` view `public.catalog_products` computes, per product, `catalog_status` (`made_to_order`, `available`, `reserved`, `sold_out`) and the sizes that can be picked. Products with no variants are left out.
+**Ready-made only.** Made to order was removed completely by new migrations: the product availability type and lead days, the `in_production` status, the made-to-order snapshot on `order_items`, and the RPC branches. Postgres cannot drop an enum value, so `order_status` was replaced by a new type (there was no production data).
 
-- **Reserved** items (stock above 0 but every unit held by an active order) stay in the catalog with a "Reservada" badge; the reserved size is disabled.
-- **Made to order:** badge "Hecha a pedido · lista en X días", every size the product has is selectable, it matches the size filter, and it is never sold out.
+**Catalog status.** A `security_invoker` view `public.catalog_products` computes, per product, `catalog_status` (`available`, `reserved`, `sold_out`, declared in display order) and the sizes that still have stock. Products with no variants are left out.
 
-**Sold gallery (`/vendidos`).**
+- **Reserved** (stock above 0 but every unit held by an active order) stays in the catalog, sorted after the available items.
+  - Card: slightly faded photo and a soft badge "Alguien la está comprando".
+  - Product page: "Alguien está comprando esta prenda. Si no completa su compra, volverá a estar disponible en unos minutos." Size selection is disabled.
+- **Sold out** is hidden from customers: not in the catalog, the filters or the size options. The admin still sees it.
+- There is no sold gallery.
 
-- Shows in-stock products where every variant has stock 0. Made-to-order products never appear. A product with one size still available stays in the catalog.
-- Newest product first. The price is hidden. Cards link to the product page.
-
-**Sold-out product page.** Answers 200 with "Esta prenda ya fue vendida" and a "Pide una parecida" button to `/personalizado`. Photos, sizes and exact measurements stay visible, because customers use them to ask for a similar item. Inactive or unknown products answer 404.
+**Sold-out product page.** An old link shows a friendly page "Esta prenda ya no está disponible" with buttons to the catalog and `/personalizado`, without the product details, marked `noindex`. Inactive or unknown products answer 404.
 
 **Catalog filters.**
 
-- Pet type, category, size and availability. One choice per filter, no sorting, no pagination.
+- Mascota, Categoría and Talla. One choice per filter, no sorting, no pagination.
 - Active filters live in Spanish query params (`/catalogo?mascota=gato&categoria=abrigos`) so filtered links can be shared on WhatsApp.
-- The category filter lists only active categories with at least one product shown in the catalog (not sold out).
+- The category filter lists only active categories with at least one product shown in the catalog, reserved ones included (confirmed by the owner on 2026-10-27).
 - Categories are seeded in a migration: Abrigos, Vestidos, Otros. The admin adds, renames or deactivates them later; a category used by products is deactivated, never deleted.
+
+**Mobile first.** Most customers arrive from WhatsApp on a phone. Pages are designed at 360px first and checked at 360, 768 and 1280px.
+
+- Header on mobile: logo left, cart icon always visible right, menu button that opens a side navigation with the links. Desktop keeps the inline links.
+- Filters on mobile: a "Filtros" button that opens a bottom sheet; active filters are shown as removable chips. Desktop keeps the inline row.
+- Product grid: 2 columns on mobile, 3 on tablet, 4 on desktop.
+- No horizontal overflow at any width, and `scrollbar-gutter: stable` so the layout does not shift when the scrollbar appears.
 
 **Size guide** is rendered on the server (not prerendered) because the size table is edited from the admin panel.
 
 **Size calculator.**
 
-- Chest is required; neck and back length are optional. With fewer than three measurements the result says it is approximate.
+- Back length is required (from the owner's sales experience, it decides the fit); chest and neck are optional. With fewer than three measurements the result says it is approximate.
 - **Size guide (table mode):** each range is [min, next size's min); the last size uses [min, max + 1). Each measurement is matched on its own, the largest match is recommended, and a note appears if the matches differ. Outside every size → suggest a custom request.
 - **Product page (exact mode):** exact measurements are those of the pet the item fits, so the pet is compared with them, never with the size table (some items are made for broad-chested breeds and differ a lot from their range). The calculator recommends among that product's variants.
   - A measurement fits when |pet − item| ≤ tolerance.
   - Tolerance: global setting `settings.size_tolerance_cm` (default 2 cm) plus an optional per-variant override `variants.tolerance_cm` (nullable, e.g. 4 cm for stretchy fabric). Null uses the global one.
-  - "Le queda" when every measurement the customer entered fits; otherwise it says which one is off and by how much (e.g. "el largo es 3 cm más corto").
-  - A variant without exact measurements falls back to its size range, as in table mode.
+  - "Le queda" when every measurement the customer entered fits; otherwise it says what is different, from the garment's point of view: "La prenda es 3 cm más corta de largo", "La prenda es 2 cm más ancha de pecho".
+  - When no size fits within tolerance, it shows the closest one first ("La más cercana: Talla 0", the size whose differences add up to the fewest cm) and then the custom request link.
+  - A variant without exact measurements falls back to its size range, as in table mode (confirmed by the owner on 2026-10-27).
 - The admin can always save any size and measurements combination; the admin UI only warns, never blocks.
 
-**Product page** shows "Talla X · Medidas de esta prenda: cuello, pecho, largo" when exact measurements exist, listing only the ones present. "Agregar al carrito" is added in step 4.
+**Product page** shows the sizes that still have stock as a size selector (reserved sizes disabled) and, for the selected size, "Talla X · Medidas de esta prenda: cuello, pecho, largo" when exact measurements exist, listing only the ones present. A size without exact measurements shows its reference ranges instead ("Talla 4 · Medidas de referencia: cuello 36 a 38 cm, pecho 55 a 59 cm, largo 45 a 49 cm"), so the measurements never disappear when the customer switches sizes. "Agregar al carrito" is added in step 4.
+
+**Price format.** "Bs 120" with a space, and no decimals when the price is whole ("Bs 120,50" otherwise). One shared helper formats every price, including link previews.
+
+**Style.** Cards and panels use a thin, soft border (1px, chocolate at low opacity). Badges use palette tokens, never black.
 
 **Content and assets.** Neutral placeholder images and a placeholder `og-image` until the owner provides real ones. The "Cómo medir" text is a first draft to be reviewed; illustrations are a placeholder.
 

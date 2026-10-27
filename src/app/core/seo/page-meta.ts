@@ -11,6 +11,8 @@ export interface PageMetaData {
   /** Absolute URL. Falls back to the default image in public/ */
   readonly imageUrl?: string;
   readonly price?: number;
+  /** Keeps search engines from indexing pages that only show a notice */
+  readonly noIndex?: boolean;
 }
 
 const SITE_NAME = 'CutePet';
@@ -42,6 +44,11 @@ export class PageMeta {
     this.meta.updateTag({ name: 'description', content: page.description });
     this.meta.updateTag({ name: 'twitter:card', content: 'summary_large_image' });
     this.setPrice(page.price);
+    if (page.noIndex) {
+      this.meta.updateTag({ name: 'robots', content: 'noindex' });
+    } else {
+      this.meta.removeTag("name='robots'");
+    }
   }
 
   /** Only has an effect during server rendering */

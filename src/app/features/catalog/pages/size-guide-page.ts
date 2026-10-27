@@ -1,8 +1,8 @@
 import { Component, inject } from '@angular/core';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 import { PageMeta } from '@core/seo/page-meta';
 import { EmptyState } from '@shared/ui/empty-state';
+import { LoadingBar } from '@shared/ui/loading-bar';
 import { PageHeader } from '@shared/ui/page-header';
 import { SizeGuideStore } from '../data-access/size-guide.store';
 import { SizeCalculator } from '../ui/size-calculator';
@@ -10,7 +10,7 @@ import { SizeTable } from '../ui/size-table';
 
 @Component({
   selector: 'cp-size-guide-page',
-  imports: [PageHeader, EmptyState, SizeTable, SizeCalculator, MatProgressBarModule],
+  imports: [PageHeader, EmptyState, SizeTable, SizeCalculator, LoadingBar],
   providers: [SizeGuideStore],
   templateUrl: './size-guide-page.html',
   styles: `
@@ -30,7 +30,7 @@ import { SizeTable } from '../ui/size-table';
     }
     .steps li {
       padding: var(--cp-space-md);
-      border: var(--cp-border);
+      border: var(--cp-border-soft);
       border-radius: var(--cp-radius);
       background: var(--mat-sys-surface-container-low);
     }

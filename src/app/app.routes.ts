@@ -45,12 +45,6 @@ export const routes: Routes = [
           ),
       },
       {
-        path: 'vendidos',
-        title: 'Ya vendidos - CutePet',
-        loadComponent: () =>
-          import('@features/catalog/pages/sold-gallery-page').then((m) => m.SoldGalleryPage),
-      },
-      {
         path: 'mi-cuenta',
         title: 'Mi cuenta - CutePet',
         loadComponent: () =>

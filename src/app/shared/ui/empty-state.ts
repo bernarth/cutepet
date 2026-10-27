@@ -17,7 +17,7 @@ import { MatIconModule } from '@angular/material/icon';
       gap: var(--cp-space-sm);
       padding: var(--cp-space-xl) var(--cp-space-md);
       text-align: center;
-      border: var(--cp-border);
+      border: var(--cp-border-soft);
       border-radius: var(--cp-radius);
       background: var(--mat-sys-surface-container-low);
     }

@@ -1,14 +1,15 @@
-import { CurrencyPipe, NgOptimizedImage } from '@angular/common';
+import { NgOptimizedImage } from '@angular/common';
 import { Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { ProductSummary, statusLabel } from '../models/product';
+import { PricePipe } from '@shared/pipes/price';
+import { ProductSummary } from '../models/product';
 
 @Component({
   selector: 'cp-product-card',
-  imports: [RouterLink, NgOptimizedImage, CurrencyPipe],
+  imports: [RouterLink, NgOptimizedImage, PricePipe],
   template: `
-    <a class="card" [routerLink]="['/catalogo', product().slug]">
+    <a class="card" [routerLink]="['/catalogo', product().slug]" [class.reserved]="isReserved()">
       <div class="photo">
         @if (product().photo; as photo) {
           <img
@@ -16,17 +17,15 @@ import { ProductSummary, statusLabel } from '../models/product';
             [alt]="photo.alt"
             fill
             [priority]="priority()"
-            sizes="(max-width: 600px) 50vw, 25vw"
+            sizes="(min-width: 1024px) 25vw, (min-width: 600px) 33vw, 50vw"
           />
         }
-        @if (badge(); as text) {
-          <span class="badge" [class.muted]="product().status !== 'made_to_order'">{{ text }}</span>
+        @if (isReserved()) {
+          <span class="badge">Alguien la está comprando</span>
         }
       </div>
       <h2 class="name">{{ product().name }}</h2>
-      @if (showPrice()) {
-        <p class="price">{{ product().price | currency }}</p>
-      }
+      <p class="price">{{ product().price | price }}</p>
     </a>
   `,
   styles: `
@@ -34,6 +33,7 @@ import { ProductSummary, statusLabel } from '../models/product';
       display: flex;
       flex-direction: column;
       gap: var(--cp-space-xs);
+      min-width: 0;
       color: inherit;
       text-decoration: none;
       border-radius: var(--cp-radius);
@@ -42,33 +42,31 @@ import { ProductSummary, statusLabel } from '../models/product';
       position: relative;
       aspect-ratio: 4 / 5;
       overflow: hidden;
-      border: var(--cp-border);
+      border: var(--cp-border-soft);
       border-radius: var(--cp-radius);
       background: var(--mat-sys-surface-container);
     }
     img {
       object-fit: cover;
     }
+    .reserved img {
+      opacity: 0.55;
+    }
     .badge {
       position: absolute;
-      left: var(--cp-space-sm);
-      bottom: var(--cp-space-sm);
-      right: var(--cp-space-sm);
-      width: fit-content;
+      inset: auto var(--cp-space-xs) var(--cp-space-xs);
       padding: var(--cp-space-xs) var(--cp-space-sm);
       border-radius: var(--cp-radius);
       font: var(--mat-sys-label-medium);
-      background: var(--mat-sys-tertiary-container);
-      color: var(--mat-sys-on-tertiary-container);
-    }
-    .badge.muted {
-      background: var(--mat-sys-inverse-surface);
-      color: var(--mat-sys-inverse-on-surface);
+      text-align: center;
+      background: var(--cp-lavender);
+      color: var(--cp-ink);
     }
     .name {
       margin: 0;
-      font: var(--mat-sys-title-medium);
+      font: var(--mat-sys-title-small);
       font-family: var(--cp-font-display);
+      overflow-wrap: anywhere;
     }
     .price {
       margin: 0;
@@ -78,12 +76,17 @@ import { ProductSummary, statusLabel } from '../models/product';
     .card:hover .name {
       text-decoration: underline;
     }
+    @media (min-width: 600px) {
+      .name {
+        font: var(--mat-sys-title-medium);
+        font-family: var(--cp-font-display);
+      }
+    }
   `,
 })
 export class ProductCard {
   readonly product = input.required<ProductSummary>();
-  readonly showPrice = input(true);
   readonly priority = input(false);
 
-  protected readonly badge = computed(() => statusLabel(this.product()));
+  protected readonly isReserved = computed(() => this.product().status === 'reserved');
 }

@@ -54,7 +54,6 @@ $$;
 create or replace function tests.create_variant(
   price numeric default 100,
   stock integer default 1,
-  availability public.availability default 'in_stock',
   is_active boolean default true
 )
 returns bigint
@@ -72,13 +71,11 @@ begin
   returning id into category_id;
 
   insert into public.products (
-    name, slug, pet_type_id, category_id, price, availability, production_days, is_active
+    name, slug, pet_type_id, category_id, price, is_active
   ) values (
     'Prenda ' || suffix, 'prenda-' || suffix,
     (select pt.id from public.pet_types pt where pt.slug = 'perro'),
-    category_id, price, availability,
-    case when availability = 'made_to_order' then 7 end,
-    is_active
+    category_id, price, is_active
   )
   returning id into product_id;
 

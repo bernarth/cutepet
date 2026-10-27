@@ -35,14 +35,14 @@ export type Database = {
                   ]
                 },"order_items": {
                   Row: {
-                    "id": number,"is_made_to_order": boolean,"order_id": string,"product_name": string,"quantity": number,"unit_price": number,"variant_id": number
+                    "id": number,"order_id": string,"product_name": string,"quantity": number,"unit_price": number,"variant_id": number
                   }
                   ComputedFields: never
                   Insert: {
-                    "id"?: never,"is_made_to_order": boolean,"order_id": string,"product_name": string,"quantity": number,"unit_price": number,"variant_id": number
+                    "id"?: never,"order_id": string,"product_name": string,"quantity": number,"unit_price": number,"variant_id": number
                   }
                   Update: {
-                    "id"?: never,"is_made_to_order"?: boolean,"order_id"?: string,"product_name"?: string,"quantity"?: number,"unit_price"?: number,"variant_id"?: number
+                    "id"?: never,"order_id"?: string,"product_name"?: string,"quantity"?: number,"unit_price"?: number,"variant_id"?: number
                   }
                   Relationships: [
                     {
@@ -121,14 +121,14 @@ isOneToOne: false
                   ]
                 },"products": {
                   Row: {
-                    "availability": Database["public"]['Enums']["availability"],"category_id": number,"created_at": string,"description": string,"id": number,"is_active": boolean,"is_featured": boolean,"name": string,"pet_type_id": number,"price": number,"production_days": number | null,"slug": string
+                    "category_id": number,"created_at": string,"description": string,"id": number,"is_active": boolean,"is_featured": boolean,"name": string,"pet_type_id": number,"price": number,"slug": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "availability"?: Database["public"]['Enums']["availability"],"category_id": number,"created_at"?: string,"description"?: string,"id"?: never,"is_active"?: boolean,"is_featured"?: boolean,"name": string,"pet_type_id": number,"price": number,"production_days"?: number | null,"slug": string
+                    "category_id": number,"created_at"?: string,"description"?: string,"id"?: never,"is_active"?: boolean,"is_featured"?: boolean,"name": string,"pet_type_id": number,"price": number,"slug": string
                   }
                   Update: {
-                    "availability"?: Database["public"]['Enums']["availability"],"category_id"?: number,"created_at"?: string,"description"?: string,"id"?: never,"is_active"?: boolean,"is_featured"?: boolean,"name"?: string,"pet_type_id"?: number,"price"?: number,"production_days"?: number | null,"slug"?: string
+                    "category_id"?: number,"created_at"?: string,"description"?: string,"id"?: never,"is_active"?: boolean,"is_featured"?: boolean,"name"?: string,"pet_type_id"?: number,"price"?: number,"slug"?: string
                   }
                   Relationships: [
                     {
@@ -224,7 +224,7 @@ isOneToOne: false
           Views: {
             "catalog_products": {
                   Row: {
-                    "availability": Database["public"]['Enums']["availability"],"catalog_status": Database["public"]['Enums']["catalog_status"] | null,"category_id": number,"created_at": string,"description": string,"id": number,"is_featured": boolean,"name": string,"pet_type_id": number,"price": number,"production_days": number | null,"size_ids": (number)[] | null,"slug": string
+                    "catalog_status": Database["public"]['Enums']["catalog_status"] | null,"category_id": number,"created_at": string,"description": string,"id": number,"is_featured": boolean,"name": string,"pet_type_id": number,"price": number,"size_ids": (number)[] | null,"slug": string
                   }
                   ComputedFields: never
                   Relationships: [
@@ -539,7 +539,7 @@ isOneToOne: false
       } }
           }
           Enums: {
-            "app_role": "admin","availability": "in_stock"|"made_to_order","catalog_status": "available"|"reserved"|"sold_out"|"made_to_order","delivery_method": "pickup_point"|"bus_parcel","order_channel": "web"|"whatsapp","order_status": "pending_payment"|"proof_uploaded"|"confirmed"|"in_production"|"ready_for_pickup"|"shipped"|"delivered"|"cancelled"
+            "app_role": "admin","catalog_status": "available"|"reserved"|"sold_out","delivery_method": "pickup_point"|"bus_parcel","order_channel": "web"|"whatsapp","order_status": "pending_payment"|"proof_uploaded"|"confirmed"|"ready_for_pickup"|"shipped"|"delivered"|"cancelled"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -655,7 +655,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "app_role": ["admin"],"availability": ["in_stock", "made_to_order"],"catalog_status": ["available", "reserved", "sold_out", "made_to_order"],"delivery_method": ["pickup_point", "bus_parcel"],"order_channel": ["web", "whatsapp"],"order_status": ["pending_payment", "proof_uploaded", "confirmed", "in_production", "ready_for_pickup", "shipped", "delivered", "cancelled"]
+            "app_role": ["admin"],"catalog_status": ["available", "reserved", "sold_out"],"delivery_method": ["pickup_point", "bus_parcel"],"order_channel": ["web", "whatsapp"],"order_status": ["pending_payment", "proof_uploaded", "confirmed", "ready_for_pickup", "shipped", "delivered", "cancelled"]
           }
         }
 } as const

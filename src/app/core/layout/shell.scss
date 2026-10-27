@@ -1,6 +1,5 @@
 :host {
-  display: flex;
-  flex-direction: column;
+  display: block;
   min-height: 100%;
 }
 
@@ -15,10 +14,33 @@
   }
 }
 
+// The window scrolls, not the container, so router scroll restoration keeps working.
+.container,
+.page {
+  overflow: visible;
+}
+
+.container {
+  min-height: 100%;
+  background: transparent;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
 .header {
-  gap: var(--cp-space-md);
+  gap: var(--cp-space-xs);
+  padding-inline: var(--cp-space-sm) var(--cp-space-xs);
   background: var(--cp-brand);
   border-bottom: var(--cp-border);
+
+  @media (min-width: 768px) {
+    gap: var(--cp-space-md);
+    padding-inline: var(--cp-space-md);
+  }
 }
 
 .brand {
@@ -28,18 +50,49 @@
   text-decoration: none;
 }
 
+.cart {
+  margin-left: auto;
+}
+
 .nav {
   display: none;
-  flex: 1;
   gap: var(--cp-space-xs);
-
-  @media (min-width: 768px) {
-    display: flex;
-  }
 
   .active {
     text-decoration: underline;
   }
+}
+
+@media (min-width: 768px) {
+  .nav {
+    display: flex;
+    flex: 1;
+  }
+
+  .cart {
+    margin-left: 0;
+  }
+
+  .menu-button {
+    display: none;
+  }
+}
+
+.menu {
+  width: min(280px, 85vw);
+  background: var(--cp-bg);
+}
+
+.menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--cp-space-sm) var(--cp-space-sm) var(--cp-space-sm) var(--cp-space-md);
+  border-bottom: var(--cp-border);
+}
+
+.menu .active {
+  font-weight: 700;
 }
 
 .content {
@@ -47,8 +100,12 @@
   width: 100%;
   max-width: var(--cp-content-width);
   margin: 0 auto;
-  padding: var(--cp-space-lg) var(--cp-space-md);
+  padding: var(--cp-space-md);
   box-sizing: border-box;
+
+  @media (min-width: 768px) {
+    padding: var(--cp-space-lg) var(--cp-space-md);
+  }
 }
 
 .footer {

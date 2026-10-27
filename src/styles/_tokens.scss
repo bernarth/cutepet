@@ -21,6 +21,7 @@
   // Shape
   --cp-radius: 16px;
   --cp-border: 2px solid var(--cp-chocolate);
+  --cp-border-soft: 1px solid color-mix(in srgb, var(--cp-chocolate) 25%, transparent); // cards and panels
 
   // Typography
   --cp-font-display: 'Fredoka', 'Nunito Variable', sans-serif;

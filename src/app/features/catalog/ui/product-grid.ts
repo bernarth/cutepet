@@ -10,7 +10,7 @@ import { ProductCard } from './product-card';
     <ul>
       @for (product of products(); track product.slug; let first = $first) {
         <li>
-          <cp-product-card [product]="product" [showPrice]="showPrices()" [priority]="first" />
+          <cp-product-card [product]="product" [priority]="first" />
         </li>
       }
     </ul>
@@ -18,15 +18,25 @@ import { ProductCard } from './product-card';
   styles: `
     ul {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(min(160px, 45%), 1fr));
-      gap: var(--cp-space-lg) var(--cp-space-md);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--cp-space-md) var(--cp-space-sm);
       margin: 0;
       padding: 0;
       list-style: none;
+    }
+    @media (min-width: 600px) {
+      ul {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--cp-space-lg) var(--cp-space-md);
+      }
+    }
+    @media (min-width: 1024px) {
+      ul {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
     }
   `,
 })
 export class ProductGrid {
   readonly products = input.required<readonly ProductSummary[]>();
-  readonly showPrices = input(true);
 }

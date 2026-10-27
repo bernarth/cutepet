@@ -1,0 +1,55 @@
+<ng-template #fields>
+  <div class="fields">
+    @for (group of groups(); track group.key) {
+      <mat-form-field subscriptSizing="dynamic">
+        <mat-label>{{ group.label }}</mat-label>
+        <mat-select
+          [value]="selected()[group.key]"
+          (selectionChange)="changed.emit({ key: group.key, value: $event.value })"
+        >
+          <mat-option [value]="null">Todas</mat-option>
+          @for (option of group.options; track option.value) {
+            <mat-option [value]="option.value">{{ option.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+  </div>
+</ng-template>
+
+<div class="inline">
+  <ng-container [ngTemplateOutlet]="fields" />
+  @if (hasFilters()) {
+    <button mat-button type="button" (click)="cleared.emit()">Quitar filtros</button>
+  }
+</div>
+
+<div class="compact">
+  <button mat-stroked-button type="button" (click)="openSheet()">
+    <mat-icon>tune</mat-icon>
+    Filtros
+  </button>
+  @if (active().length) {
+    <mat-chip-set aria-label="Filtros activos">
+      @for (filter of active(); track filter.key) {
+        <mat-chip (removed)="changed.emit({ key: filter.key, value: null })">
+          {{ filter.label }}
+          <button matChipRemove [attr.aria-label]="'Quitar ' + filter.label">
+            <mat-icon>cancel</mat-icon>
+          </button>
+        </mat-chip>
+      }
+    </mat-chip-set>
+  }
+</div>
+
+<ng-template #sheet>
+  <div class="sheet">
+    <h2>Filtros</h2>
+    <ng-container [ngTemplateOutlet]="fields" />
+    @if (hasFilters()) {
+      <button mat-button type="button" (click)="cleared.emit()">Quitar filtros</button>
+    }
+    <button mat-flat-button type="button" (click)="closeSheet()">Ver prendas</button>
+  </div>
+</ng-template>

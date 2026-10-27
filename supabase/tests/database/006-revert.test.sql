@@ -3,7 +3,7 @@ select plan(17);
 
 select tests.set_settings('{"qr_checkout_enabled": true}');
 select tests.create_variant() as web_variant \gset
-select tests.create_variant(stock => 0, availability => 'made_to_order') as made_to_order_variant \gset
+select tests.create_variant() as bus_variant \gset
 select tests.create_variant() as quick_variant \gset
 select tests.create_variant() as contested_variant \gset
 select tests.create_user('a@test.bo') as customer_a \gset
@@ -26,7 +26,7 @@ select public.advance_order(:'web_order');
 select is((public.revert_order_status(:'web_order', 'No lo recogió')).status, 'ready_for_pickup',
   'delivered goes back to ready_for_pickup for pickup orders');
 select is((public.revert_order_status(:'web_order', 'Aún no está lista')).status, 'confirmed',
-  'ready_for_pickup goes back to confirmed when nothing is made to order');
+  'ready_for_pickup goes back to confirmed');
 select is((public.revert_order_status(:'web_order', 'Pago no llegó')).status, 'proof_uploaded',
   'confirmed goes back to proof_uploaded for web orders');
 select tests.clear_authentication();
@@ -49,23 +49,22 @@ select throws_ok(format('select public.revert_order_status(%L, %L)', :'web_order
 select tests.clear_authentication();
 
 select tests.authenticate_as(:'customer_b');
-select (public.reserve_order(tests.items(:made_to_order_variant), 'Luis', '61234567', 'bus_parcel', 'Oruro', 'Luis Rojas')).id
-  as made_to_order_order \gset
+select (public.reserve_order(tests.items(:bus_variant), 'Luis', '61234567', 'bus_parcel', 'Oruro', 'Luis Rojas')).id
+  as bus_order \gset
 select tests.clear_authentication();
-select tests.upload_proof(:'made_to_order_order') as made_to_order_proof \gset
+select tests.upload_proof(:'bus_order') as bus_proof \gset
 select tests.authenticate_as(:'customer_b');
-select public.submit_payment_proof(:'made_to_order_order', :'made_to_order_proof');
+select public.submit_payment_proof(:'bus_order', :'bus_proof');
 select tests.clear_authentication();
 
 select tests.authenticate_as(:'admin_id', true);
-select public.confirm_order(:'made_to_order_order');
-select public.advance_order(:'made_to_order_order');
-select public.advance_order(:'made_to_order_order');
-select public.advance_order(:'made_to_order_order');
-select is((public.revert_order_status(:'made_to_order_order', 'Sigue en la terminal')).status, 'shipped',
+select public.confirm_order(:'bus_order');
+select public.advance_order(:'bus_order');
+select public.advance_order(:'bus_order');
+select is((public.revert_order_status(:'bus_order', 'Sigue en la terminal')).status, 'shipped',
   'delivered goes back to shipped for bus parcel orders');
-select is((public.revert_order_status(:'made_to_order_order', 'No salió la flota')).status, 'in_production',
-  'shipped goes back to in_production when the order is made to order');
+select is((public.revert_order_status(:'bus_order', 'No salió la flota')).status, 'confirmed',
+  'shipped goes back to confirmed');
 
 select (public.create_quick_sale(tests.items(:quick_variant), 'Rosa', '71112222', 'pickup_point')).id as quick_order \gset
 select throws_ok(format('select public.revert_order_status(%L, %L)', :'quick_order', 'x'), 'P0001', 'INVALID_STATUS',

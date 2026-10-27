@@ -1,9 +1,9 @@
 begin;
-select plan(15);
+select plan(14);
 
 select tests.set_settings('{"qr_checkout_enabled": true}');
 select tests.create_variant(stock => 1) as pickup_variant \gset
-select tests.create_variant(stock => 0, availability => 'made_to_order') as made_to_order_variant \gset
+select tests.create_variant(stock => 1) as bus_variant \gset
 select tests.create_variant(stock => 1) as contested_variant \gset
 select tests.create_user('a@test.bo') as customer_a \gset
 select tests.create_user('b@test.bo') as customer_b \gset
@@ -34,20 +34,19 @@ select throws_ok(format('select public.advance_order(%L)', :'pickup_order'), 'P0
 select tests.clear_authentication();
 
 select tests.authenticate_as(:'customer_b');
-select (public.reserve_order(tests.items(:made_to_order_variant), 'Luis', '61234567', 'bus_parcel', 'Santa Cruz', 'Luis Rojas')).id
-  as made_to_order_order \gset
+select (public.reserve_order(tests.items(:bus_variant), 'Luis', '61234567', 'bus_parcel', 'Santa Cruz', 'Luis Rojas')).id
+  as bus_order \gset
 select tests.clear_authentication();
-select tests.upload_proof(:'made_to_order_order') as made_to_order_proof \gset
+select tests.upload_proof(:'bus_order') as bus_proof \gset
 select tests.authenticate_as(:'customer_b');
-select public.submit_payment_proof(:'made_to_order_order', :'made_to_order_proof');
+select public.submit_payment_proof(:'bus_order', :'bus_proof');
 select tests.clear_authentication();
 
 select tests.authenticate_as(:'admin_id', true);
-select public.confirm_order(:'made_to_order_order');
-select is(tests.stock_of(:made_to_order_variant), 0, 'made to order items do not touch stock');
-select is((public.advance_order(:'made_to_order_order')).status, 'in_production', 'made to order goes through in_production');
-select is((public.advance_order(:'made_to_order_order')).status, 'shipped', 'bus parcel orders go to shipped');
-select is((public.advance_order(:'made_to_order_order')).status, 'delivered', 'and then to delivered');
+select public.confirm_order(:'bus_order');
+select is(tests.stock_of(:bus_variant), 0, 'confirming a bus parcel order lowers the stock');
+select is((public.advance_order(:'bus_order')).status, 'shipped', 'bus parcel orders go to shipped');
+select is((public.advance_order(:'bus_order')).status, 'delivered', 'and then to delivered');
 select tests.clear_authentication();
 
 select tests.reserve(:'customer_a', tests.items(:contested_variant)) as late_order \gset

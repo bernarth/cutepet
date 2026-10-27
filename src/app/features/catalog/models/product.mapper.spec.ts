@@ -1,4 +1,5 @@
-import { ProductDetailRow, VariantRow, toProductDetail, toProductSummary } from './product.mapper';
+import { ProductDetail } from './product';
+import { ProductDetailRow, VariantRow, toProductLookup, toProductSummary } from './product.mapper';
 
 const photoUrl = (path: string) => `https://cdn.test/${path}`;
 
@@ -23,7 +24,6 @@ function detailRow(overrides: Partial<ProductDetailRow>): ProductDetailRow {
     name: 'Abrigo',
     price: 120,
     catalog_status: 'available',
-    production_days: null,
     description: 'Suave',
     pet_types: { name: 'Perro' },
     categories: { name: 'Abrigos' },
@@ -52,22 +52,39 @@ describe('toProductSummary', () => {
   });
 });
 
-describe('toProductDetail', () => {
-  it('sorts variants by size order', () => {
-    const detail = toProductDetail(
+function foundProduct(row: ProductDetailRow): ProductDetail {
+  const lookup = toProductLookup(row, photoUrl);
+  if (lookup.kind !== 'found') {
+    throw new Error(`expected a product, got ${lookup.kind}`);
+  }
+  return lookup.product;
+}
+
+describe('toProductLookup', () => {
+  it('reports a missing row as not found', () => {
+    expect(toProductLookup(null, photoUrl)).toEqual({ kind: 'not_found' });
+  });
+
+  it('hides every detail of a sold out product', () => {
+    expect(toProductLookup(detailRow({ catalog_status: 'sold_out' }), photoUrl)).toEqual({
+      kind: 'sold_out',
+    });
+  });
+
+  it('sorts sizes by size order', () => {
+    const product = foundProduct(
       detailRow({
         catalog_variants: [
           variantRow({ id: 2, sizes: { label: '2', sort_order: 5 } }),
           variantRow({ id: 1, sizes: { label: '000', sort_order: 1 } }),
         ],
       }),
-      photoUrl,
     );
-    expect(detail.variants.map((variant) => variant.sizeLabel)).toEqual(['000', '2']);
+    expect(product.variants.map((variant) => variant.sizeLabel)).toEqual(['000', '2']);
   });
 
-  it('derives the availability of each variant', () => {
-    const detail = toProductDetail(
+  it('drops sold out sizes and marks reserved ones', () => {
+    const product = foundProduct(
       detailRow({
         catalog_variants: [
           variantRow({ id: 1, stock: 1, available_stock: 1 }),
@@ -75,37 +92,23 @@ describe('toProductDetail', () => {
           variantRow({ id: 3, stock: 0, available_stock: 0 }),
         ],
       }),
-      photoUrl,
     );
-    expect(detail.variants.map((variant) => variant.availability)).toEqual([
-      'available',
-      'reserved',
-      'sold_out',
+    expect(product.variants.map((variant) => [variant.id, variant.isReserved])).toEqual([
+      [1, false],
+      [2, true],
     ]);
   });
 
-  it('treats every made-to-order variant as available', () => {
-    const detail = toProductDetail(
-      detailRow({
-        catalog_status: 'made_to_order',
-        catalog_variants: [variantRow({ stock: 0, available_stock: 0 })],
-      }),
-      photoUrl,
-    );
-    expect(detail.variants[0].availability).toBe('available');
-  });
-
   it('keeps only the exact measurements that exist', () => {
-    const detail = toProductDetail(
+    const product = foundProduct(
       detailRow({
         catalog_variants: [
           variantRow({ id: 1, chest_cm: 38.5, back_length_cm: 27 }),
           variantRow({ id: 2 }),
         ],
       }),
-      photoUrl,
     );
-    expect(detail.variants[0].exactMeasurements).toEqual({ chest: 38.5, backLength: 27 });
-    expect(detail.variants[1].exactMeasurements).toBeNull();
+    expect(product.variants[0].exactMeasurements).toEqual({ chest: 38.5, backLength: 27 });
+    expect(product.variants[1].exactMeasurements).toBeNull();
   });
 });

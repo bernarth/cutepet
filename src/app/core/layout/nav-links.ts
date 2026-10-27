@@ -8,5 +8,4 @@ export const NAV_LINKS: readonly NavLink[] = [
   { label: 'Catálogo', path: '/catalogo' },
   { label: 'Personalizado', path: '/personalizado' },
   { label: 'Guía de tallas', path: '/guia-de-tallas' },
-  { label: 'Ya vendidos', path: '/vendidos' },
 ];

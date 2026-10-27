@@ -1,28 +1,28 @@
-import { CurrencyPipe } from '@angular/common';
-import { Component, computed, effect, inject } from '@angular/core';
+import { Component, computed, effect, inject, linkedSignal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { RouterLink } from '@angular/router';
 
 import { PageMeta } from '@core/seo/page-meta';
 import { EmptyState } from '@shared/ui/empty-state';
+import { PricePipe } from '@shared/pipes/price';
+import { LoadingBar } from '@shared/ui/loading-bar';
 import { ProductStore } from '../data-access/product.store';
-import { statusLabel } from '../models/product';
+import { measurementsText, referenceMeasurementsText } from '../models/measurements-text';
 import { productMetaDescription } from '../models/product-meta';
 import { PhotoGallery } from '../ui/photo-gallery';
 import { SizeCalculator } from '../ui/size-calculator';
-import { VariantList } from '../ui/variant-list';
+import { SizePicker } from '../ui/size-picker';
 
 @Component({
   selector: 'cp-product-page',
   imports: [
-    CurrencyPipe,
+    PricePipe,
     RouterLink,
     MatButtonModule,
-    MatProgressBarModule,
+    LoadingBar,
     EmptyState,
     PhotoGallery,
-    VariantList,
+    SizePicker,
     SizeCalculator,
   ],
   providers: [ProductStore],
@@ -30,9 +30,10 @@ import { VariantList } from '../ui/variant-list';
   styles: `
     .layout {
       display: grid;
+      grid-template-columns: minmax(0, 1fr);
       gap: var(--cp-space-lg);
     }
-    @media (min-width: 800px) {
+    @media (min-width: 768px) {
       .layout {
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
         align-items: start;
@@ -42,49 +43,45 @@ import { VariantList } from '../ui/variant-list';
       display: flex;
       flex-direction: column;
       gap: var(--cp-space-md);
+      min-width: 0;
     }
     h1 {
       margin: 0;
       font-family: var(--cp-font-display);
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+    p {
+      margin: 0;
     }
     .price {
-      margin: 0;
       font: var(--mat-sys-headline-small);
       font-weight: 700;
     }
-    .badge {
-      width: fit-content;
-      padding: var(--cp-space-xs) var(--cp-space-sm);
-      border-radius: var(--cp-radius);
-      font: var(--mat-sys-label-large);
-      background: var(--mat-sys-tertiary-container);
-      color: var(--mat-sys-on-tertiary-container);
+    .reserved {
+      opacity: 0.55;
     }
-    .meta,
-    .description {
-      margin: 0;
-    }
-    .meta {
-      color: var(--mat-sys-on-surface-variant);
-    }
-    .sold {
-      display: flex;
-      flex-direction: column;
-      gap: var(--cp-space-sm);
-      align-items: flex-start;
+    .notice {
       padding: var(--cp-space-md);
-      border: var(--cp-border);
       border-radius: var(--cp-radius);
-      background: var(--mat-sys-surface-container-low);
+      background: var(--cp-lavender);
+      color: var(--cp-ink);
     }
-    .sold p {
-      margin: 0;
-      font: var(--mat-sys-title-medium);
+    .hint,
+    .meta {
+      font: var(--mat-sys-body-medium);
+      color: var(--mat-sys-on-surface-variant);
     }
     .calculator h2 {
       margin: 0 0 var(--cp-space-sm);
       font: var(--mat-sys-title-medium);
       font-family: var(--cp-font-display);
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: var(--cp-space-sm);
     }
   `,
 })
@@ -92,9 +89,30 @@ export class ProductPage {
   protected readonly store = inject(ProductStore);
   private readonly pageMeta = inject(PageMeta);
 
-  protected readonly badge = computed(() => {
+  protected readonly selectedVariantId = linkedSignal(
+    () => this.store.product()?.variants.find((variant) => !variant.isReserved)?.id ?? null,
+  );
+
+  /**
+   * Measurements of the selected size, or of the first one when every size is reserved.
+   * Without exact measurements it falls back to the reference ranges of the size table
+   */
+  protected readonly measurements = computed(() => {
+    const variants = this.store.product()?.variants ?? [];
+    const shown =
+      variants.find((variant) => variant.id === this.selectedVariantId()) ?? variants[0];
+    if (!shown) {
+      return null;
+    }
+    const size = this.store.sizes().find((item) => item.id === shown.sizeId);
+    return measurementsText(shown) ?? (size ? referenceMeasurementsText(size) : null);
+  });
+
+  protected readonly hasReservedSize = computed(() => {
     const product = this.store.product();
-    return product ? statusLabel(product) : null;
+    return (
+      product?.status === 'available' && product.variants.some((variant) => variant.isReserved)
+    );
   });
 
   constructor() {
@@ -106,13 +124,22 @@ export class ProductPage {
           description: productMetaDescription(product),
           path: `/catalogo/${product.slug}`,
           imageUrl: product.photo?.url,
-          price: product.status === 'sold_out' ? undefined : product.price,
+          price: product.price,
+        });
+      } else if (this.store.isSoldOut()) {
+        this.pageMeta.set({
+          title: 'Prenda no disponible',
+          description:
+            'Esta prenda ya no está disponible. Mira el catálogo o pide una personalizada.',
+          path: '/catalogo',
+          noIndex: true,
         });
       } else if (this.store.notFound()) {
         this.pageMeta.set({
           title: 'Prenda no encontrada',
-          description: 'Esta prenda no existe o ya no está disponible.',
+          description: 'Esta prenda no existe.',
           path: '/catalogo',
+          noIndex: true,
         });
         this.pageMeta.setNotFoundStatus();
       }

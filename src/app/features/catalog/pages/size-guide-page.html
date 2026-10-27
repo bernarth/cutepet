@@ -37,9 +37,7 @@
 
 <section aria-labelledby="size-table-title">
   <h2 id="size-table-title">Tabla de tallas</h2>
-  @if (store.isLoading()) {
-    <mat-progress-bar mode="indeterminate" aria-label="Cargando tallas" />
-  }
+  <cp-loading-bar [active]="store.isLoading()" label="Cargando tallas" />
   @if (store.hasError()) {
     <cp-empty-state icon="info" message="No pudimos cargar la tabla de tallas." />
   } @else {

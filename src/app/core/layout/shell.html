@@ -1,23 +1,53 @@
 <a class="skip-link" href="#contenido">Saltar al contenido</a>
 
-<mat-toolbar class="header">
-  <a class="brand" routerLink="/">CutePet</a>
+<mat-sidenav-container class="container">
+  <mat-sidenav #menu class="menu" mode="over" position="end" fixedInViewport>
+    <div class="menu-header">
+      <span class="brand">CutePet</span>
+      <button mat-icon-button type="button" aria-label="Cerrar menú" (click)="menu.close()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <mat-nav-list aria-label="Menú principal">
+      @for (link of links; track link.path) {
+        <a mat-list-item [routerLink]="link.path" routerLinkActive="active" (click)="menu.close()">
+          {{ link.label }}
+        </a>
+      }
+    </mat-nav-list>
+  </mat-sidenav>
 
-  <nav class="nav" aria-label="Principal">
-    @for (link of links; track link.path) {
-      <a mat-button [routerLink]="link.path" routerLinkActive="active">{{ link.label }}</a>
-    }
-  </nav>
+  <mat-sidenav-content class="page">
+    <mat-toolbar class="header">
+      <a class="brand" routerLink="/">CutePet</a>
 
-  <a mat-icon-button routerLink="/carrito" aria-label="Ver carrito">
-    <mat-icon>shopping_bag</mat-icon>
-  </a>
-</mat-toolbar>
+      <nav class="nav" aria-label="Principal">
+        @for (link of links; track link.path) {
+          <a mat-button [routerLink]="link.path" routerLinkActive="active">{{ link.label }}</a>
+        }
+      </nav>
 
-<main id="contenido" class="content">
-  <router-outlet />
-</main>
+      <a mat-icon-button class="cart" routerLink="/carrito" aria-label="Ver carrito">
+        <mat-icon>shopping_bag</mat-icon>
+      </a>
+      <button
+        mat-icon-button
+        type="button"
+        class="menu-button"
+        aria-label="Abrir menú"
+        [attr.aria-expanded]="menu.opened"
+        (click)="menu.open()"
+      >
+        <mat-icon>menu</mat-icon>
+      </button>
+    </mat-toolbar>
 
-<footer class="footer">
-  <span>CutePet - Ropa para mascotas hecha a mano en La Paz</span>
-</footer>
+    <main id="contenido" class="content">
+      <router-outlet />
+    </main>
+
+    <footer class="footer">
+      <span>Creaciones CutePet - Ropa 100% nueva en La Paz</span>
+    </footer>
+  </mat-sidenav-content>
+</mat-sidenav-container>

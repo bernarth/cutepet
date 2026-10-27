@@ -78,6 +78,20 @@ export function fitProduct(
   return { variants: fits, approximate: entered.length < MEASUREMENTS.length };
 }
 
+/** When no size fits, the one whose differences add up to the fewest cm. null when some size fits */
+export function closestVariant(fit: ProductFit): VariantFit | null {
+  if (fit.variants.length === 0 || fit.variants.some((variant) => variant.fits)) {
+    return null;
+  }
+  return fit.variants.reduce((best, current) =>
+    totalDifference(current) < totalDifference(best) ? current : best,
+  );
+}
+
+function totalDifference(fit: VariantFit): number {
+  return fit.issues.reduce((sum, issue) => sum + Math.abs(issue.differenceCm), 0);
+}
+
 function issueFor(
   variant: Variant,
   measurement: Measurement,

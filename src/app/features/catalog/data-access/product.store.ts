@@ -34,14 +34,18 @@ export class ProductStore {
     },
   });
 
-  readonly product = computed(() =>
+  private readonly lookup = computed(() =>
     this.productResource.hasValue() ? this.productResource.value() : null,
   );
+
+  readonly product = computed(() => {
+    const lookup = this.lookup();
+    return lookup?.kind === 'found' ? lookup.product : null;
+  });
+  readonly isSoldOut = computed(() => this.lookup()?.kind === 'sold_out');
+  readonly notFound = computed(() => this.lookup()?.kind === 'not_found');
   readonly isLoading = computed(() => this.productResource.isLoading());
   readonly hasError = computed(() => this.productResource.status() === 'error');
-  readonly notFound = computed(
-    () => this.productResource.status() === 'resolved' && this.productResource.value() === null,
-  );
 
   readonly sizes = computed(() => (this.sizing.hasValue() ? this.sizing.value().sizes : []));
   readonly toleranceCm = computed(() =>

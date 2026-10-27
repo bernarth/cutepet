@@ -1,6 +1,13 @@
 import { Tables } from '@core/supabase/database.types';
 
-import { CatalogStatus, Photo, ProductDetail, ProductSummary, Variant } from './product';
+import {
+  CatalogStatus,
+  Photo,
+  ProductDetail,
+  ProductLookup,
+  ProductSummary,
+  Variant,
+} from './product';
 import { Measurements, Size } from './size';
 
 export type PhotoUrl = (storagePath: string) => string;
@@ -16,7 +23,6 @@ export interface ProductSummaryRow {
   readonly name: string;
   readonly price: number;
   readonly catalog_status: CatalogStatus | null;
-  readonly production_days: number | null;
   readonly product_photos: readonly PhotoRow[];
 }
 
@@ -46,20 +52,28 @@ export function toProductSummary(row: ProductSummaryRow, photoUrl: PhotoUrl): Pr
     name: row.name,
     price: row.price,
     status: row.catalog_status ?? 'sold_out',
-    productionDays: row.production_days,
     photo: photo ?? null,
   };
 }
 
-export function toProductDetail(row: ProductDetailRow, photoUrl: PhotoUrl): ProductDetail {
-  const summary = toProductSummary(row, photoUrl);
-  const isMadeToOrder = summary.status === 'made_to_order';
-  const variants = [...row.catalog_variants]
+export function toProductLookup(row: ProductDetailRow | null, photoUrl: PhotoUrl): ProductLookup {
+  if (!row) {
+    return { kind: 'not_found' };
+  }
+  if (row.catalog_status === 'sold_out') {
+    return { kind: 'sold_out' };
+  }
+  return { kind: 'found', product: toProductDetail(row, photoUrl) };
+}
+
+function toProductDetail(row: ProductDetailRow, photoUrl: PhotoUrl): ProductDetail {
+  const variants = row.catalog_variants
+    .filter((variant) => variant.stock > 0)
     .sort((a, b) => (a.sizes?.sort_order ?? 0) - (b.sizes?.sort_order ?? 0))
-    .map((variant) => toVariant(variant, isMadeToOrder));
+    .map(toVariant);
 
   return {
-    ...summary,
+    ...toProductSummary(row, photoUrl),
     description: row.description,
     petTypeName: row.pet_types?.name ?? '',
     categoryName: row.categories?.name ?? '',
@@ -79,22 +93,15 @@ export function toSize(row: Tables<'sizes'>): Size {
   };
 }
 
-function toVariant(row: VariantRow, isMadeToOrder: boolean): Variant {
+function toVariant(row: VariantRow): Variant {
   return {
     id: row.id,
     sizeId: row.size_id,
     sizeLabel: row.sizes?.label ?? '',
-    availability: variantAvailability(row, isMadeToOrder),
+    isReserved: (row.available_stock ?? 0) === 0,
     exactMeasurements: toMeasurements(row),
     toleranceCm: row.tolerance_cm,
   };
-}
-
-function variantAvailability(row: VariantRow, isMadeToOrder: boolean): Variant['availability'] {
-  if (isMadeToOrder || (row.available_stock ?? 0) > 0) {
-    return 'available';
-  }
-  return row.stock > 0 ? 'reserved' : 'sold_out';
 }
 
 function toMeasurements(row: VariantRow): Measurements | null {
