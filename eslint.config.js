@@ -1,6 +1,6 @@
 // @ts-check
 const eslint = require('@eslint/js');
-const { defineConfig } = require('eslint/config');
+const { defineConfig, globalIgnores } = require('eslint/config');
 const tseslint = require('typescript-eslint');
 const angular = require('angular-eslint');
 
@@ -23,6 +23,7 @@ const featureNames = [
 ];
 
 module.exports = defineConfig([
+  globalIgnores(['src/app/core/supabase/database.types.ts']),
   {
     files: ['**/*.ts'],
     extends: [

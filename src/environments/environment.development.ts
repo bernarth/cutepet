@@ -4,7 +4,7 @@ export const environment: Environment = {
   production: false,
   siteUrl: 'http://localhost:4200',
   supabase: {
-    url: 'https://ljhydejghdcgwmyfroxp.supabase.co',
-    publishableKey: 'sb_publishable_tLs8RHcMScRvpMq_gQWX5Q_511cH2KG',
+    url: 'http://127.0.0.1:54321',
+    publishableKey: 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH',
   },
 };
