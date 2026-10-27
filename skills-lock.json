@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "skills": {
+    "accessibility": {
+      "source": "addyosmani/web-quality-skills",
+      "sourceType": "autoskills-registry",
+      "computedHash": "2174f783a038a7ca4869c4c18e14726ec13b9c6b705d59253f647d0ca37cb78d"
+    },
+    "adev-writing-guide": {
+      "source": "angular/angular",
+      "sourceType": "autoskills-registry",
+      "computedHash": "c7ab4fc48e0edcefb0b8a2ec19ce724fe02c0f068f384fe5c0b9de6b39f6f197"
+    },
+    "angular-developer": {
+      "source": "angular/skills",
+      "sourceType": "autoskills-registry",
+      "computedHash": "959729aa281538edc7fdfed3e71250d4eae2b863a08cb89e32fc932ea94ae9cf"
+    },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "autoskills-registry",
+      "computedHash": "a4e6516a601f72ffd8bcd0d64609e8ba724d2ce92569a059a6890a5caadf072b"
+    },
+    "impeccable": {
+      "source": "pbakaus/impeccable",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/impeccable/SKILL.md",
+      "computedHash": "e3bb18720f45bb007f97042d0eaf0253531af1f85f9425a89f87bc22708bc3b4"
+    },
+    "ponytail": {
+      "source": "dietrichgebert/ponytail",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/ponytail/SKILL.md",
+      "computedHash": "061f887d9e3e735f85db3be3655a8936a00f24d5fb65ac4ab74a968a770fe342"
+    },
+    "pr_review": {
+      "source": "angular/angular",
+      "sourceType": "autoskills-registry",
+      "computedHash": "f53bb16d1a293a3440f04a607a78a7c0c908739e712592e39c484259354c889b"
+    },
+    "reference-compiler-cli": {
+      "source": "angular/angular",
+      "sourceType": "autoskills-registry",
+      "computedHash": "03610c5196684d4ba6b6079bc3b2c8d28645ce1bc4443dc62dbc78b444684dad"
+    },
+    "reference-core": {
+      "source": "angular/angular",
+      "sourceType": "autoskills-registry",
+      "computedHash": "c198e0de139cef99e8dd330132a27981a5e1d298be2ecf485f8af81162ad474a"
+    },
+    "reference-signal-forms": {
+      "source": "angular/angular",
+      "sourceType": "autoskills-registry",
+      "computedHash": "96b33fe80f33529bb3050a6c0a81c69cf7f91b80b886e27a3571399fecb2722d"
+    },
+    "supabase-postgres-best-practices": {
+      "source": "supabase/agent-skills",
+      "sourceType": "autoskills-registry",
+      "computedHash": "7be4ec62e989dc425e13c0be40951f1aa81f6578483c2d2416e5c6d3c6263d42"
+    },
+    "typescript-advanced-types": {
+      "source": "wshobson/agents",
+      "sourceType": "autoskills-registry",
+      "computedHash": "cb5d18bc19191b388cc49c15ff98dcbc714fa343373d078be00833e8a18ef291"
+    },
+    "using-superpowers": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/using-superpowers/SKILL.md",
+      "computedHash": "ef8670c2a2d8e2f6ed52d6f3219759903300ca13afc5ec2e25826a735112562b"
+    }
+  }
+}

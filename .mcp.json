@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "angular-cli": {
+      "command": "pnpm",
+      "args": ["dlx", "@angular/cli", "mcp"]
+    },
+    "supabase": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=ljhydejghdcgwmyfroxp"
+    }
+  }
+}
