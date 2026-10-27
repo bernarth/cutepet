@@ -34,7 +34,7 @@ export const routes: Routes = [
         path: 'guia-de-tallas',
         title: 'Guía de tallas - CutePet',
         loadComponent: () =>
-          import('@features/size-guide/pages/size-guide-page').then((m) => m.SizeGuidePage),
+          import('@features/catalog/pages/size-guide-page').then((m) => m.SizeGuidePage),
       },
       {
         path: 'personalizado',
@@ -48,7 +48,7 @@ export const routes: Routes = [
         path: 'vendidos',
         title: 'Ya vendidos - CutePet',
         loadComponent: () =>
-          import('@features/sold-gallery/pages/sold-gallery-page').then((m) => m.SoldGalleryPage),
+          import('@features/catalog/pages/sold-gallery-page').then((m) => m.SoldGalleryPage),
       },
       {
         path: 'mi-cuenta',

@@ -1,0 +1,43 @@
+<div class="fields">
+  <mat-form-field>
+    <mat-label>Pecho (cm)</mat-label>
+    <input matInput inputmode="decimal" autocomplete="off" [formField]="measurementsForm.chest" />
+    <mat-hint>Obligatorio</mat-hint>
+    @if (measurementsForm.chest().touched() && measurementsForm.chest().errors().length) {
+      <mat-error>{{ measurementsForm.chest().errors()[0].message }}</mat-error>
+    }
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>Cuello (cm)</mat-label>
+    <input matInput inputmode="decimal" autocomplete="off" [formField]="measurementsForm.neck" />
+    <mat-hint>Opcional</mat-hint>
+    @if (measurementsForm.neck().errors().length) {
+      <mat-error>{{ measurementsForm.neck().errors()[0].message }}</mat-error>
+    }
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>Largo de espalda (cm)</mat-label>
+    <input
+      matInput
+      inputmode="decimal"
+      autocomplete="off"
+      [formField]="measurementsForm.backLength"
+    />
+    <mat-hint>Opcional</mat-hint>
+    @if (measurementsForm.backLength().errors().length) {
+      <mat-error>{{ measurementsForm.backLength().errors()[0].message }}</mat-error>
+    }
+  </mat-form-field>
+</div>
+
+<div class="result" aria-live="polite">
+  @if (tableResult(); as result) {
+    <cp-size-recommendation-view [result]="result" />
+  }
+  @if (productResult(); as result) {
+    <cp-product-fit-list [result]="result" />
+  }
+  @if (approximate()) {
+    <p class="note">Resultado aproximado. Agrega las tres medidas para mayor precisión.</p>
+  }
+</div>

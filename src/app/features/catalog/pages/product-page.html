@@ -1,0 +1,48 @@
+@if (store.isLoading()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Cargando prenda" />
+}
+
+@if (store.product(); as product) {
+  <article class="layout">
+    <cp-photo-gallery [photos]="product.photos" />
+
+    <div class="info">
+      <h1>{{ product.name }}</h1>
+      @if (badge(); as text) {
+        <span class="badge">{{ text }}</span>
+      }
+
+      @if (product.status === 'sold_out') {
+        <div class="sold">
+          <p>Esta prenda ya fue vendida</p>
+          <a mat-flat-button routerLink="/personalizado">Pide una parecida</a>
+        </div>
+      } @else {
+        <p class="price">{{ product.price | currency }}</p>
+      }
+
+      <p class="meta">{{ product.petTypeName }} · {{ product.categoryName }}</p>
+      <p class="description">{{ product.description }}</p>
+
+      <cp-variant-list [variants]="product.variants" />
+
+      <section class="calculator" aria-labelledby="calculator-title">
+        <h2 id="calculator-title">¿Cuál es su talla?</h2>
+        <cp-size-calculator
+          [sizes]="store.sizes()"
+          [variants]="product.variants"
+          [toleranceCm]="store.toleranceCm()"
+        />
+      </section>
+    </div>
+  </article>
+} @else if (store.notFound()) {
+  <cp-empty-state message="No encontramos esta prenda. Puede que ya no esté disponible.">
+    <a mat-button routerLink="/catalogo">Ver catálogo</a>
+  </cp-empty-state>
+} @else if (store.hasError()) {
+  <cp-empty-state
+    icon="info"
+    message="No pudimos cargar esta prenda. Intenta de nuevo en unos minutos."
+  />
+}

@@ -109,6 +109,12 @@ isOneToOne: false
       foreignKeyName: "product_photos_product_id_fkey"
       columns: ["product_id"]
 isOneToOne: false
+      referencedRelation: "catalog_products"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "product_photos_product_id_fkey"
+      columns: ["product_id"]
+isOneToOne: false
       referencedRelation: "products"
       referencedColumns: ["id"]
     }
@@ -141,14 +147,14 @@ isOneToOne: false
                   ]
                 },"settings": {
                   Row: {
-                    "free_pickup_min_items": number,"id": boolean,"pickup_address": string,"pickup_fee": number,"pickup_hours": string,"pickup_notice": string,"qr_checkout_enabled": boolean,"qr_disabled_message": string,"qr_expires_on": string | null,"qr_image_path": string | null,"reservation_minutes": number,"shipping_promo_enabled": boolean,"shipping_promo_min_items": number | null,"shipping_promo_min_total": number | null,"store_whatsapp": string | null,"validation_hours": string
+                    "free_pickup_min_items": number,"id": boolean,"pickup_address": string,"pickup_fee": number,"pickup_hours": string,"pickup_notice": string,"qr_checkout_enabled": boolean,"qr_disabled_message": string,"qr_expires_on": string | null,"qr_image_path": string | null,"reservation_minutes": number,"shipping_promo_enabled": boolean,"shipping_promo_min_items": number | null,"shipping_promo_min_total": number | null,"size_tolerance_cm": number,"store_whatsapp": string | null,"validation_hours": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "free_pickup_min_items"?: number,"id"?: boolean,"pickup_address"?: string,"pickup_fee"?: number,"pickup_hours"?: string,"pickup_notice"?: string,"qr_checkout_enabled"?: boolean,"qr_disabled_message"?: string,"qr_expires_on"?: string | null,"qr_image_path"?: string | null,"reservation_minutes"?: number,"shipping_promo_enabled"?: boolean,"shipping_promo_min_items"?: number | null,"shipping_promo_min_total"?: number | null,"store_whatsapp"?: string | null,"validation_hours"?: string
+                    "free_pickup_min_items"?: number,"id"?: boolean,"pickup_address"?: string,"pickup_fee"?: number,"pickup_hours"?: string,"pickup_notice"?: string,"qr_checkout_enabled"?: boolean,"qr_disabled_message"?: string,"qr_expires_on"?: string | null,"qr_image_path"?: string | null,"reservation_minutes"?: number,"shipping_promo_enabled"?: boolean,"shipping_promo_min_items"?: number | null,"shipping_promo_min_total"?: number | null,"size_tolerance_cm"?: number,"store_whatsapp"?: string | null,"validation_hours"?: string
                   }
                   Update: {
-                    "free_pickup_min_items"?: number,"id"?: boolean,"pickup_address"?: string,"pickup_fee"?: number,"pickup_hours"?: string,"pickup_notice"?: string,"qr_checkout_enabled"?: boolean,"qr_disabled_message"?: string,"qr_expires_on"?: string | null,"qr_image_path"?: string | null,"reservation_minutes"?: number,"shipping_promo_enabled"?: boolean,"shipping_promo_min_items"?: number | null,"shipping_promo_min_total"?: number | null,"store_whatsapp"?: string | null,"validation_hours"?: string
+                    "free_pickup_min_items"?: number,"id"?: boolean,"pickup_address"?: string,"pickup_fee"?: number,"pickup_hours"?: string,"pickup_notice"?: string,"qr_checkout_enabled"?: boolean,"qr_disabled_message"?: string,"qr_expires_on"?: string | null,"qr_image_path"?: string | null,"reservation_minutes"?: number,"shipping_promo_enabled"?: boolean,"shipping_promo_min_items"?: number | null,"shipping_promo_min_total"?: number | null,"size_tolerance_cm"?: number,"store_whatsapp"?: string | null,"validation_hours"?: string
                   }
                   Relationships: [
                     
@@ -183,17 +189,23 @@ isOneToOne: false
                   ]
                 },"variants": {
                   Row: {
-                    "back_length_cm": number | null,"chest_cm": number | null,"id": number,"neck_cm": number | null,"product_id": number,"size_id": number,"stock": number
+                    "back_length_cm": number | null,"chest_cm": number | null,"id": number,"neck_cm": number | null,"product_id": number,"size_id": number,"stock": number,"tolerance_cm": number | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "back_length_cm"?: number | null,"chest_cm"?: number | null,"id"?: never,"neck_cm"?: number | null,"product_id": number,"size_id": number,"stock"?: number
+                    "back_length_cm"?: number | null,"chest_cm"?: number | null,"id"?: never,"neck_cm"?: number | null,"product_id": number,"size_id": number,"stock"?: number,"tolerance_cm"?: number | null
                   }
                   Update: {
-                    "back_length_cm"?: number | null,"chest_cm"?: number | null,"id"?: never,"neck_cm"?: number | null,"product_id"?: number,"size_id"?: number,"stock"?: number
+                    "back_length_cm"?: number | null,"chest_cm"?: number | null,"id"?: never,"neck_cm"?: number | null,"product_id"?: number,"size_id"?: number,"stock"?: number,"tolerance_cm"?: number | null
                   }
                   Relationships: [
                     {
+      foreignKeyName: "variants_product_id_fkey"
+      columns: ["product_id"]
+isOneToOne: false
+      referencedRelation: "catalog_products"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "variants_product_id_fkey"
       columns: ["product_id"]
 isOneToOne: false
@@ -210,19 +222,45 @@ isOneToOne: false
                 }
           }
           Views: {
-            "catalog_variants": {
+            "catalog_products": {
                   Row: {
-                    "available_stock": number | null,"back_length_cm": number | null,"chest_cm": number | null,"id": number,"neck_cm": number | null,"product_id": number,"size_id": number,"stock": number
+                    "availability": Database["public"]['Enums']["availability"],"catalog_status": Database["public"]['Enums']["catalog_status"] | null,"category_id": number,"created_at": string,"description": string,"id": number,"is_featured": boolean,"name": string,"pet_type_id": number,"price": number,"production_days": number | null,"size_ids": (number)[] | null,"slug": string
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "products_category_id_fkey"
+      columns: ["category_id"]
+isOneToOne: false
+      referencedRelation: "categories"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "products_pet_type_id_fkey"
+      columns: ["pet_type_id"]
+isOneToOne: false
+      referencedRelation: "pet_types"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"catalog_variants": {
+                  Row: {
+                    "available_stock": number | null,"back_length_cm": number | null,"chest_cm": number | null,"id": number,"neck_cm": number | null,"product_id": number,"size_id": number,"stock": number,"tolerance_cm": number | null
                   }
                   ComputedFields: never
                   Insert: {
-                           "available_stock"?: never,"back_length_cm"?: number | null,"chest_cm"?: number | null,"id"?: number | null,"neck_cm"?: number | null,"product_id"?: number | null,"size_id"?: number | null,"stock"?: number | null
+                           "available_stock"?: never,"back_length_cm"?: number | null,"chest_cm"?: number | null,"id"?: number | null,"neck_cm"?: number | null,"product_id"?: number | null,"size_id"?: number | null,"stock"?: number | null,"tolerance_cm"?: number | null
                          }
                         Update: {
-                           "available_stock"?: never,"back_length_cm"?: number | null,"chest_cm"?: number | null,"id"?: number | null,"neck_cm"?: number | null,"product_id"?: number | null,"size_id"?: number | null,"stock"?: number | null
+                           "available_stock"?: never,"back_length_cm"?: number | null,"chest_cm"?: number | null,"id"?: number | null,"neck_cm"?: number | null,"product_id"?: number | null,"size_id"?: number | null,"stock"?: number | null,"tolerance_cm"?: number | null
                          }
                         Relationships: [
                     {
+      foreignKeyName: "variants_product_id_fkey"
+      columns: ["product_id"]
+isOneToOne: false
+      referencedRelation: "catalog_products"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "variants_product_id_fkey"
       columns: ["product_id"]
 isOneToOne: false
@@ -247,7 +285,8 @@ isOneToOne: false
 "neck_cm": number | null,
 "product_id": number,
 "size_id": number,
-"stock": number
+"stock": number,
+"tolerance_cm": number | null
             }
                           SetofOptions: {
         from: "*"
@@ -500,7 +539,7 @@ isOneToOne: false
       } }
           }
           Enums: {
-            "app_role": "admin","availability": "in_stock"|"made_to_order","delivery_method": "pickup_point"|"bus_parcel","order_channel": "web"|"whatsapp","order_status": "pending_payment"|"proof_uploaded"|"confirmed"|"in_production"|"ready_for_pickup"|"shipped"|"delivered"|"cancelled"
+            "app_role": "admin","availability": "in_stock"|"made_to_order","catalog_status": "available"|"reserved"|"sold_out"|"made_to_order","delivery_method": "pickup_point"|"bus_parcel","order_channel": "web"|"whatsapp","order_status": "pending_payment"|"proof_uploaded"|"confirmed"|"in_production"|"ready_for_pickup"|"shipped"|"delivered"|"cancelled"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -616,7 +655,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "app_role": ["admin"],"availability": ["in_stock", "made_to_order"],"delivery_method": ["pickup_point", "bus_parcel"],"order_channel": ["web", "whatsapp"],"order_status": ["pending_payment", "proof_uploaded", "confirmed", "in_production", "ready_for_pickup", "shipped", "delivered", "cancelled"]
+            "app_role": ["admin"],"availability": ["in_stock", "made_to_order"],"catalog_status": ["available", "reserved", "sold_out", "made_to_order"],"delivery_method": ["pickup_point", "bus_parcel"],"order_channel": ["web", "whatsapp"],"order_status": ["pending_payment", "proof_uploaded", "confirmed", "in_production", "ready_for_pickup", "shipped", "delivered", "cancelled"]
           }
         }
 } as const

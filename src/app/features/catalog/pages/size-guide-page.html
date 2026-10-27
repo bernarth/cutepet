@@ -1,0 +1,48 @@
+<cp-page-header title="Guía de tallas" subtitle="Cómo medir a tu mascota y qué talla elegir" />
+
+<section aria-labelledby="how-to-measure">
+  <h2 id="how-to-measure">Cómo medir</h2>
+  <p>Usa una cinta métrica de costura. Mide con tu mascota de pie y tranquila, sin ropa puesta.</p>
+  <ol class="steps">
+    <li>
+      <div class="illustration" aria-hidden="true">Ilustración próximamente</div>
+      <h3>1. Pecho</h3>
+      <p>Rodea la parte más ancha del pecho, justo detrás de las patas delanteras.</p>
+    </li>
+    <li>
+      <div class="illustration" aria-hidden="true">Ilustración próximamente</div>
+      <h3>2. Cuello</h3>
+      <p>Mide donde normalmente va el collar, en la base del cuello.</p>
+    </li>
+    <li>
+      <div class="illustration" aria-hidden="true">Ilustración próximamente</div>
+      <h3>3. Largo de espalda</h3>
+      <p>Desde la base del cuello hasta el inicio de la cola, siguiendo la columna.</p>
+    </li>
+  </ol>
+  <div class="tips">
+    <p>
+      La cinta debe quedar firme, sin apretar. Anota la medida tal cual, la holgura ya está pensada
+      en cada prenda.
+    </p>
+    <p>Si tu mascota tiene mucho pelo, mide sin apretar el pelaje.</p>
+    <p>Si queda entre dos tallas, elige la más grande.</p>
+  </div>
+</section>
+
+<section aria-labelledby="calculator-title">
+  <h2 id="calculator-title">Calcula su talla</h2>
+  <cp-size-calculator [sizes]="store.sizes()" />
+</section>
+
+<section aria-labelledby="size-table-title">
+  <h2 id="size-table-title">Tabla de tallas</h2>
+  @if (store.isLoading()) {
+    <mat-progress-bar mode="indeterminate" aria-label="Cargando tallas" />
+  }
+  @if (store.hasError()) {
+    <cp-empty-state icon="info" message="No pudimos cargar la tabla de tallas." />
+  } @else {
+    <cp-size-table [sizes]="store.sizes()" />
+  }
+</section>

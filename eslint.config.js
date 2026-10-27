@@ -15,9 +15,7 @@ const featureNames = [
   'catalog',
   'cart',
   'checkout',
-  'size-guide',
   'custom-request',
-  'sold',
   'account',
   'admin',
 ];

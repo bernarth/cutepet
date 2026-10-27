@@ -39,13 +39,14 @@ supabase db push      # apply new migrations to the remote project
 
 ## Scripts
 
-| Command                    | Description                                                         |
-| -------------------------- | ------------------------------------------------------------------- |
-| `pnpm start`               | Dev server                                                          |
-| `pnpm check`               | Format check, lint, tests and build                                 |
-| `pnpm build`               | Production build with SSR                                           |
-| `pnpm db:types`            | Regenerate database types from the local Supabase database          |
-| `pnpm db:test:concurrency` | Prove that a unique item is never sold twice under real concurrency |
+| Command                    | Description                                                           |
+| -------------------------- | --------------------------------------------------------------------- |
+| `pnpm start`               | Dev server                                                            |
+| `pnpm check`               | Format check, lint, tests and build                                   |
+| `pnpm build`               | Production build with SSR                                             |
+| `pnpm db:types`            | Regenerate database types from the local Supabase database            |
+| `pnpm db:test:concurrency` | Prove that a unique item is never sold twice under real concurrency   |
+| `pnpm db:seed:images`      | Upload the seed placeholder photos to the local `store-images` bucket |
 
 ## Database
 
@@ -53,10 +54,13 @@ The schema lives in `supabase/migrations/`. Development uses the local Supabase 
 
 ```bash
 supabase start                # start the local stack
-supabase db reset             # recreate the local database from the migrations
+supabase db reset             # recreate the local database from the migrations + supabase/seed.sql
+pnpm db:seed:images           # upload the seed photos (local only)
 supabase test db              # pgTAP tests for RLS and every order and stock rule
 pnpm db:test:concurrency      # several sessions race for the same item; exactly one must win
 ```
+
+`supabase/seed.sql` is local test data (products in every catalog state). It never reaches production: `supabase db push` does not run it.
 
 pgTAP runs in a single database session, so it cannot show two customers paying at the same moment. `pnpm db:test:concurrency` opens several sessions at once against the local database and checks that the row lock makes all but one of them fail.
 

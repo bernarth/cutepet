@@ -40,7 +40,7 @@ Online store for handmade pet clothing based in La Paz, Bolivia. Customers buy i
 | `/catalogo/:slug` | Product: photos, size, "¿Cuál es su talla?", add to cart | Server    |
 | `/carrito`        | Summary + "Pagar con QR" / "Pedir por WhatsApp"          | Client    |
 | `/pagar`          | QR, amount, order code, countdown, upload proof          | Client    |
-| `/guia-de-tallas` | How to measure + size table + size calculator            | Prerender |
+| `/guia-de-tallas` | How to measure + size table + size calculator            | Server    |
 | `/personalizado`  | Custom request form                                      | Prerender |
 | `/vendidos`       | Sold gallery                                             | Server    |
 | `/mi-cuenta`      | Orders, order status by link, my pets                    | Client    |
@@ -141,8 +141,9 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
 6. Full QR checkout
 7. Notifications: `notify` Edge Function + `notification_channels`
 8. Account, my pets, custom requests
-9. Keep-alive job, domain and launch
-10. (Optional) AI proof check with OpenRouter
+9. Home: featured products and categories
+10. Keep-alive job, domain and launch
+11. (Optional) AI proof check with OpenRouter
 
 ## Decisions
 
@@ -211,7 +212,7 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
   - Ranges have 1 cm gaps, so each range is treated as [min, next size's min).
   - Each measurement is matched on its own. The calculator recommends the **largest** match and shows a note if the matches differ.
   - Outside every size → suggest a custom request.
-  - If the item has exact measurements, compare against those instead of the table.
+  - If the item has exact measurements, compare against those instead of the table (details in "Step 3" below).
 
 ### Delivery and pricing
 
@@ -227,3 +228,47 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
 - `pets`, `custom_requests` and `notification_channels` are left for their steps (7 and 8). The `settings` table is included now.
 - Development uses the local Supabase stack (`supabase start` / `supabase db reset`) with pgTAP tests for RLS and every RPC rule (double-booking, restore conflicts, permissions).
 - The remote Supabase project is never touched without asking the owner first.
+
+### Step 3: catalog, product page, size guide and sold gallery
+
+> Recorded on 2026-10-26 while planning step 3.
+
+**Catalog status.** A `security_invoker` view `public.catalog_products` computes, per product, `catalog_status` (`made_to_order`, `available`, `reserved`, `sold_out`) and the sizes that can be picked. Products with no variants are left out.
+
+- **Reserved** items (stock above 0 but every unit held by an active order) stay in the catalog with a "Reservada" badge; the reserved size is disabled.
+- **Made to order:** badge "Hecha a pedido · lista en X días", every size the product has is selectable, it matches the size filter, and it is never sold out.
+
+**Sold gallery (`/vendidos`).**
+
+- Shows in-stock products where every variant has stock 0. Made-to-order products never appear. A product with one size still available stays in the catalog.
+- Newest product first. The price is hidden. Cards link to the product page.
+
+**Sold-out product page.** Answers 200 with "Esta prenda ya fue vendida" and a "Pide una parecida" button to `/personalizado`. Photos, sizes and exact measurements stay visible, because customers use them to ask for a similar item. Inactive or unknown products answer 404.
+
+**Catalog filters.**
+
+- Pet type, category, size and availability. One choice per filter, no sorting, no pagination.
+- Active filters live in Spanish query params (`/catalogo?mascota=gato&categoria=abrigos`) so filtered links can be shared on WhatsApp.
+- The category filter lists only active categories with at least one product shown in the catalog (not sold out).
+- Categories are seeded in a migration: Abrigos, Vestidos, Otros. The admin adds, renames or deactivates them later; a category used by products is deactivated, never deleted.
+
+**Size guide** is rendered on the server (not prerendered) because the size table is edited from the admin panel.
+
+**Size calculator.**
+
+- Chest is required; neck and back length are optional. With fewer than three measurements the result says it is approximate.
+- **Size guide (table mode):** each range is [min, next size's min); the last size uses [min, max + 1). Each measurement is matched on its own, the largest match is recommended, and a note appears if the matches differ. Outside every size → suggest a custom request.
+- **Product page (exact mode):** exact measurements are those of the pet the item fits, so the pet is compared with them, never with the size table (some items are made for broad-chested breeds and differ a lot from their range). The calculator recommends among that product's variants.
+  - A measurement fits when |pet − item| ≤ tolerance.
+  - Tolerance: global setting `settings.size_tolerance_cm` (default 2 cm) plus an optional per-variant override `variants.tolerance_cm` (nullable, e.g. 4 cm for stretchy fabric). Null uses the global one.
+  - "Le queda" when every measurement the customer entered fits; otherwise it says which one is off and by how much (e.g. "el largo es 3 cm más corto").
+  - A variant without exact measurements falls back to its size range, as in table mode.
+- The admin can always save any size and measurements combination; the admin UI only warns, never blocks.
+
+**Product page** shows "Talla X · Medidas de esta prenda: cuello, pecho, largo" when exact measurements exist, listing only the ones present. "Agregar al carrito" is added in step 4.
+
+**Content and assets.** Neutral placeholder images and a placeholder `og-image` until the owner provides real ones. The "Cómo medir" text is a first draft to be reviewed; illustrations are a placeholder.
+
+**Local test data.** `supabase/seed.sql` plus placeholder photos uploaded to the local `store-images` bucket. Seed data never reaches production.
+
+**For step 5 (admin panel):** compress product photos on upload. WhatsApp ignores link preview images above about 600 KB, while the bucket accepts up to 5 MB.
