@@ -16,6 +16,7 @@ export const SUPABASE = new InjectionToken<CutePetSupabase>('SUPABASE', {
   providedIn: 'root',
   factory: () => {
     const isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+
     return createClient<Database>(environment.supabase.url, environment.supabase.publishableKey, {
       auth: {
         persistSession: isBrowser,

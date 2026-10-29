@@ -27,7 +27,11 @@ export class ProductRepository {
   private readonly photoUrl: PhotoUrl = (path) =>
     this.supabase.storage.from('store-images').getPublicUrl(path).data.publicUrl;
 
-  /** Sold out products are hidden. catalog_status is declared in display order, so reserved ones come last */
+  /**
+   * @description Lists the catalog where old out products are hidden. catalog_status is declared in display order, so reserved ones come last
+   * @param query
+   * @returns @type ProductSummary[]
+   */
   async listForCatalog(query: ProductQuery): Promise<ProductSummary[]> {
     let request = this.supabase
       .from('catalog_products')
@@ -52,6 +56,7 @@ export class ProductRepository {
         .order('sort_order', { referencedTable: 'product_photos' })
         .limit(1, { referencedTable: 'product_photos' }),
     );
+
     return rows.map((row) => toProductSummary(row, this.photoUrl));
   }
 
@@ -63,6 +68,7 @@ export class ProductRepository {
         .eq('slug', slug)
         .maybeSingle(),
     );
+
     return toProductLookup(row, this.photoUrl);
   }
 }

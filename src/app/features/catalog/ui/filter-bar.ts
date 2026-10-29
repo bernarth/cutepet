@@ -19,7 +19,9 @@ export interface FilterChange {
   readonly value: string | null;
 }
 
-/** Inline selects from 600px. Below that, a "Filtros" button opens a bottom sheet and chips show what is active */
+/**
+ * @description Inline selects from 600px. Below that, a "Filtros" button opens a bottom sheet and chips show what is active
+ */
 @Component({
   selector: 'cp-filter-bar',
   imports: [

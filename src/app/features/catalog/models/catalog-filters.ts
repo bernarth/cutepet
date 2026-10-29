@@ -22,7 +22,9 @@ export interface ActiveFilter {
   readonly label: string;
 }
 
-/** Query param names are Spanish because they are part of the URL the customer shares */
+/**
+ * @description Query param names are Spanish because they are part of the URL the customer shares
+ */
 export const FILTER_PARAMS: Readonly<Record<CatalogFilterKey, string>> = {
   petType: 'mascota',
   category: 'categoria',
@@ -37,7 +39,12 @@ export function filtersFromParams(params: Readonly<Record<string, unknown>>): Ca
   return { petType: read('petType'), category: read('category'), size: read('size') };
 }
 
-/** One entry per selected filter, labelled with the option name, for the removable chips */
+/**
+ * @description Gets one entry per selected filter, labelled with the option name, for the removable chips
+ * @param groups
+ * @param filters
+ * @returns @type ActiveFilter[]
+ */
 export function activeFilters(
   groups: readonly FilterGroup[],
   filters: CatalogFilters,

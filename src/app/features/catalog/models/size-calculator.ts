@@ -37,9 +37,14 @@ interface SizeBounds {
   readonly upperExclusive: number;
 }
 
-/** Accepts "38", "38.5" or "38,5". Anything else, zero or empty is undefined */
+/**
+ * @description Parses number, accepts "38", "38.5" or "38,5". Anything else, zero or empty is undefined
+ * @param text
+ * @returns number or undefined
+ */
 export function parseMeasurement(text: string): number | undefined {
   const value = Number(text.trim().replace(',', '.'));
+
   return text.trim() !== '' && Number.isFinite(value) && value > 0 ? value : undefined;
 }
 
@@ -58,6 +63,7 @@ export function recommendSize(sizes: readonly Size[], pet: Measurements): SizeRe
   const matched = matches.filter((size) => size !== undefined);
   const largest = matched.reduce((a, b) => (b.sortOrder > a.sortOrder ? b : a));
   const matchesDiffer = new Set(matched.map((size) => size.id)).size > 1;
+
   return { size: largest, matchesDiffer, approximate };
 }
 
@@ -73,8 +79,10 @@ export function fitProduct(
     const issues = entered
       .map((measurement) => issueFor(variant, measurement, context))
       .filter((issue) => issue !== null);
+
     return { variant, fits: issues.length === 0, issues };
   });
+
   return { variants: fits, approximate: entered.length < MEASUREMENTS.length };
 }
 
@@ -83,6 +91,7 @@ export function closestVariant(fit: ProductFit): VariantFit | null {
   if (fit.variants.length === 0 || fit.variants.some((variant) => variant.fits)) {
     return null;
   }
+
   return fit.variants.reduce((best, current) =>
     totalDifference(current) < totalDifference(best) ? current : best,
   );
@@ -103,14 +112,18 @@ function issueFor(
   if (exact !== undefined) {
     const difference = roundCm(exact - petValue);
     const tolerance = variant.toleranceCm ?? defaultToleranceCm;
+
     return Math.abs(difference) <= tolerance ? null : { measurement, differenceCm: difference };
   }
 
   const index = sorted.findIndex((size) => size.id === variant.sizeId);
+
   if (index === -1) {
     return null;
   }
+
   const bounds = boundsOf(sorted, index, measurement);
+
   if (isWithin(bounds, petValue)) {
     return null;
   }
@@ -118,10 +131,17 @@ function issueFor(
   return { measurement, differenceCm: roundCm(nearest - petValue) };
 }
 
-/** Ranges have 1 cm gaps, so each one runs until the next size starts. The last one ends at max + 1 */
+/**
+ * @description Ranges have 1 cm gaps, so each one runs until the next size starts. The last one ends at max + 1
+ * @param sorted
+ * @param index
+ * @param measurement
+ * @returns @type SizeBounds
+ */
 function boundsOf(sorted: readonly Size[], index: number, measurement: Measurement): SizeBounds {
   const { min, max } = sorted[index][measurement];
   const next = sorted[index + 1];
+
   return { min, max, upperExclusive: next ? next[measurement].min : max + 1 };
 }
 

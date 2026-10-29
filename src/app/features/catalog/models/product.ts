@@ -17,7 +17,9 @@ export interface ProductSummary {
   readonly photo: Photo | null;
 }
 
-/** Only sizes that still have stock. A reserved size is held by someone who is paying */
+/**
+ * @description Only sizes that still have stock. A reserved size is held by someone who is paying
+ */
 export interface Variant {
   readonly id: number;
   readonly sizeId: number;
@@ -35,7 +37,9 @@ export interface ProductDetail extends ProductSummary {
   readonly variants: readonly Variant[];
 }
 
-/** A sold out product carries no details: customers only see a friendly notice */
+/**
+ * @description A sold out product carries no details: customers only see a friendly notice
+ */
 export type ProductLookup =
   | { readonly kind: 'found'; readonly product: ProductDetail }
   | { readonly kind: 'sold_out' }

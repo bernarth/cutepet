@@ -14,7 +14,7 @@ import { ProductGrid } from '../ui/product-grid';
   imports: [PageHeader, EmptyState, FilterBar, ProductGrid, MatButtonModule, LoadingBar],
   providers: [CatalogStore],
   template: `
-    <cp-page-header title="Catálogo" subtitle="Prendas únicas hechas a mano, listas para llevar" />
+    <cp-page-header title="Catálogo" subtitle="Prendas nuevas confeccionadas por nosotros" />
     <cp-filter-bar
       [groups]="store.filterGroups()"
       [selected]="store.filters()"
@@ -48,7 +48,8 @@ export class CatalogPage {
       const [first] = this.store.items();
       this.pageMeta.set({
         title: 'Catálogo',
-        description: 'Ropa para perros y gatos hecha a mano en La Paz. Modelos únicos.',
+        description:
+          'Ropa nueva para perros y gatos, confeccionada en La Paz con tela de calidad. Modelos únicos.',
         path: '/catalogo',
         imageUrl: first?.photo?.url,
       });

@@ -2,13 +2,18 @@ import { formatPrice } from '@shared/pipes/price';
 
 import { ProductDetail } from './product';
 
-/** Link preview text. WhatsApp ignores product:price, so the price goes here */
+/**
+ * @description Link preview text. WhatsApp ignores product:price, so the price goes here
+ * @param product
+ * @returns
+ */
 export function productMetaDescription(product: ProductDetail): string {
   const labels = product.variants
     .filter((variant) => !variant.isReserved)
     .map((variant) => variant.sizeLabel);
   const sizes = labels.length === 1 ? `Talla ${labels[0]}` : `Tallas ${joinSpanish(labels)}`;
   const parts = [formatPrice(product.price), labels.length ? sizes : 'Alguien la está comprando'];
+
   return `${parts.join(' · ')}. ${product.description}`.trim();
 }
 

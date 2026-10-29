@@ -8,7 +8,7 @@ import { unwrap } from '@shared/data-access/supabase-result';
 export type AppRole = 'admin' | 'customer';
 
 /**
- * Session state for the whole app.
+ * @description Session state for the whole app.
  * - Guests use Supabase anonymous sign-in, created only when needed (checkout), not on every page visit
  * - The admin role is read from the JWT (`app_metadata.role`), set server-side by a custom access token hook. Never trust a role coming from the client
  */

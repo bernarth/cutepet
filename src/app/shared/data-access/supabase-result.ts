@@ -1,5 +1,5 @@
 /**
- * The ONLY place that interprets Supabase `{ data, error }` responses.
+ * @description The ONLY place that interprets Supabase `{ data, error }` responses.
  * Every repository uses `unwrap` instead of repeating `if (error) ...` checks
  */
 export class AppError extends Error {
@@ -27,7 +27,11 @@ export function unwrap<T>({ data, error }: SupabaseResponse<T>): T {
   return data;
 }
 
-/** Same as `unwrap`, but `null` is a valid result (for example `.maybeSingle()`). */
+/**
+ * @description Unwraps as `unwrap`, but `null` is a valid result (for example `.maybeSingle()`).
+ * @param param0
+ * @returns The generic T
+ */
 export function unwrapNullable<T>({ data, error }: SupabaseResponse<T>): T | null {
   if (error) {
     throw new AppError(error.message, error.code);

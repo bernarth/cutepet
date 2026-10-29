@@ -8,7 +8,9 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { NAV_LINKS } from './nav-links';
 
-/** Public layout: header, page content and footer. On mobile the links live in a side menu */
+/**
+ * @description Public layout: header, page content and footer. On mobile the links live in a side menu
+ */
 @Component({
   selector: 'cp-shell',
   imports: [

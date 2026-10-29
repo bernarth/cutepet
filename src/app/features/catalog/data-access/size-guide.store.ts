@@ -2,7 +2,6 @@ import { Service, computed, inject, resource } from '@angular/core';
 
 import { LookupRepository } from './lookup.repository';
 
-/** Provided by SizeGuidePage */
 @Service({ autoProvided: false })
 export class SizeGuideStore {
   private readonly lookups = inject(LookupRepository);

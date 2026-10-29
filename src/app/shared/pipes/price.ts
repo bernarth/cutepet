@@ -6,7 +6,11 @@ const centsAmount = new Intl.NumberFormat('es-BO', {
   maximumFractionDigits: 2,
 });
 
-/** "Bs 120" for whole amounts, "Bs 120,50" otherwise. The only place that formats prices */
+/**
+ * @description Formats the price with whole amount and 2 decimals of precision.
+ * @param amount The number to be formated
+ * @returns string formatted price
+ */
 export function formatPrice(amount: number): string {
   const format = Number.isInteger(amount) ? wholeAmount : centsAmount;
   return `Bs ${format.format(amount)}`;

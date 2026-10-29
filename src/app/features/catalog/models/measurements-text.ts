@@ -8,7 +8,11 @@ export function formatCm(value: number): string {
   return `${centimeters.format(value)} cm`;
 }
 
-/** "Talla 2 · Medidas de esta prenda: cuello 25 cm, pecho 38,5 cm" or null without exact measurements */
+/**
+ * @description "Talla 2 · Medidas de esta prenda: cuello 25 cm, pecho 38,5 cm" or null without exact measurements
+ * @param variant
+ * @returns string or null
+ */
 export function measurementsText(variant: Variant): string | null {
   const exact = variant.exactMeasurements;
   if (!exact) {
@@ -20,7 +24,11 @@ export function measurementsText(variant: Variant): string | null {
   return `Talla ${variant.sizeLabel} · Medidas de esta prenda: ${parts.join(', ')}`;
 }
 
-/** For a size without exact measurements: "Talla 4 · Medidas de referencia: cuello 36 a 38 cm, ..." */
+/**
+ * @description For a size without exact measurements: "Talla 4 · Medidas de referencia: cuello 36 a 38 cm, ..."
+ * @param size
+ * @returns
+ */
 export function referenceMeasurementsText(size: Size): string {
   const parts = MEASUREMENTS.map((measurement) => {
     const { min, max } = size[measurement];
@@ -29,7 +37,11 @@ export function referenceMeasurementsText(size: Size): string {
   return `Talla ${size.label} · Medidas de referencia: ${parts.join(', ')}`;
 }
 
-/** "La prenda es 3 cm más corta de largo y 2 cm más ancha de pecho" */
+/**
+ * @description @example "La prenda es 3 cm más corta de largo y 2 cm más ancha de pecho"
+ * @param issues
+ * @returns string
+ */
 export function fitIssuesText(issues: readonly FitIssue[]): string {
   return `La prenda es ${issues.map(issueText).join(' y ')}`;
 }

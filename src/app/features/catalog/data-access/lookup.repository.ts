@@ -1,12 +1,13 @@
 import { Service, inject } from '@angular/core';
-
 import { SUPABASE } from '@core/supabase/supabase.client';
 import { AppError, unwrap } from '@shared/data-access/supabase-result';
 import { FilterOption } from '../models/catalog-filters';
 import { toSize } from '../models/product.mapper';
 import { Size } from '../models/size';
 
-/** Lookup tables the admin edits: pet types, categories, sizes and the size tolerance setting */
+/**
+ * @description Lookup tables the admin edits: pet types, categories, sizes and the size tolerance setting
+ */
 @Service()
 export class LookupRepository {
   private readonly supabase = inject(SUPABASE);
@@ -19,10 +20,14 @@ export class LookupRepository {
         .eq('active', true)
         .order('sort_order'),
     );
+
     return rows.map((row) => ({ value: row.slug, label: row.name }));
   }
 
-  /** Only active categories with at least one product shown in the catalog */
+  /**
+   * @description Shows only active categories with at least one product shown in the catalog
+   * @returns Category filters
+   */
   async listCatalogCategories(): Promise<FilterOption[]> {
     const rows = unwrap(
       await this.supabase
@@ -32,6 +37,7 @@ export class LookupRepository {
         .neq('catalog_products.catalog_status', 'sold_out')
         .order('sort_order'),
     );
+
     return rows.map((row) => ({ value: row.slug, label: row.name }));
   }
 
@@ -39,6 +45,7 @@ export class LookupRepository {
     const rows = unwrap(
       await this.supabase.from('sizes').select('*').eq('active', true).order('sort_order'),
     );
+
     return rows.map(toSize);
   }
 
@@ -46,9 +53,11 @@ export class LookupRepository {
     const [settings] = unwrap(
       await this.supabase.from('settings').select('size_tolerance_cm').limit(1),
     );
+
     if (!settings) {
       throw new AppError('Faltan los ajustes de la tienda', 'NOT_FOUND');
     }
+
     return settings.size_tolerance_cm;
   }
 }

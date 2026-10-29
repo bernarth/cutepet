@@ -5,7 +5,9 @@ import { ActivatedRoute } from '@angular/router';
 import { LookupRepository } from './lookup.repository';
 import { ProductRepository } from './product.repository';
 
-/** Provided by ProductPage. Reads the slug from the route */
+/**
+ * @description Provided by ProductPage. Reads the slug from the route
+ */
 @Service({ autoProvided: false })
 export class ProductStore {
   private readonly route = inject(ActivatedRoute);
@@ -30,6 +32,7 @@ export class ProductStore {
         this.lookups.listActiveSizes(),
         this.lookups.getSizeToleranceCm(),
       ]);
+
       return { sizes, toleranceCm };
     },
   });
@@ -40,6 +43,7 @@ export class ProductStore {
 
   readonly product = computed(() => {
     const lookup = this.lookup();
+
     return lookup?.kind === 'found' ? lookup.product : null;
   });
   readonly isSoldOut = computed(() => this.lookup()?.kind === 'sold_out');

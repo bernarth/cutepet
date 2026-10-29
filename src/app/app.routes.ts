@@ -3,7 +3,6 @@ import { Routes } from '@angular/router';
 import { adminGuard } from '@core/auth/admin.guard';
 import { Shell } from '@core/layout/shell';
 
-/** Every feature is lazy-loaded. Paths are in Spanish */
 export const routes: Routes = [
   {
     path: '',

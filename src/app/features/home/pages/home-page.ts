@@ -9,7 +9,7 @@ import { PageHeader } from '@shared/ui/page-header';
   imports: [PageHeader, MatButtonModule, RouterLink],
   template: `
     <cp-page-header
-      title="Ropa hecha a mano para tu mascota"
+      title="Ropa nueva para tu mascota, confeccionada por nosotros"
       subtitle="Modelos únicos, hechos en La Paz"
     />
     <a mat-flat-button class="cp-cta" routerLink="/catalogo">Ver catálogo</a>

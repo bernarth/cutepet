@@ -13,7 +13,9 @@ import { ProductSummary } from '../models/product';
 import { LookupRepository } from './lookup.repository';
 import { ProductRepository } from './product.repository';
 
-/** Provided by CatalogPage. The URL query params are the source of truth for the filters */
+/**
+ * @description Provided by CatalogPage. The URL query params are the source of truth for the filters
+ */
 @Service({ autoProvided: false })
 export class CatalogStore {
   private readonly route = inject(ActivatedRoute);
@@ -53,7 +55,9 @@ export class CatalogStore {
       }),
   });
 
-  /** Keeps the previous items while new filters load, so the page does not collapse and jump */
+  /**
+   * @description Keeps the previous items while new filters load, so the page does not collapse and jump
+   */
   readonly items = linkedSignal<ProductSummary[] | undefined, ProductSummary[]>({
     source: () => (this.productList.hasValue() ? this.productList.value() : undefined),
     computation: (current, previous) => current ?? previous?.value ?? [],

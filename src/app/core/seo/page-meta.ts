@@ -38,12 +38,15 @@ export class PageMeta {
       'og:type': page.price === undefined ? 'website' : 'product',
       'og:locale': 'es_BO',
     };
+
     for (const [property, content] of Object.entries(tags)) {
       this.meta.updateTag({ property, content });
     }
+
     this.meta.updateTag({ name: 'description', content: page.description });
     this.meta.updateTag({ name: 'twitter:card', content: 'summary_large_image' });
     this.setPrice(page.price);
+
     if (page.noIndex) {
       this.meta.updateTag({ name: 'robots', content: 'noindex' });
     } else {
@@ -62,8 +65,10 @@ export class PageMeta {
     if (price === undefined) {
       this.meta.removeTag("property='product:price:amount'");
       this.meta.removeTag("property='product:price:currency'");
+
       return;
     }
+
     this.meta.updateTag({ property: 'product:price:amount', content: price.toFixed(2) });
     this.meta.updateTag({ property: 'product:price:currency', content: 'BOB' });
   }

@@ -94,7 +94,7 @@ export class ProductPage {
   );
 
   /**
-   * Measurements of the selected size, or of the first one when every size is reserved.
+   * @description Measurements of the selected size, or of the first one when every size is reserved.
    * Without exact measurements it falls back to the reference ranges of the size table
    */
   protected readonly measurements = computed(() => {
@@ -118,6 +118,7 @@ export class ProductPage {
   constructor() {
     effect(() => {
       const product = this.store.product();
+
       if (product) {
         this.pageMeta.set({
           title: product.name,

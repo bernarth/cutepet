@@ -13,7 +13,7 @@ const CENTIMETERS = /^\s*\d+([.,]\d+)?\s*$/;
 const NUMBER_MESSAGE = 'Escribe solo números, por ejemplo 38 o 38,5';
 
 /**
- * Without variants it recommends a size from the table (size guide).
+ * @description Without variants it recommends a size from the table (size guide).
  * With variants it compares the pet with each variant of one product (product page)
  */
 @Component({
