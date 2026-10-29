@@ -19,7 +19,7 @@ Online store for handmade pet clothing based in La Paz, Bolivia. Customers buy i
 | ------------- | ----------------------------------------------------------------------------------------------------- |
 | Frontend      | Angular 22 (signals, zoneless) + Angular Material 3, pnpm                                             |
 | Rendering     | Angular SSR (Node/Express). Hosting is handled by the owner                                           |
-| Backend       | Supabase free: Postgres + RLS, Auth (anonymous), Storage, Edge Functions                              |
+| Backend       | Supabase free: Postgres + RLS, Auth (anonymous + Google), Storage, Edge Functions                     |
 | Notifications | Edge Function `notify` → Telegram and email (multiple recipients)                                     |
 | AI            | Out of the MVP. Later: OpenRouter vision model inside `notify`                                        |
 | Keep-alive    | Free scheduled job (e.g. GitHub Action) that queries Supabase daily so the free project is not paused |
@@ -29,6 +29,8 @@ Online store for handmade pet clothing based in La Paz, Bolivia. Customers buy i
 - **Guest:** Supabase anonymous user, created only when a QR checkout starts (not on every visit).
 - **Customer with account:** order history and "Mis mascotas" (my pets) with saved measurements.
 - **Admin:** owner and helpers. The role travels in the JWT (`app_metadata.role`), set by a custom access token hook.
+- **Login:** customers are guests by default; an account is optional. **Google OAuth is the only login**, for customers and admins alike. On sign-in, the anonymous identity is linked to the Google account (`linkIdentity`, needs manual linking enabled) so the guest's orders stay with the customer.
+- No email/password and no magic link for now: Supabase's default SMTP only sends to project team members, so it cannot email customers.
 - **Audit log:** Postgres triggers record who, when, entity, old value, new value and reason. Cancel, restore, reject proof, revert status and stock adjustment require a reason.
 
 ## Pages
@@ -217,6 +219,13 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
 ### Security
 
 - Cloudflare Turnstile protects anonymous sign-in. Implemented in step 6 (QR checkout); nothing in the schema.
+- Dependency security: `pnpm-workspace.yaml` only allows install scripts for the packages listed in `allowBuilds` and enforces `trustPolicy: no-downgrade`. No exceptions are added without asking the owner.
+
+### Hosting
+
+- Hosting the SSR app is handled by the owner; where it runs is not decided yet. Only the domain is paid.
+- Angular SSR answers only the hosts in `NG_ALLOWED_HOSTS`, so that variable must list the production domain (and `www` if used).
+- The free Supabase project pauses after a week without activity. A free scheduled job (e.g. a GitHub Action) queries it daily to keep it alive (step 10).
 
 ### Scope and workflow of step 2
 

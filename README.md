@@ -7,7 +7,7 @@ Customers pay with Bolivia's interoperable bank QR and upload their payment proo
 
 - **Angular 22** — signals, zoneless, SSR for link previews and SEO
 - **Angular Material 3** — custom theme
-- **Supabase** — Postgres with RLS, Auth (anonymous checkout), Storage, Edge Functions
+- **Supabase** — Postgres with RLS, Auth (anonymous checkout, Google login), Storage, Edge Functions
 - **pnpm**, ESLint with architecture boundaries, Vitest
 
 ## Getting started
@@ -26,16 +26,6 @@ pnpm start            # http://localhost:4200
 - `pnpm start` uses `src/environments/environment.development.ts`, which points to the local stack. If `supabase status` shows a different API URL or publishable key, update that file.
 - Local Studio (tables, users, SQL editor) runs at http://127.0.0.1:54323.
 - Production builds use `src/environments/environment.ts`, which points to the remote Supabase project.
-
-### Remote Supabase project
-
-```bash
-supabase login
-supabase link --project-ref <project-ref>
-supabase db push      # apply new migrations to the remote project
-```
-
-`supabase db push` only applies migrations. Auth settings live in the dashboard: anonymous sign-ins (**Sign In / Providers**) and the Custom Access Token hook `public.custom_access_token_hook` (**Auth Hooks**).
 
 ## Scripts
 
@@ -63,5 +53,43 @@ pnpm db:test:concurrency      # several sessions race for the same item; exactly
 `supabase/seed.sql` is local test data (products in every catalog state). It never reaches production: `supabase db push` does not run it.
 
 pgTAP runs in a single database session, so it cannot show two customers paying at the same moment. `pnpm db:test:concurrency` opens several sessions at once against the local database and checks that the row lock makes all but one of them fail.
+
+## Deploying the database
+
+The remote project is never changed without asking the owner first.
+
+```bash
+supabase login
+supabase link --project-ref <project-ref>
+supabase db push --dry-run   # list the migrations that would be applied
+supabase db push             # apply them
+```
+
+`supabase db push` only applies migrations (never `seed.sql`). These settings live in the dashboard and must be set by hand once:
+
+1. **Authentication → Sign In / Providers:** enable anonymous sign-ins and manual linking (so a guest's anonymous identity can be linked to Google).
+2. **Authentication → Sign In / Providers → Google:** enable it with the OAuth client ID and secret from Google Cloud. In Google Cloud, add `https://<project-ref>.supabase.co/auth/v1/callback` as an authorized redirect URI.
+3. **Authentication → URL Configuration:** set the Site URL to the production domain and add it to the redirect URLs.
+4. **Authentication → Auth Hooks:** enable the Custom Access Token hook with `public.custom_access_token_hook`.
+
+### First admin
+
+1. Sign in once on the site with the owner's Google account.
+2. Copy the user id from **Authentication → Users**.
+3. In the SQL editor run:
+
+   ```sql
+   insert into public.user_roles (user_id, role) values ('<user-id>', 'admin');
+   ```
+
+4. Sign out and in again so the new JWT carries `app_metadata.role = admin`.
+
+## Hosting
+
+Hosting is handled by the owner. The SSR app is started with `pnpm build`, then `node dist/cutepet/server/server.mjs`. Angular SSR only answers hosts listed in `NG_ALLOWED_HOSTS`, so set it to the domain, e.g. `NG_ALLOWED_HOSTS=example.com,www.example.com`. A free scheduled job (e.g. a GitHub Action) queries Supabase daily so the free project is not paused.
+
+## Dependency security
+
+`pnpm-workspace.yaml` blocks install scripts except for the packages in `allowBuilds` and enforces `trustPolicy: no-downgrade`. Do not add exceptions or relax these settings without asking.
 
 The UI is in Spanish (Bolivia); code and docs are in English.
