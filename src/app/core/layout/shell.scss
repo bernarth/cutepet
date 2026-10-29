@@ -52,6 +52,8 @@
 
 .cart {
   margin-left: auto;
+  --mat-badge-background-color: var(--cp-ink);
+  --mat-badge-text-color: var(--cp-bg);
 }
 
 .nav {

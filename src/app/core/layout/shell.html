@@ -27,8 +27,13 @@
         }
       </nav>
 
-      <a mat-icon-button class="cart" routerLink="/carrito" aria-label="Ver carrito">
-        <mat-icon>shopping_bag</mat-icon>
+      <a mat-icon-button class="cart" routerLink="/carrito" [attr.aria-label]="cartLabel()">
+        <mat-icon
+          [matBadge]="cart.unitCount()"
+          [matBadgeHidden]="cart.unitCount() === 0"
+          aria-hidden="false"
+          >shopping_bag</mat-icon
+        >
       </a>
       <button
         mat-icon-button

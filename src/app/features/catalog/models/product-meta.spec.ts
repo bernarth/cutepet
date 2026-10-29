@@ -2,7 +2,15 @@ import { ProductDetail, Variant } from './product';
 import { productMetaDescription } from './product-meta';
 
 function variant(sizeLabel: string, isReserved = false): Variant {
-  return { id: 1, sizeId: 1, sizeLabel, isReserved, exactMeasurements: null, toleranceCm: null };
+  return {
+    id: 1,
+    sizeId: 1,
+    sizeLabel,
+    availableStock: isReserved ? 0 : 1,
+    isReserved,
+    exactMeasurements: null,
+    toleranceCm: null,
+  };
 }
 
 function product(variants: Variant[]): ProductDetail {

@@ -1,7 +1,10 @@
 import { Component, computed, effect, inject, linkedSignal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { RouterLink } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router, RouterLink } from '@angular/router';
 
+import { quantityInCart } from '@core/cart/cart-line';
+import { CartStore } from '@core/cart/cart.store';
 import { PageMeta } from '@core/seo/page-meta';
 import { EmptyState } from '@shared/ui/empty-state';
 import { PricePipe } from '@shared/pipes/price';
@@ -77,6 +80,15 @@ import { SizePicker } from '../ui/size-picker';
       font: var(--mat-sys-title-medium);
       font-family: var(--cp-font-display);
     }
+    .add-to-cart {
+      width: 100%;
+    }
+    @media (min-width: 768px) {
+      .add-to-cart {
+        width: fit-content;
+        min-width: 16rem;
+      }
+    }
     .actions {
       display: flex;
       flex-wrap: wrap;
@@ -88,9 +100,18 @@ import { SizePicker } from '../ui/size-picker';
 export class ProductPage {
   protected readonly store = inject(ProductStore);
   private readonly pageMeta = inject(PageMeta);
+  private readonly cart = inject(CartStore);
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly router = inject(Router);
 
   protected readonly selectedVariantId = linkedSignal(
     () => this.store.product()?.variants.find((variant) => !variant.isReserved)?.id ?? null,
+  );
+
+  private readonly selectedVariant = computed(
+    () =>
+      this.store.product()?.variants.find((variant) => variant.id === this.selectedVariantId()) ??
+      null,
   );
 
   /**
@@ -98,9 +119,7 @@ export class ProductPage {
    * Without exact measurements it falls back to the reference ranges of the size table
    */
   protected readonly measurements = computed(() => {
-    const variants = this.store.product()?.variants ?? [];
-    const shown =
-      variants.find((variant) => variant.id === this.selectedVariantId()) ?? variants[0];
+    const shown = this.selectedVariant() ?? this.store.product()?.variants[0];
     if (!shown) {
       return null;
     }
@@ -114,6 +133,36 @@ export class ProductPage {
       product?.status === 'available' && product.variants.some((variant) => variant.isReserved)
     );
   });
+
+  protected readonly cartAction = computed(() => {
+    const variant = this.selectedVariant();
+
+    if (!variant || variant.isReserved) {
+      return 'unavailable';
+    }
+
+    return quantityInCart(this.cart.lines(), variant.id) < variant.availableStock
+      ? 'add'
+      : 'in_cart';
+  });
+
+  protected addToCart(): void {
+    const product = this.store.product();
+    const variant = this.selectedVariant();
+
+    if (!product || !variant) {
+      return;
+    }
+
+    this.cart.add(
+      { variantId: variant.id, productName: product.name, sizeLabel: variant.sizeLabel },
+      variant.availableStock,
+    );
+    this.snackBar
+      .open('Agregado al carrito', 'Ver carrito', { duration: 4000 })
+      .onAction()
+      .subscribe(() => void this.router.navigateByUrl('/carrito'));
+  }
 
   constructor() {
     effect(() => {

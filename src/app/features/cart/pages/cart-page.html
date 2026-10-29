@@ -1,0 +1,53 @@
+<cp-page-header title="Tu carrito" />
+<cp-loading-bar [active]="check.isLoading()" label="Revisando tu carrito" />
+
+@if (check.notices().length) {
+  <div class="notices" role="status">
+    @for (notice of check.notices(); track notice) {
+      <p class="notice">{{ notice }}</p>
+    }
+  </div>
+}
+
+@if (sent()) {
+  <cp-empty-state
+    icon="check_circle"
+    message="Te abrimos WhatsApp con tu pedido. Cuando lo envíes, te responderemos para coordinar el pago y la entrega."
+  >
+    <div class="actions">
+      <button mat-flat-button type="button" (click)="finishOrder()">
+        Ya lo envié, vaciar carrito
+      </button>
+      <button mat-stroked-button type="button" (click)="sent.set(false)">Volver al carrito</button>
+    </div>
+  </cp-empty-state>
+} @else if (check.hasError()) {
+  <cp-empty-state icon="info" message="No pudimos revisar tu carrito. Intenta de nuevo.">
+    <button mat-button type="button" (click)="check.retry()">Reintentar</button>
+  </cp-empty-state>
+} @else if (cart.restored() && cart.lines().length === 0) {
+  <cp-empty-state icon="shopping_bag" message="Tu carrito está vacío.">
+    <a mat-flat-button routerLink="/catalogo">Ver catálogo</a>
+  </cp-empty-state>
+} @else if (check.items().length && check.settings(); as settings) {
+  <div class="layout">
+    <ul class="items" aria-label="Prendas en tu carrito">
+      @for (item of check.items(); track item.line.variantId) {
+        <li>
+          <cp-cart-item-row [item]="item" (remove)="cart.remove([item.line.variantId])" />
+        </li>
+      }
+    </ul>
+    <cp-cart-summary-panel
+      [total]="check.total()"
+      [units]="check.units()"
+      [pickupRule]="settings.pickupRule"
+      [pickupFee]="check.pickupFee()"
+      [whatsappUrl]="check.whatsappUrl()"
+      [hasReserved]="check.hasReserved()"
+      [(delivery)]="check.delivery"
+      (ordered)="sent.set(true)"
+      (recheck)="check.revalidate()"
+    />
+  </div>
+}

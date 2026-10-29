@@ -112,3 +112,6 @@ insert into public.order_items (order_id, variant_id, quantity, unit_price, prod
 select reserved.id, v.id, 1, 110, 'Chompa Trenzada Crema'
 from reserved
 join public.variants v on v.product_id = (select id from public.products where slug = 'chompa-trenzada-crema');
+
+-- Fake store number so the WhatsApp order button shows locally.
+update public.settings set store_whatsapp = '59170000000';

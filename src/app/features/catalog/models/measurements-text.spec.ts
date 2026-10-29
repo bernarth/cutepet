@@ -6,6 +6,7 @@ function variant(exactMeasurements: Variant['exactMeasurements']): Variant {
     id: 1,
     sizeId: 1,
     sizeLabel: '2',
+    availableStock: 1,
     isReserved: false,
     exactMeasurements,
     toleranceCm: null,

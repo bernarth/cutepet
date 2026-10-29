@@ -65,7 +65,7 @@ Online store for handmade pet clothing based in La Paz, Bolivia. Customers buy i
 5. `notify` alerts every active notification channel. The admin checks the bank app and confirms or rejects.
 6. Reservation expires without a proof → automatic cancellation and stock released.
 
-**WhatsApp order ("Pedir por WhatsApp"):** `wa.me` link with the order prefilled (code, items, sizes, total).
+**WhatsApp order ("Pedir por WhatsApp"):** `wa.me` link with the order prefilled (items, sizes, total, delivery). No order code: the order is recorded later by the admin as a quick sale (see "Step 4" in Decisions).
 
 **Quick sale (admin):** every sale made through WhatsApp is recorded as an **order with channel `whatsapp`**, directly in `confirmed` (pick items, name, phone, delivery). Stock is never lowered by hand to record a sale.
 
@@ -279,3 +279,49 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
 **Local test data.** `supabase/seed.sql` plus placeholder photos uploaded to the local `store-images` bucket. Seed data never reaches production.
 
 **For step 5 (admin panel):** compress product photos on upload. WhatsApp ignores link preview images above about 600 KB, while the bucket accepts up to 5 MB.
+
+### Step 4: cart and WhatsApp order
+
+> Recorded on 2026-10-28 while planning step 4.
+
+**Product page.** "Agregar al carrito" is the only `.cp-cta` on the page and acts on the selected size. After adding, a snackbar "Agregado al carrito" offers "Ver carrito". When the selected size is already in the cart with no more units available, the button becomes a link "Ya está en tu carrito · Ver carrito". When every size is reserved it is disabled. Adding the same size again adds one unit, up to its available stock.
+
+**Same size twice.** When two variants of a product share a size, they are labeled with a letter in variant id order among the sizes that still have stock: "Talla 1 (A)", "Talla 1 (B)". The label is shown on the size picker, the measurements text, the cart and the WhatsApp message.
+
+**Cart storage.** The cart lives in the browser (`localStorage`, key `cutepet.cart.v1`), not in the database: the anonymous user is only created for QR checkout. Each line stores the variant id, quantity, product name and size label. The price is never stored; price, photo, measurements and availability always come fresh from the database. The name and size label are kept only to say which piece was removed when the product is no longer visible. On the server the cart is empty; the browser restores it after hydration.
+
+**Availability check.** When the cart opens (and with "Revisar de nuevo"), every line is checked against the database:
+
+- No longer visible or no stock left → removed from the cart with the notice "Esta prenda ya fue vendida: <name> (Talla X)".
+- Stock left but every unit held by an order → stays in the cart, faded, with "Alguien está comprando esta prenda. Si no completa su compra, volverá a estar disponible en unos minutos." It is left out of the totals and the WhatsApp message.
+- Fewer units available than in the cart → the quantity is lowered, with "Solo queda N".
+
+There is no quantity stepper while every piece is unique; a line can only be removed.
+
+**Cart page.** Items, a delivery choice (pickup point in La Paz by default, or bus parcel shipping) and a summary. The total is the items only. The pickup rule comes from settings and is always shown: "Recojo en La Paz: Bs 2, gratis desde 3 prendas", or "Recojo en La Paz: gratis" once the cart reaches the threshold (counted in units). Bus parcel shipping says the customer pays it at the terminal. The shipping promotion is left for step 6. Only the delivery method is asked here; no name, phone or city.
+
+**WhatsApp order.**
+
+- Shown whenever `settings.store_whatsapp` is set; otherwise the cart says "Muy pronto podrás hacer tu pedido aquí". In step 4 it is the cart's `.cp-cta`. From step 6, QR checkout takes the `.cp-cta` when enabled and WhatsApp stays visible as a secondary button; when QR is off the cart also shows `qr_disabled_message`.
+- An 8 digit `store_whatsapp` gets the `591` country code added when building the link (`https://wa.me/<digits>?text=<encodeURIComponent(message)>`). Step 5 validates the number in the settings form.
+- The link is a plain link opened by the tap (no await before opening, so mobile browsers do not block it). Availability is checked when the cart opens; the owner still confirms in the chat and the quick sale RPC never sells an item twice.
+- Message, with no order code (the owner records it later as a quick sale with its own code):
+
+  ```
+  ¡Hola CutePet! Quiero hacer este pedido desde la web:
+
+  • Abrigo Osito Rosa · Talla 1 (A) · cuello 28, pecho 42, largo 32 cm · Bs 120 · <product link>
+  • 2 x Vestido Floral · Talla 0 · Bs 190 · <product link>
+
+  Total: Bs 310 (3 prendas)
+  Entrega: recojo en La Paz (gratis)
+
+  ¿Me confirmas para hacer el pago?
+  ```
+
+  - Each line identifies the exact piece: name, size label, exact measurements (only those present; omitted when the variant has none), price and product link. "2 x" and the line subtotal only when the quantity is above 1.
+  - Delivery line: "recojo en La Paz (Bs 2 al recoger)", "recojo en La Paz (gratis)" or "envío por flota a otro departamento (el envío lo pago en la terminal)".
+
+- After the tap the cart shows "Te abrimos WhatsApp con tu pedido. Cuando lo envíes, te responderemos para coordinar el pago y la entrega." with "Ya lo envié, vaciar carrito" and "Volver al carrito". The cart is never emptied automatically.
+
+**Header.** The cart icon shows a badge with the number of units in the cart, hidden when empty; its label is "Ver carrito (N prendas)". It needs no database call.

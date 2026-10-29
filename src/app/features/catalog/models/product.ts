@@ -24,6 +24,7 @@ export interface Variant {
   readonly id: number;
   readonly sizeId: number;
   readonly sizeLabel: string;
+  readonly availableStock: number;
   readonly isReserved: boolean;
   readonly exactMeasurements: Measurements | null;
   readonly toleranceCm: number | null;

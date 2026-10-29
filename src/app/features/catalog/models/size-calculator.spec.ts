@@ -36,6 +36,7 @@ function variant(overrides: Partial<Variant>): Variant {
     id: 1,
     sizeId: 2,
     sizeLabel: '00',
+    availableStock: 1,
     isReserved: false,
     exactMeasurements: null,
     toleranceCm: null,

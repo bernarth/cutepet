@@ -1,5 +1,6 @@
 import { Service, inject } from '@angular/core';
 
+import { storeImageUrl } from '@core/supabase/store-image-url';
 import { SUPABASE } from '@core/supabase/supabase.client';
 import { unwrap, unwrapNullable } from '@shared/data-access/supabase-result';
 import { ProductLookup, ProductSummary } from '../models/product';
@@ -24,8 +25,7 @@ const DETAIL_COLUMNS = `${SUMMARY_COLUMNS}, description, pet_types(name), catego
 @Service()
 export class ProductRepository {
   private readonly supabase = inject(SUPABASE);
-  private readonly photoUrl: PhotoUrl = (path) =>
-    this.supabase.storage.from('store-images').getPublicUrl(path).data.publicUrl;
+  private readonly photoUrl: PhotoUrl = (path) => storeImageUrl(this.supabase, path);
 
   /**
    * @description Lists the catalog where old out products are hidden. catalog_status is declared in display order, so reserved ones come last

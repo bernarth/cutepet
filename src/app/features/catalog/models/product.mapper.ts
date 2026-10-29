@@ -67,10 +67,10 @@ export function toProductLookup(row: ProductDetailRow | null, photoUrl: PhotoUrl
 }
 
 function toProductDetail(row: ProductDetailRow, photoUrl: PhotoUrl): ProductDetail {
-  const variants = row.catalog_variants
-    .filter((variant) => variant.stock > 0)
+  const inStock = row.catalog_variants.filter((variant) => variant.stock > 0);
+  const variants = inStock
     .sort((a, b) => (a.sizes?.sort_order ?? 0) - (b.sizes?.sort_order ?? 0))
-    .map(toVariant);
+    .map((variant) => toVariant(variant, sizeLetter(variant, inStock)));
 
   return {
     ...toProductSummary(row, photoUrl),
@@ -93,15 +93,30 @@ export function toSize(row: Tables<'sizes'>): Size {
   };
 }
 
-function toVariant(row: VariantRow): Variant {
+function toVariant(row: VariantRow, letter: string | null): Variant {
+  const label = row.sizes?.label ?? '';
+
   return {
     id: row.id,
     sizeId: row.size_id,
-    sizeLabel: row.sizes?.label ?? '',
+    sizeLabel: letter ? `${label} (${letter})` : label,
+    availableStock: row.available_stock ?? 0,
     isReserved: (row.available_stock ?? 0) === 0,
     exactMeasurements: toMeasurements(row),
     toleranceCm: row.tolerance_cm,
   };
+}
+
+/**
+ * @description Two pieces of the same size are told apart as "1 (A)" and "1 (B)", in variant id order
+ */
+function sizeLetter(row: VariantRow, inStock: readonly VariantRow[]): string | null {
+  const sameSizeIds = inStock
+    .filter((variant) => variant.size_id === row.size_id)
+    .map((variant) => variant.id)
+    .sort((a, b) => a - b);
+
+  return sameSizeIds.length > 1 ? String.fromCharCode(65 + sameSizeIds.indexOf(row.id)) : null;
 }
 
 function toMeasurements(row: VariantRow): Measurements | null {

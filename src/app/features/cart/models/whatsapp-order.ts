@@ -1,0 +1,79 @@
+import { itemsTotal } from '@core/cart/cart-summary';
+import { formatPrice } from '@shared/pipes/price';
+
+import { ItemMeasurements } from './cart-item';
+import { DeliveryMethod, unitsText } from './delivery';
+
+export interface WhatsappOrderItem {
+  readonly productName: string;
+  readonly sizeLabel: string;
+  readonly measurements: ItemMeasurements;
+  readonly unitPrice: number;
+  readonly quantity: number;
+  readonly productUrl: string;
+}
+
+export interface WhatsappOrder {
+  readonly items: readonly WhatsappOrderItem[];
+  readonly total: number;
+  readonly units: number;
+  readonly delivery: DeliveryMethod;
+  readonly pickupFee: number;
+}
+
+const BOLIVIA_CODE = '591';
+const centimeters = new Intl.NumberFormat('es-BO', { maximumFractionDigits: 1 });
+
+export function whatsappOrderMessage(order: WhatsappOrder): string {
+  return [
+    '¡Hola CutePet! Quiero hacer este pedido desde la web:',
+    '',
+    ...order.items.map(itemText),
+    '',
+    `Total: ${formatPrice(order.total)} (${unitsText(order.units)})`,
+    `Entrega: ${deliveryText(order.delivery, order.pickupFee)}`,
+    '',
+    '¿Me confirmas para hacer el pago?',
+  ].join('\n');
+}
+
+/**
+ * @description wa.me needs the country code, so an 8 digit Bolivian number gets 591
+ */
+export function whatsappOrderUrl(storeNumber: string, message: string): string {
+  const digits = storeNumber.replace(/\D/g, '');
+  const number = digits.length === 8 ? `${BOLIVIA_CODE}${digits}` : digits;
+
+  return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
+}
+
+function itemText(item: WhatsappOrderItem): string {
+  const quantity = item.quantity > 1 ? `${item.quantity} x ` : '';
+  const parts = [
+    `${quantity}${item.productName}`,
+    `Talla ${item.sizeLabel}`,
+    measurementsText(item.measurements),
+    formatPrice(itemsTotal([item])),
+    item.productUrl,
+  ];
+
+  return `• ${parts.filter(Boolean).join(' · ')}`;
+}
+
+function measurementsText({ neck, chest, backLength }: ItemMeasurements): string {
+  const parts = [
+    neck === null ? '' : `cuello ${centimeters.format(neck)}`,
+    chest === null ? '' : `pecho ${centimeters.format(chest)}`,
+    backLength === null ? '' : `largo ${centimeters.format(backLength)}`,
+  ].filter(Boolean);
+
+  return parts.length ? `${parts.join(', ')} cm` : '';
+}
+
+function deliveryText(delivery: DeliveryMethod, pickupFee: number): string {
+  if (delivery === 'bus_parcel') {
+    return 'envío por flota a otro departamento (el envío lo pago en la terminal)';
+  }
+
+  return `recojo en La Paz (${pickupFee === 0 ? 'gratis' : `${formatPrice(pickupFee)} al recoger`})`;
+}
