@@ -22,8 +22,11 @@
     </div>
   </cp-empty-state>
 } @else if (check.hasError()) {
-  <cp-empty-state icon="info" message="No pudimos revisar tu carrito. Intenta de nuevo.">
-    <button mat-button type="button" (click)="check.retry()">Reintentar</button>
+  <cp-empty-state
+    icon="info"
+    message="No pudimos revisar tu carrito. Tus prendas siguen guardadas; intenta de nuevo en unos minutos."
+  >
+    <button mat-stroked-button type="button" (click)="check.retry()">Revisar de nuevo</button>
   </cp-empty-state>
 } @else if (cart.restored() && cart.lines().length === 0) {
   <cp-empty-state icon="shopping_bag" message="Tu carrito está vacío.">

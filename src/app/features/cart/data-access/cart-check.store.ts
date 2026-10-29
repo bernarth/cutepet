@@ -24,6 +24,7 @@ export class CartCheckStore {
   private readonly checking = signal(false);
   private readonly checkFailed = signal(false);
   private readonly reviewNotices = signal<readonly string[]>([]);
+  private latestCheck = 0;
 
   readonly delivery = signal<DeliveryMethod>('pickup_point');
   readonly notices = this.reviewNotices.asReadonly();
@@ -92,13 +93,20 @@ export class CartCheckStore {
     });
   }
 
+  /**
+   * @description Only the latest check may change the cart. A failed check never touches it
+   */
   async revalidate(): Promise<void> {
+    const checkId = ++this.latestCheck;
     const lines = this.cart.lines();
     this.checking.set(true);
     this.checkFailed.set(false);
 
     try {
       const found = await this.repository.findVariants(lines.map((line) => line.variantId));
+      if (checkId !== this.latestCheck) {
+        return;
+      }
       const variants = new Map(found.map((variant) => [variant.id, variant]));
       const review = reviewCart(lines, variants);
 
@@ -107,9 +115,13 @@ export class CartCheckStore {
       this.reviewNotices.set(review.notices);
       this.variants.set(variants);
     } catch {
-      this.checkFailed.set(true);
+      if (checkId === this.latestCheck) {
+        this.checkFailed.set(true);
+      }
     } finally {
-      this.checking.set(false);
+      if (checkId === this.latestCheck) {
+        this.checking.set(false);
+      }
     }
   }
 

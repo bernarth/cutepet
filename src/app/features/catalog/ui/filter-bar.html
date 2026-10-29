@@ -1,7 +1,7 @@
 <ng-template #fields>
   <div class="fields">
     @for (group of groups(); track group.key) {
-      <mat-form-field subscriptSizing="dynamic">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <mat-label>{{ group.label }}</mat-label>
         <mat-select
           [value]="selected()[group.key]"

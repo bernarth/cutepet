@@ -56,3 +56,9 @@ h3 {
   outline: 3px solid var(--cp-ink);
   outline-offset: 2px;
 }
+
+// Material hides the outline on button toggles, so the shared focus ring is drawn inside them
+.mat-button-toggle-button:focus-visible {
+  outline: 3px solid var(--cp-ink);
+  outline-offset: -3px;
+}

@@ -8,7 +8,7 @@ import {
   removeLines,
 } from './cart-line';
 
-const coat = { variantId: 1, productName: 'Abrigo Osito', sizeLabel: '1 (A)' };
+const coat = { variantId: 1, productName: 'Abrigo Osito', sizeLabel: '1' };
 const dress = { variantId: 2, productName: 'Vestido Floral', sizeLabel: '0' };
 
 describe('addLine', () => {

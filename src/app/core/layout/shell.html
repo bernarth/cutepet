@@ -18,34 +18,38 @@
   </mat-sidenav>
 
   <mat-sidenav-content class="page">
-    <mat-toolbar class="header">
-      <a class="brand" routerLink="/">CutePet</a>
+    <header>
+      <mat-toolbar class="header">
+        <a class="brand" routerLink="/">CutePet</a>
 
-      <nav class="nav" aria-label="Principal">
-        @for (link of links; track link.path) {
-          <a mat-button [routerLink]="link.path" routerLinkActive="active">{{ link.label }}</a>
-        }
-      </nav>
+        <nav class="nav" aria-label="Principal">
+          @for (link of links; track link.path) {
+            <a mat-button [routerLink]="link.path" routerLinkActive="active">{{ link.label }}</a>
+          }
+        </nav>
 
-      <a mat-icon-button class="cart" routerLink="/carrito" [attr.aria-label]="cartLabel()">
-        <mat-icon
+        <a
+          mat-icon-button
+          class="cart"
+          routerLink="/carrito"
+          [attr.aria-label]="cartLabel()"
           [matBadge]="cart.unitCount()"
           [matBadgeHidden]="cart.unitCount() === 0"
-          aria-hidden="false"
-          >shopping_bag</mat-icon
         >
-      </a>
-      <button
-        mat-icon-button
-        type="button"
-        class="menu-button"
-        aria-label="Abrir menú"
-        [attr.aria-expanded]="menu.opened"
-        (click)="menu.open()"
-      >
-        <mat-icon>menu</mat-icon>
-      </button>
-    </mat-toolbar>
+          <mat-icon>shopping_bag</mat-icon>
+        </a>
+        <button
+          mat-icon-button
+          type="button"
+          class="menu-button"
+          aria-label="Abrir menú"
+          [attr.aria-expanded]="menu.opened"
+          (click)="menu.open()"
+        >
+          <mat-icon>menu</mat-icon>
+        </button>
+      </mat-toolbar>
+    </header>
 
     <main id="contenido" class="content">
       <router-outlet />

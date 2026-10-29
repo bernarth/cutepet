@@ -2,7 +2,7 @@ import { WhatsappOrder, whatsappOrderMessage, whatsappOrderUrl } from './whatsap
 
 const coat = {
   productName: 'Abrigo Osito Rosa',
-  sizeLabel: '1 (A)',
+  sizeLabel: '1',
   measurements: { neck: 28, chest: 42, backLength: 32 },
   unitPrice: 120,
   quantity: 1,
@@ -35,7 +35,7 @@ describe('whatsappOrderMessage', () => {
       [
         '¡Hola CutePet! Quiero hacer este pedido desde la web:',
         '',
-        '• Abrigo Osito Rosa · Talla 1 (A) · cuello 28, pecho 42, largo 32 cm · Bs 120 · https://cutepet.test/catalogo/abrigo-osito-rosa',
+        '• Abrigo Osito Rosa · Talla 1 · cuello 28, pecho 42, largo 32 cm · Bs 120 · https://cutepet.test/catalogo/abrigo-osito-rosa',
         '',
         'Total: Bs 120 (1 prenda)',
         'Entrega: recojo en La Paz (Bs 2 al recoger)',
@@ -56,7 +56,7 @@ describe('whatsappOrderMessage', () => {
   it('omits measurements when the piece has none', () => {
     const plain = { ...coat, measurements: { neck: null, chest: null, backLength: null } };
     expect(whatsappOrderMessage(order({ items: [plain] }))).toContain(
-      '• Abrigo Osito Rosa · Talla 1 (A) · Bs 120 · https://',
+      '• Abrigo Osito Rosa · Talla 1 · Bs 120 · https://',
     );
   });
 

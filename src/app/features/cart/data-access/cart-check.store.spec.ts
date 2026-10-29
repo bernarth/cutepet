@@ -1,0 +1,120 @@
+import { PLATFORM_ID } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+
+import { CartLine } from '@core/cart/cart-line';
+import { CartStore } from '@core/cart/cart.store';
+import { CartVariant } from '../models/cart-item';
+import { CartCheckStore } from './cart-check.store';
+import { CartRepository, CartSettings } from './cart.repository';
+
+const STORAGE_KEY = 'cutepet.cart.v1';
+
+const settings: CartSettings = {
+  storeWhatsapp: '70000000',
+  pickupRule: { fee: 2, freeFromUnits: 3 },
+};
+
+function line(variantId: number, productName: string, quantity = 1): CartLine {
+  return { variantId, quantity, productName, sizeLabel: '1' };
+}
+
+function variant(id: number, stock: number, availableStock: number): CartVariant {
+  return {
+    id,
+    stock,
+    availableStock,
+    productName: `Prenda ${id}`,
+    slug: `prenda-${id}`,
+    unitPrice: 100,
+    photo: null,
+    measurements: { neck: null, chest: null, backLength: null },
+  };
+}
+
+const coat = line(1, 'Abrigo');
+const sweater = line(2, 'Chompa');
+const poncho = line(3, 'Poncho', 3);
+const dress = line(4, 'Vestido');
+
+async function setUp(lines: readonly CartLine[], findVariants: CartRepository['findVariants']) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(lines));
+  TestBed.configureTestingModule({
+    providers: [
+      { provide: PLATFORM_ID, useValue: 'browser' },
+      { provide: CartRepository, useValue: { findVariants, getSettings: async () => settings } },
+      CartCheckStore,
+    ],
+  });
+  const check = TestBed.inject(CartCheckStore);
+  TestBed.tick();
+  await new Promise((resolve) => setTimeout(resolve));
+  TestBed.tick();
+
+  return { check, cart: TestBed.inject(CartStore) };
+}
+
+function storedLines(): CartLine[] {
+  return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]');
+}
+
+describe('CartCheckStore', () => {
+  beforeEach(() => localStorage.clear());
+
+  it('removes a sold piece and says so', async () => {
+    const { check, cart } = await setUp([coat, dress], async () => [variant(1, 1, 1)]);
+
+    expect(cart.lines()).toEqual([coat]);
+    expect(storedLines()).toEqual([coat]);
+    expect(check.notices()).toEqual(['Esta prenda ya fue vendida: Vestido (Talla 1)']);
+  });
+
+  it('keeps a reserved piece out of the totals and the WhatsApp message', async () => {
+    const { check, cart } = await setUp([coat, sweater], async () => [
+      variant(1, 1, 1),
+      variant(2, 1, 0),
+    ]);
+
+    expect(cart.lines()).toEqual([coat, sweater]);
+    expect(check.items().map((item) => item.isReserved)).toEqual([false, true]);
+    expect(check.total()).toBe(100);
+    expect(check.units()).toBe(1);
+
+    const message = decodeURIComponent(check.whatsappUrl()?.split('text=')[1] ?? '');
+    expect(message).toContain('Prenda 1');
+    expect(message).not.toContain('Prenda 2');
+  });
+
+  it('lowers a quantity above the units left', async () => {
+    const { check, cart } = await setUp([poncho], async () => [variant(3, 3, 2)]);
+
+    expect(cart.lines()).toEqual([{ ...poncho, quantity: 2 }]);
+    expect(check.notices()).toEqual(['Solo queda 2 de Poncho (Talla 1)']);
+  });
+
+  it('leaves the cart unchanged when the query fails', async () => {
+    const { check, cart } = await setUp([coat, dress], async () => {
+      throw new Error('network');
+    });
+
+    expect(check.hasError()).toBe(true);
+    expect(cart.lines()).toEqual([coat, dress]);
+    expect(storedLines()).toEqual([coat, dress]);
+    expect(check.notices()).toEqual([]);
+  });
+
+  it('ignores a slower older check that answers after a newer one', async () => {
+    const answers: ((variants: CartVariant[]) => void)[] = [];
+    const findVariants = () => new Promise<CartVariant[]>((resolve) => answers.push(resolve));
+    const { check, cart } = await setUp([coat], findVariants);
+
+    const newer = check.revalidate();
+    answers[1]([variant(1, 1, 1)]);
+    await newer;
+    answers[0]([]);
+    await new Promise((resolve) => setTimeout(resolve));
+
+    expect(cart.lines()).toEqual([coat]);
+    expect(check.notices()).toEqual([]);
+    expect(check.isLoading()).toBe(false);
+  });
+});

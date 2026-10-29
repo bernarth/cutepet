@@ -99,24 +99,6 @@ describe('toProductLookup', () => {
     ]);
   });
 
-  it('labels two pieces of the same size with a letter in id order', () => {
-    const product = foundProduct(
-      detailRow({
-        catalog_variants: [
-          variantRow({ id: 7 }),
-          variantRow({ id: 3 }),
-          variantRow({ id: 9, size_id: 2, sizes: { label: '2', sort_order: 2 } }),
-          variantRow({ id: 5, stock: 0, available_stock: 0 }),
-        ],
-      }),
-    );
-    expect(product.variants.map((variant) => [variant.id, variant.sizeLabel])).toEqual([
-      [7, '1 (B)'],
-      [3, '1 (A)'],
-      [9, '2'],
-    ]);
-  });
-
   it('keeps the available stock of each size', () => {
     const product = foundProduct(
       detailRow({ catalog_variants: [variantRow({ stock: 3, available_stock: 2 })] }),

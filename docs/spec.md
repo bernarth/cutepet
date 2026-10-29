@@ -135,7 +135,7 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
 1. ~~Base project~~ (done)
 2. ~~Supabase schema: migrations, RLS, audit triggers, atomic reservation (RPC)~~ (done)
 3. ~~Catalog, product, size guide (with Open Graph)~~ (done)
-4. Cart + WhatsApp order
+4. ~~Cart + WhatsApp order~~ (done)
 5. Admin panel: products, quick sale, orders, settings, audit log
 6. Full QR checkout
 7. Notifications: `notify` Edge Function + `notification_channels`
@@ -210,6 +210,7 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
   - Each measurement is matched on its own. The calculator recommends the **largest** match and shows a note if the matches differ.
   - Outside every size → suggest a custom request.
   - If the item has exact measurements, compare against those instead of the table (details in "Step 3" below).
+- **Settings reader (step 6):** `settings` is read in two places today (the catalog size tolerance and the cart). QR checkout is the third reader, so step 6 extracts one shared settings reader in `core/` and moves both existing readers to it.
 
 ### Delivery and pricing
 
@@ -295,7 +296,7 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
 
 **Product page.** "Agregar al carrito" is the only `.cp-cta` on the page and acts on the selected size. After adding, a snackbar "Agregado al carrito" offers "Ver carrito". When the selected size is already in the cart with no more units available, the button becomes a link "Ya está en tu carrito · Ver carrito". When every size is reserved it is disabled. Adding the same size again adds one unit, up to its available stock.
 
-**Same size twice.** When two variants of a product share a size, they are labeled with a letter in variant id order among the sizes that still have stock: "Talla 1 (A)", "Talla 1 (B)". The label is shown on the size picker, the measurements text, the cart and the WhatsApp message.
+**One variant per size.** A product has at most one variant per size (unique product and size in the database). Identical pieces of the same model and size are one variant with stock above 1. If the owner makes the same model in the same size with different measurements, it is created as a separate product.
 
 **Cart storage.** The cart lives in the browser (`localStorage`, key `cutepet.cart.v1`), not in the database: the anonymous user is only created for QR checkout. Each line stores the variant id, quantity, product name and size label. The price is never stored; price, photo, measurements and availability always come fresh from the database. The name and size label are kept only to say which piece was removed when the product is no longer visible. On the server the cart is empty; the browser restores it after hydration.
 
@@ -319,7 +320,7 @@ There is no quantity stepper while every piece is unique; a line can only be rem
   ```
   ¡Hola CutePet! Quiero hacer este pedido desde la web:
 
-  • Abrigo Osito Rosa · Talla 1 (A) · cuello 28, pecho 42, largo 32 cm · Bs 120 · <product link>
+  • Abrigo Osito Rosa · Talla 1 · cuello 28, pecho 42, largo 32 cm · Bs 120 · <product link>
   • 2 x Vestido Floral · Talla 0 · Bs 190 · <product link>
 
   Total: Bs 310 (3 prendas)
@@ -328,9 +329,9 @@ There is no quantity stepper while every piece is unique; a line can only be rem
   ¿Me confirmas para hacer el pago?
   ```
 
-  - Each line identifies the exact piece: name, size label, exact measurements (only those present; omitted when the variant has none), price and product link. "2 x" and the line subtotal only when the quantity is above 1.
+  - Each line identifies the exact piece: name, size, exact measurements (only those present; omitted when the variant has none), price and product link. "2 x" and the line subtotal only when the quantity is above 1.
   - Delivery line: "recojo en La Paz (Bs 2 al recoger)", "recojo en La Paz (gratis)" or "envío por flota a otro departamento (el envío lo pago en la terminal)".
 
 - After the tap the cart shows "Te abrimos WhatsApp con tu pedido. Cuando lo envíes, te responderemos para coordinar el pago y la entrega." with "Ya lo envié, vaciar carrito" and "Volver al carrito". The cart is never emptied automatically.
 
-**Header.** The cart icon shows a badge with the number of units in the cart, hidden when empty; its label is "Ver carrito (N prendas)". It needs no database call.
+**Header.** The cart icon shows a badge with the number of units in the cart, hidden when empty; its label is "Ver carrito, N prendas" (the visible number must appear as its own word in the label, or AXE flags it). It needs no database call.

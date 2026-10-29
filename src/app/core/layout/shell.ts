@@ -38,6 +38,6 @@ export class Shell {
 
     return units === 0
       ? 'Ver carrito'
-      : `Ver carrito (${units} ${units === 1 ? 'prenda' : 'prendas'})`;
+      : `Ver carrito, ${units} ${units === 1 ? 'prenda' : 'prendas'}`;
   });
 }
