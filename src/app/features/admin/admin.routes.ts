@@ -41,6 +41,11 @@ export const ADMIN_ROUTES: Routes = [
         title: 'Prenda - Panel CutePet',
         loadComponent: () => import('./pages/admin-product-page').then((m) => m.AdminProductPage),
       },
+      {
+        path: 'configuracion',
+        title: 'Configuración - Panel CutePet',
+        loadComponent: () => import('./pages/admin-settings-page').then((m) => m.AdminSettingsPage),
+      },
     ],
   },
 ];

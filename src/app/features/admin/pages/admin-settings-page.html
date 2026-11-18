@@ -1,0 +1,169 @@
+<h1>Configuración</h1>
+<cp-loading-bar [active]="store.isLoading() || saving.isSaving()" />
+
+@if (store.hasError()) {
+  <cp-empty-state icon="info" message="No pudimos cargar la configuración.">
+    <button mat-button type="button" (click)="store.reload()">Reintentar</button>
+  </cp-empty-state>
+} @else if (store.form()) {
+  <form novalidate (submit)="save($event)">
+    <section class="panel" aria-labelledby="settings-whatsapp">
+      <h2 id="settings-whatsapp">WhatsApp de la tienda</h2>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Número de WhatsApp</mat-label>
+        <input matInput type="tel" inputmode="numeric" [formField]="form.storeWhatsapp" />
+        <mat-hint>8 dígitos. El enlace agrega 591. Vacío oculta el pedido por WhatsApp.</mat-hint>
+        <mat-error>{{ form.storeWhatsapp().errors()[0]?.message }}</mat-error>
+      </mat-form-field>
+    </section>
+
+    <section class="panel" aria-labelledby="settings-pickup">
+      <h2 id="settings-pickup">Recojo en La Paz</h2>
+      <mat-form-field appearance="outline">
+        <mat-label>Dirección</mat-label>
+        <textarea matInput rows="2" [formField]="form.pickupAddress"></textarea>
+        <mat-error>{{ form.pickupAddress().errors()[0]?.message }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Horario de atención</mat-label>
+        <input matInput [formField]="form.pickupHours" />
+        <mat-error>{{ form.pickupHours().errors()[0]?.message }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Aviso del punto de recojo</mat-label>
+        <textarea matInput rows="2" [formField]="form.pickupNotice"></textarea>
+        <mat-hint>Por ejemplo, el cobro extra después de una semana.</mat-hint>
+        <mat-error>{{ form.pickupNotice().errors()[0]?.message }}</mat-error>
+      </mat-form-field>
+      <div class="pair">
+        <mat-form-field appearance="outline">
+          <mat-label>Costo del recojo</mat-label>
+          <span matTextPrefix>Bs&nbsp;</span>
+          <input matInput type="number" inputmode="decimal" [formField]="form.pickupFee" />
+          <mat-error>{{ form.pickupFee().errors()[0]?.message }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Gratis desde (prendas)</mat-label>
+          <input matInput type="number" inputmode="numeric" [formField]="form.freePickupMinItems" />
+          <mat-error>{{ form.freePickupMinItems().errors()[0]?.message }}</mat-error>
+        </mat-form-field>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="settings-shipping">
+      <h2 id="settings-shipping">Envío por flota</h2>
+      <mat-slide-toggle [formField]="form.shippingPromoEnabled">
+        CutePet paga el envío como promoción
+      </mat-slide-toggle>
+      @if (form.shippingPromoEnabled().value()) {
+        <p class="hint">Basta con cumplir una de las dos condiciones.</p>
+        <div class="pair">
+          <mat-form-field appearance="outline">
+            <mat-label>Desde (prendas)</mat-label>
+            <input
+              matInput
+              type="number"
+              inputmode="numeric"
+              [formField]="form.shippingPromoMinItems"
+            />
+            <mat-error>{{ form.shippingPromoMinItems().errors()[0]?.message }}</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>O desde un total de</mat-label>
+            <span matTextPrefix>Bs&nbsp;</span>
+            <input
+              matInput
+              type="number"
+              inputmode="decimal"
+              [formField]="form.shippingPromoMinTotal"
+            />
+            <mat-error>{{ form.shippingPromoMinTotal().errors()[0]?.message }}</mat-error>
+          </mat-form-field>
+        </div>
+      }
+    </section>
+
+    <section class="panel" aria-labelledby="settings-sizes">
+      <h2 id="settings-sizes">Tallas</h2>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Tolerancia general</mat-label>
+        <input matInput type="number" inputmode="decimal" [formField]="form.sizeToleranceCm" />
+        <span matTextSuffix>cm</span>
+        <mat-hint>Diferencia aceptada entre la mascota y la prenda en la calculadora.</mat-hint>
+        <mat-error>{{ form.sizeToleranceCm().errors()[0]?.message }}</mat-error>
+      </mat-form-field>
+    </section>
+
+    <section class="panel" aria-labelledby="settings-qr">
+      <h2 id="settings-qr">Pago con QR</h2>
+      <p class="hint">Se usa cuando el pago con QR esté activo.</p>
+      <mat-slide-toggle [formField]="form.qrCheckoutEnabled">Pago con QR activo</mat-slide-toggle>
+
+      <div class="qr">
+        @if (form.qrImage().value(); as image) {
+          <img class="qr-image" [src]="store.imageSrc(image)" alt="QR de pago de la tienda" />
+        }
+        <div>
+          <button mat-stroked-button type="button" (click)="qrPicker.click()">
+            <mat-icon>qr_code_2</mat-icon>
+            {{ form.qrImage().value() ? 'Cambiar QR' : 'Subir QR' }}
+          </button>
+          <input
+            #qrPicker
+            type="file"
+            accept="image/png,image/jpeg"
+            hidden
+            (change)="pickQr(qrPicker)"
+          />
+          <p class="hint">
+            PNG o JPG, máximo 2 MB. Se guarda tal cual para que el banco lo pueda leer.
+          </p>
+          @if (
+            qrFileError() ?? (form.qrImage().touched() && form.qrImage().errors()[0]?.message);
+            as message
+          ) {
+            <p class="error" role="alert">{{ message }}</p>
+          }
+        </div>
+      </div>
+
+      <mat-form-field appearance="outline">
+        <mat-label>El QR vale hasta</mat-label>
+        <input matInput type="date" [formField]="form.qrExpiresOn" />
+        <mat-error>{{ form.qrExpiresOn().errors()[0]?.message }}</mat-error>
+      </mat-form-field>
+      @if (qrNotice(); as notice) {
+        <p class="notice" role="status">
+          <mat-icon aria-hidden="true">warning</mat-icon>{{ notice }}
+        </p>
+      }
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Horario de validación de pagos</mat-label>
+        <input matInput [formField]="form.validationHours" />
+        <mat-hint>Se usa cuando el pago con QR esté activo.</mat-hint>
+        <mat-error>{{ form.validationHours().errors()[0]?.message }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Minutos para pagar</mat-label>
+        <input matInput type="number" inputmode="numeric" [formField]="form.reservationMinutes" />
+        <mat-hint>Se usa cuando el pago con QR esté activo. De 5 a 60.</mat-hint>
+        <mat-error>{{ form.reservationMinutes().errors()[0]?.message }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Mensaje cuando el QR está apagado</mat-label>
+        <textarea matInput rows="2" [formField]="form.qrDisabledMessage"></textarea>
+        <mat-hint>Se muestra en el carrito cuando el pago con QR está apagado.</mat-hint>
+        <mat-error>{{ form.qrDisabledMessage().errors()[0]?.message }}</mat-error>
+      </mat-form-field>
+    </section>
+
+    <div class="save-bar">
+      @if (saving.errorMessage(); as message) {
+        <p class="error" role="alert">{{ message }}</p>
+      }
+      <button mat-flat-button type="submit" [disabled]="!hasChanges() || saving.isSaving()">
+        Guardar cambios
+      </button>
+    </div>
+  </form>
+}
