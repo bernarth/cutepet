@@ -20,6 +20,12 @@ export const ADMIN_ROUTES: Routes = [
           import('./pages/admin-dashboard-page').then((m) => m.AdminDashboardPage),
       },
       {
+        path: 'venta-rapida',
+        title: 'Venta rápida - Panel CutePet',
+        loadComponent: () =>
+          import('./pages/admin-quick-sale-page').then((m) => m.AdminQuickSalePage),
+      },
+      {
         path: 'prendas',
         title: 'Prendas - Panel CutePet',
         loadComponent: () => import('./pages/admin-products-page').then((m) => m.AdminProductsPage),

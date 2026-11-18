@@ -9,5 +9,6 @@ export interface AdminNavLink extends NavLink {
  */
 export const ADMIN_NAV_LINKS: readonly AdminNavLink[] = [
   { label: 'Inicio', path: '/admin', icon: 'dashboard' },
+  { label: 'Venta rápida', path: '/admin/venta-rapida', icon: 'point_of_sale' },
   { label: 'Prendas', path: '/admin/prendas', icon: 'checkroom' },
 ];

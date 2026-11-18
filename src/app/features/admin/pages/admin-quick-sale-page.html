@@ -1,0 +1,126 @@
+<h1>Venta rápida</h1>
+<p class="intro">Registra aquí cada venta hecha por WhatsApp. Queda como pedido confirmado.</p>
+<cp-loading-bar [active]="store.isLoading() || saving.isSaving()" />
+
+@if (recorded(); as sale) {
+  <section class="panel done" aria-labelledby="sale-done" role="status">
+    <h2 id="sale-done">Venta registrada · {{ sale.code }}</h2>
+    <p>Total {{ sale.itemsTotal | price }}. El stock ya se descontó.</p>
+    <div class="actions">
+      <a mat-flat-button [href]="sale.whatsappUrl" target="_blank" rel="noopener">
+        <mat-icon>chat</mat-icon>
+        Enviar confirmación por WhatsApp
+      </a>
+      <button mat-stroked-button type="button" (click)="startNewSale()">Nueva venta</button>
+    </div>
+  </section>
+} @else if (store.hasError()) {
+  <cp-empty-state icon="info" message="No pudimos cargar las prendas.">
+    <button mat-button type="button" (click)="store.reload()">Reintentar</button>
+  </cp-empty-state>
+} @else {
+  <form class="columns" novalidate (submit)="record($event)">
+    <section class="panel" aria-labelledby="sale-items">
+      <h2 id="sale-items">Prendas</h2>
+      <cp-sale-lines
+        [lines]="form.lines().value()"
+        [options]="store.optionsById()"
+        (remove)="removeOption($event)"
+      />
+      @if (form.lines().touched() && form.lines().errors()[0]; as error) {
+        <p class="error" role="alert">{{ error.message }}</p>
+      }
+      <mat-form-field appearance="outline" class="search" subscriptSizing="dynamic">
+        <mat-label>Buscar prenda</mat-label>
+        <mat-icon matPrefix aria-hidden="true">search</mat-icon>
+        <input matInput type="search" [value]="store.search()" (input)="onSearch($event)" />
+      </mat-form-field>
+      @if (store.search().trim()) {
+        <cp-sale-product-picker
+          [products]="store.visibleProducts()"
+          [lines]="form.lines().value()"
+          (add)="addOption($event)"
+        />
+      } @else {
+        <p class="hint">Escribe el nombre de la prenda, como aparece en el mensaje del cliente.</p>
+      }
+    </section>
+
+    <div class="side">
+      <section class="panel" aria-labelledby="sale-customer">
+        <h2 id="sale-customer">Cliente</h2>
+        <mat-form-field appearance="outline">
+          <mat-label>Nombre</mat-label>
+          <input matInput autocomplete="off" [formField]="form.customerName" />
+          <mat-error>{{ form.customerName().errors()[0]?.message }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Celular</mat-label>
+          <input
+            matInput
+            type="tel"
+            inputmode="numeric"
+            autocomplete="off"
+            [formField]="form.customerPhone"
+          />
+          <mat-error>{{ form.customerPhone().errors()[0]?.message }}</mat-error>
+        </mat-form-field>
+      </section>
+
+      <section class="panel" aria-labelledby="sale-delivery">
+        <h2 id="sale-delivery">Entrega</h2>
+        <mat-button-toggle-group
+          aria-labelledby="sale-delivery"
+          hideSingleSelectionIndicator
+          [formField]="form.deliveryMethod"
+        >
+          <mat-button-toggle value="pickup_point">{{
+            deliveryLabels.pickup_point
+          }}</mat-button-toggle>
+          <mat-button-toggle value="bus_parcel">{{ deliveryLabels.bus_parcel }}</mat-button-toggle>
+        </mat-button-toggle-group>
+
+        @if (form.deliveryMethod().value() === 'bus_parcel') {
+          <div class="bus-parcel">
+            <mat-form-field appearance="outline">
+              <mat-label>Ciudad de destino</mat-label>
+              <input matInput autocomplete="off" [formField]="form.destinationCity" />
+              <mat-error>{{ form.destinationCity().errors()[0]?.message }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Quién recibe (opcional)</mat-label>
+              <input matInput autocomplete="off" [formField]="form.recipientName" />
+              <mat-hint>Vacío: recibe el mismo cliente</mat-hint>
+              <mat-error>{{ form.recipientName().errors()[0]?.message }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Carnet de quien recibe (opcional)</mat-label>
+              <input matInput autocomplete="off" [formField]="form.recipientIdNumber" />
+              <mat-error>{{ form.recipientIdNumber().errors()[0]?.message }}</mat-error>
+            </mat-form-field>
+          </div>
+        }
+      </section>
+
+      <section class="panel summary" aria-labelledby="sale-summary">
+        <h2 id="sale-summary">Resumen</h2>
+        <p class="total">
+          {{ units() }} {{ units() === 1 ? 'prenda' : 'prendas' }} · {{ total() | price }}
+        </p>
+        <p class="hint">
+          {{
+            form.deliveryMethod().value() === 'pickup_point'
+              ? pickupText()
+              : 'El envío por flota lo paga el cliente en la terminal.'
+          }}
+        </p>
+        @if (saving.errorMessage(); as message) {
+          <p class="error" role="alert">{{ message }}</p>
+        }
+        <button mat-flat-button type="submit" [disabled]="saving.isSaving()">
+          Registrar venta
+        </button>
+      </section>
+    </div>
+  </form>
+}

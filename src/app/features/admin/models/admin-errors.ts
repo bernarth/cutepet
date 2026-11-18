@@ -11,6 +11,9 @@ const MESSAGES_BY_CODE: Readonly<Record<string, string>> = {
   VARIANT_NOT_FOUND: 'No encontramos esa talla. Recarga la página.',
   PHOTO_UNREADABLE:
     'No pudimos leer esta foto. Súbela en JPG o PNG, o desde la galería del celular.',
+  ITEMS_UNAVAILABLE:
+    'Alguna prenda ya se vendió o alguien la está pagando. Revisa la lista e inténtalo de nuevo.',
+  INVALID_ITEMS: 'Revisa las prendas de la venta.',
   FORBIDDEN: 'Tu cuenta no tiene permiso para hacer esto. Vuelve a ingresar.',
 };
 
