@@ -22,10 +22,16 @@ html {
   );
 
   // Rounder, softer Material look (less "Google")
+  // Surfaces and selected items use the CutePet palette instead of the generated white and sky blue roles
   @include mat.theme-overrides(
     (
       corner-medium: 16px,
       corner-large: 24px,
+      surface: var(--cp-card),
+      surface-bright: var(--cp-card),
+      surface-container-lowest: var(--cp-card),
+      secondary-container: var(--cp-brand-soft),
+      on-secondary-container: var(--cp-ink),
     )
   );
 }

@@ -22,7 +22,7 @@ import { ADMIN_PRODUCT_STATUS_LABELS, AdminProductStatus } from '../models/admin
       background: color-mix(in srgb, var(--cp-lavender) 60%, var(--cp-bg));
     }
     :host(.sold_out) {
-      background: color-mix(in srgb, var(--cp-sky) 60%, var(--cp-bg));
+      background: var(--mat-sys-surface-container-highest);
     }
     :host(.no_sizes) {
       background: color-mix(in srgb, var(--cp-brand) 60%, var(--cp-bg));

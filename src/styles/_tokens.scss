@@ -17,6 +17,10 @@
   --cp-cta: var(--cp-cherry);
   --cp-on-cta: #ffffff;
   --cp-success: var(--cp-candy-green);
+  // Cards, dialogs and tables: a cream lighter than the background, never pure white
+  --cp-card: color-mix(in srgb, var(--cp-cream) 65%, white);
+  // Selected items: a pink lighter than the header
+  --cp-brand-soft: color-mix(in srgb, var(--cp-pink) 45%, white);
 
   // Shape
   --cp-radius: 16px;
