@@ -52,6 +52,12 @@ export const ADMIN_ROUTES: Routes = [
         loadComponent: () => import('./pages/admin-settings-page').then((m) => m.AdminSettingsPage),
       },
       {
+        path: 'categorias-y-tallas',
+        title: 'Categorías y tallas - Panel CutePet',
+        loadComponent: () =>
+          import('./pages/admin-catalog-lists-page').then((m) => m.AdminCatalogListsPage),
+      },
+      {
         path: 'historial',
         title: 'Historial - Panel CutePet',
         loadComponent: () => import('./pages/admin-audit-page').then((m) => m.AdminAuditPage),

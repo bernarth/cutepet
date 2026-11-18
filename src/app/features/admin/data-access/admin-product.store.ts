@@ -2,7 +2,8 @@ import { Service, computed, inject, resource, signal } from '@angular/core';
 
 import { AdminPhoto, AdminProduct, AdminVariant } from '../models/admin-product';
 import { compressPhoto } from '../models/photo-compression';
-import { movePhoto, nextSortOrder } from '../models/photo-order';
+import { movePhoto } from '../models/photo-order';
+import { nextSortOrder } from '../models/sort-order';
 import { ProductFormModel, toProductInput } from '../models/product-form';
 import { slugify } from '../models/slugify';
 import { VariantFormModel } from '../models/variant-form';
@@ -37,6 +38,10 @@ export class AdminProductStore {
     () => this.productResource.status() === 'resolved' && this.productResource.value() === null,
   );
   readonly lookups = computed(() => this.lookupsResource.value() ?? NO_LOOKUPS);
+
+  reloadLookups(): void {
+    this.lookupsResource.reload();
+  }
 
   load(id: number): void {
     this.productId.set(id);

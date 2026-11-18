@@ -29,7 +29,7 @@ export class ProductStore {
     id: 'product-sizing',
     loader: async () => {
       const [sizes, toleranceCm] = await Promise.all([
-        this.lookups.listActiveSizes(),
+        this.lookups.listAllSizes(),
         this.lookups.getSizeToleranceCm(),
       ]);
 

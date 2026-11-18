@@ -48,6 +48,14 @@ export class LookupRepository {
     return rows.map(toSize);
   }
 
+  /**
+   * @description Every size, inactive ones too, so a product whose size was deactivated keeps its reference ranges
+   */
+  async listAllSizes(): Promise<Size[]> {
+    const rows = unwrap(await this.supabase.from('sizes').select('*').order('sort_order'));
+    return rows.map(toSize);
+  }
+
   async getSizeToleranceCm(): Promise<number> {
     const [settings] = unwrap(
       await this.supabase.from('settings').select('size_tolerance_cm').limit(1),

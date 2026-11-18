@@ -1,4 +1,5 @@
-import { movePhoto, nextSortOrder } from './photo-order';
+import { movePhoto } from './photo-order';
+import { nextSortOrder } from './sort-order';
 
 const photos = [
   { id: 10, sortOrder: 1 },

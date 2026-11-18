@@ -29,7 +29,3 @@ export function movePhoto(
     .filter((photo) => photo.sortOrder !== photo.previous)
     .map(({ id, sortOrder }) => ({ id, sortOrder }));
 }
-
-export function nextSortOrder(photos: readonly PhotoPosition[]): number {
-  return photos.reduce((highest, photo) => Math.max(highest, photo.sortOrder), 0) + 1;
-}

@@ -1,0 +1,78 @@
+<h2 mat-dialog-title>{{ data.title }}</h2>
+<form novalidate (submit)="save($event)">
+  <mat-dialog-content>
+    <div class="warning" role="note">
+      <mat-icon aria-hidden="true">info</mat-icon>
+      <p>
+        Los rangos se usan en la guía de tallas y en la calculadora de la tienda. Cambiarlos cambia
+        las recomendaciones.
+      </p>
+    </div>
+    <div class="measurements">
+      <mat-form-field appearance="outline">
+        <mat-label>Talla</mat-label>
+        <input matInput autocomplete="off" [formField]="form.label" />
+        <mat-error>{{ form.label().errors()[0]?.message }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Posición</mat-label>
+        <input matInput type="number" inputmode="numeric" [formField]="form.sortOrder" />
+        <mat-error>{{ form.sortOrder().errors()[0]?.message }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <fieldset>
+      <legend>Cuello (cm)</legend>
+      <div class="measurements">
+        <mat-form-field appearance="outline">
+          <mat-label>Mínimo</mat-label>
+          <input matInput type="number" inputmode="decimal" [formField]="form.neckMin" />
+          <mat-error>{{ form.neckMin().errors()[0]?.message }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Máximo</mat-label>
+          <input matInput type="number" inputmode="decimal" [formField]="form.neckMax" />
+          <mat-error>{{ form.neckMax().errors()[0]?.message }}</mat-error>
+        </mat-form-field>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>Pecho (cm)</legend>
+      <div class="measurements">
+        <mat-form-field appearance="outline">
+          <mat-label>Mínimo</mat-label>
+          <input matInput type="number" inputmode="decimal" [formField]="form.chestMin" />
+          <mat-error>{{ form.chestMin().errors()[0]?.message }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Máximo</mat-label>
+          <input matInput type="number" inputmode="decimal" [formField]="form.chestMax" />
+          <mat-error>{{ form.chestMax().errors()[0]?.message }}</mat-error>
+        </mat-form-field>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>Largo (cm)</legend>
+      <div class="measurements">
+        <mat-form-field appearance="outline">
+          <mat-label>Mínimo</mat-label>
+          <input matInput type="number" inputmode="decimal" [formField]="form.backLengthMin" />
+          <mat-error>{{ form.backLengthMin().errors()[0]?.message }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Máximo</mat-label>
+          <input matInput type="number" inputmode="decimal" [formField]="form.backLengthMax" />
+          <mat-error>{{ form.backLengthMax().errors()[0]?.message }}</mat-error>
+        </mat-form-field>
+      </div>
+    </fieldset>
+
+    @if (saving.errorMessage(); as message) {
+      <p class="error" role="alert">{{ message }}</p>
+    }
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" mat-dialog-close>Cancelar</button>
+    <button mat-flat-button type="submit" [disabled]="saving.isSaving()">Guardar</button>
+  </mat-dialog-actions>
+</form>
