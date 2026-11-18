@@ -1,0 +1,76 @@
+<a class="skip-link" href="#contenido">Saltar al contenido</a>
+
+<mat-sidenav-container class="container">
+  <mat-sidenav
+    #menu
+    class="menu"
+    [mode]="isWide() ? 'side' : 'over'"
+    [opened]="isWide()"
+    fixedInViewport
+  >
+    <nav aria-label="Menú del panel">
+      <div class="menu-header">
+        <span class="brand">Panel CutePet</span>
+        @if (!isWide()) {
+          <button mat-icon-button type="button" aria-label="Cerrar menú" (click)="menu.close()">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </div>
+
+      <mat-nav-list aria-label="Secciones">
+        @for (link of links; track link.path) {
+          <a
+            mat-list-item
+            [routerLink]="link.path"
+            routerLinkActive
+            #active="routerLinkActive"
+            [routerLinkActiveOptions]="{ exact: link.path === '/admin' }"
+            [activated]="active.isActive"
+            (click)="closeOnPhone(menu)"
+          >
+            <mat-icon matListItemIcon>{{ link.icon }}</mat-icon>
+            <span matListItemTitle>{{ link.label }}</span>
+          </a>
+        }
+      </mat-nav-list>
+
+      <mat-nav-list class="account" aria-label="Cuenta">
+        <a mat-list-item routerLink="/">
+          <mat-icon matListItemIcon>storefront</mat-icon>
+          <span matListItemTitle>Ver tienda</span>
+        </a>
+      </mat-nav-list>
+
+      <mat-action-list>
+        <button mat-list-item type="button" (click)="signOut()">
+          <mat-icon matListItemIcon>logout</mat-icon>
+          <span matListItemTitle>Cerrar sesión</span>
+        </button>
+      </mat-action-list>
+    </nav>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="page">
+    @if (!isWide()) {
+      <header>
+        <mat-toolbar class="header">
+          <button
+            mat-icon-button
+            type="button"
+            aria-label="Abrir menú"
+            [attr.aria-expanded]="menu.opened"
+            (click)="menu.open()"
+          >
+            <mat-icon>menu</mat-icon>
+          </button>
+          <span class="brand">Panel CutePet</span>
+        </mat-toolbar>
+      </header>
+    }
+
+    <main id="contenido" class="content">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

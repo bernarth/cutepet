@@ -13,5 +13,5 @@ export const adminGuard: CanMatchFn = async () => {
   const auth = injector.get(AuthStore);
   await auth.ready;
 
-  return auth.isAdmin() || router.createUrlTree(['/']);
+  return auth.isAdmin() || router.createUrlTree(['/admin/ingresar']);
 };

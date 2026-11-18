@@ -128,7 +128,7 @@ No returns · bus shipping is paid by the customer · pickup Bs 2 with extra cha
 
 ## Out of the MVP
 
-Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabled), custom backend API, reviews, coupons, advanced analytics.
+Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabled), custom backend API, reviews, coupons, advanced analytics, seasonal or time-limited discounts on the website (future).
 
 ## Build order
 
@@ -335,3 +335,97 @@ There is no quantity stepper while every piece is unique; a line can only be rem
 - After the tap the cart shows "Te abrimos WhatsApp con tu pedido. Cuando lo envíes, te responderemos para coordinar el pago y la entrega." with "Ya lo envié, vaciar carrito" and "Volver al carrito". The cart is never emptied automatically.
 
 **Header.** The cart icon shows a badge with the number of units in the cart, hidden when empty; its label is "Ver carrito, N prendas" (the visible number must appear as its own word in the label, or AXE flags it). It needs no database call.
+
+### Step 5: admin panel
+
+> Recorded on 2026-11-17 while planning step 5.
+
+**Who uses it.** The owner and her helpers, mostly from a phone. Every admin page is designed at 360px first. Helpers have the same `admin` role as the owner; the audit log shows who did what.
+
+**Slices.** Built and committed one at a time, each with `pnpm check` passing: (1) admin login and layout, (2) products, sizes and stock adjustment, (3) product photos, (4) quick sale, (5) settings, (6) orders with timeline, WhatsApp buttons and shipping receipt, (7) audit log, (8) categories, pet types and sizes.
+
+**Routes.** `/admin/ingresar` (Google sign-in, no guard), `/admin/pedidos`, `/admin/pedidos/:code`, `/admin/venta-rapida`, `/admin/prendas`, `/admin/prendas/nueva`, `/admin/prendas/:id`, `/admin/configuracion`, `/admin/historial`. `/admin` opens the orders list. A signed-in user without the admin role sees "Tu cuenta no tiene acceso al panel".
+
+**Products.**
+
+- Archiving is `is_active = false` and can be undone. Orders in progress continue; new sales of an archived product are refused.
+- The slug is generated from the name when the product is created and then locked. "Cambiar enlace" changes it with a warning that shared links stop working.
+- A product is created first (data only); sizes and photos are added on its edit page. A product with no variants is not shown in the catalog.
+- A variant's `size_id` can be changed only while the variant has no orders (enforced in the database). Otherwise its stock goes to 0 with a reason and a new variant is created. Variants are never deleted.
+- Exact measurements outside the size range [min, max] of the table show a warning, never a block.
+- Removing a photo deletes both the row and the file in storage.
+- Photos are compressed in the browser before upload (no dependency): longest side 1600px, JPEG, quality lowered until the file is about 550 KB or less, so link previews stay under WhatsApp's 600 KB limit. Re-encoding also drops EXIF data (phone location).
+- `is_featured` is edited in step 9.
+
+**Quick sale.** Price is never editable; it always comes from the product.
+
+**Settings.**
+
+- `store_whatsapp`: 8 digits starting with 6 or 7. The `wa.me` link adds `591`.
+- The QR expiry date is required when QR checkout is on. A warning "vence en X días" appears from 7 days before. In step 6 an expired QR turns QR checkout off automatically.
+- The QR image is uploaded without lossy compression so it stays scannable.
+- The admin form reads the whole `settings` row for editing; the shared settings reader of step 6 is still extracted then.
+
+**Orders.**
+
+- Each order shows its timeline (who, when, from which status to which, why) from the audit log. The actor is the admin's Google name or email, "Cliente" for the order's customer and "Sistema" when there is no actor (expiry job).
+- A rejected proof is `cancel_order` with a reason; the "comprobante rechazado" message is offered for orders cancelled from `proof_uploaded`.
+- Shipping receipt: only for bus parcel orders (enforced in the database). The admin uploads it to the order as a record and attaches the photo by hand in WhatsApp; no link is sent.
+- Marking an order "Enviado" without a receipt is allowed, with a warning.
+
+**WhatsApp messages to the customer** (draft, reviewed by the owner):
+
+- Confirmado:
+
+  ```
+  ¡Hola {nombre}! Recibimos tu pago del pedido {código} por Bs {total}. ¡Gracias por tu compra! 🐾
+  [recojo] Te avisamos cuando esté listo para recoger.
+  [flota] Te enviaremos la guía cuando lo despachemos.
+  ```
+
+- Listo para recoger:
+
+  ```
+  ¡Hola {nombre}! Tu pedido {código} ya está listo para recoger.
+  📍 {dirección}
+  🕒 {horario}
+  Recojo: {Bs 2 al recoger | gratis}
+  {aviso del punto de recojo}
+  ```
+
+- Guía de envío:
+
+  ```
+  ¡Hola {nombre}! Tu pedido {código} ya fue enviado por flota a {ciudad}. Te mando la foto de la guía.
+  [no pagado por la tienda] Recuerda que el envío se paga al recoger en la terminal.
+  [pagado por la tienda] El envío ya está pagado por CutePet.
+  ```
+
+- Comprobante rechazado:
+
+  ```
+  Hola {nombre}, revisamos el comprobante de tu pedido {código} y no pudimos confirmar el pago: {motivo}. ¿Nos ayudas a revisarlo? Si ya hiciste la transferencia, envíanos la captura por aquí y lo vemos juntos.
+  ```
+
+**Audit log.** Read only, no export. Filters by entity and date. The timeline and the audit page share one admin-only RPC that returns the actor label, because the admin cannot read `auth.users`.
+
+**Categories, pet types and sizes.** Edited in the last slice. They are deactivated, never deleted.
+
+**Anonymous users.** Anonymous sign-ins are off on the remote project until step 6, which turns them on together with Turnstile and checks that RLS and RPCs exclude anonymous users (`is_anonymous` claim) where needed.
+
+**Local admin user.**
+
+1. One Google OAuth client (Web, Testing mode) with the redirect URIs `http://127.0.0.1:54321/auth/v1/callback` (local) and `https://<ref>.supabase.co/auth/v1/callback` (remote). Its ID and secret go in `supabase/.env` (gitignored) as `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` and `SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET`.
+2. Restart the local stack, open `/admin/ingresar` and sign in with Google once.
+3. Give that user the admin role in the local database:
+
+   ```sql
+   insert into public.user_roles (user_id, role)
+   select id, 'admin' from auth.users where email = '<your email>';
+   ```
+
+4. Sign out and in again so the token carries the role.
+
+Apply new migrations with `supabase migration up`, which keeps `auth.users` and the admin row. Use `supabase db reset` only for a clean start; it deletes the users, so steps 2 to 4 must be repeated.
+
+**Remote project.** Migrations are pushed only when step 5 is done and `pnpm check` passes, after asking the owner. The owner configures the Google provider in the dashboard.

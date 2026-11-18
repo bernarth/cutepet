@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 
-import { adminGuard } from '@core/auth/admin.guard';
 import { Shell } from '@core/layout/shell';
 
 export const routes: Routes = [
@@ -53,7 +52,6 @@ export const routes: Routes = [
   },
   {
     path: 'admin',
-    canMatch: [adminGuard],
     loadChildren: () => import('@features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
   },
   { path: '**', redirectTo: '' },
