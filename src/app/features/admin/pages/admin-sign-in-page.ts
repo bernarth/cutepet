@@ -24,7 +24,12 @@ import { LoadingBar } from '@shared/ui/loading-bar';
         } @else if (auth.isSignedIn()) {
           <p>Tu cuenta no tiene acceso al panel.</p>
           <p class="email">{{ auth.user()?.email }}</p>
-          <button mat-stroked-button type="button" [disabled]="isBusy()" (click)="signOut()">
+          <button
+            mat-stroked-button
+            type="button"
+            [disabled]="isBusy()"
+            (click)="useAnotherAccount()"
+          >
             Usar otra cuenta
           </button>
         } @else {
@@ -98,8 +103,11 @@ export class AdminSignInPage {
     );
   }
 
-  protected async signOut(): Promise<void> {
-    await this.run(() => this.auth.signOut(), 'No se pudo cerrar la sesión');
+  protected async useAnotherAccount(): Promise<void> {
+    await this.run(async () => {
+      await this.auth.signOut();
+      await this.auth.signInWithGoogle('/admin');
+    }, 'No se pudo cambiar de cuenta');
   }
 
   private async run(action: () => Promise<void>, failureMessage: string): Promise<void> {

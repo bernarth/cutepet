@@ -77,13 +77,16 @@ export class AuthStore {
   }
 
   /**
-   * @description Starts Google sign-in. Google sends the user back to `returnPath` on the current site
+   * @description Starts Google sign-in, always showing Google's account picker. Google sends the user back to `returnPath` on the current site
    * @param returnPath Path to open after sign-in, for example `/admin`
    */
   async signInWithGoogle(returnPath: string): Promise<void> {
     const redirectTo = new URL(returnPath, this.document.location.origin).toString();
     unwrap<{ url: string | null }>(
-      await this.supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } }),
+      await this.supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo, queryParams: { prompt: 'select_account' } },
+      }),
     );
   }
 
