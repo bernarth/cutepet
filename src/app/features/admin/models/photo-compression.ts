@@ -53,9 +53,7 @@ export async function encodeUnder(
  * Only runs after the admin picks a file, so it is never called on the server
  */
 export async function compressPhoto(file: Blob): Promise<Blob> {
-  const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' }).catch(() => {
-    throw new AppError(PHOTO_UNREADABLE);
-  });
+  const bitmap = await decodePhoto(file);
 
   try {
     const { width, height } = fitWithin(bitmap, PHOTO_MAX_SIDE);
@@ -77,5 +75,16 @@ export async function compressPhoto(file: Blob): Promise<Blob> {
     );
   } finally {
     bitmap.close();
+  }
+}
+
+/**
+ * @description Formats the browser cannot open (for example HEIC in Chrome) end here with a clear error
+ */
+async function decodePhoto(file: Blob): Promise<ImageBitmap> {
+  try {
+    return await createImageBitmap(file, { imageOrientation: 'from-image' });
+  } catch {
+    throw new AppError(PHOTO_UNREADABLE);
   }
 }

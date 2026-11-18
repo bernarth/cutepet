@@ -9,7 +9,8 @@ const MESSAGES_BY_CODE: Readonly<Record<string, string>> = {
   INVALID_STOCK: 'El stock debe ser un número entero de 0 o más.',
   REASON_REQUIRED: 'Escribe el motivo.',
   VARIANT_NOT_FOUND: 'No encontramos esa talla. Recarga la página.',
-  PHOTO_UNREADABLE: 'No pudimos leer esa foto. Usa una foto JPG, PNG o WebP.',
+  PHOTO_UNREADABLE:
+    'No pudimos leer esta foto. Súbela en JPG o PNG, o desde la galería del celular.',
   FORBIDDEN: 'Tu cuenta no tiene permiso para hacer esto. Vuelve a ingresar.',
 };
 

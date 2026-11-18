@@ -1,4 +1,5 @@
-import { encodeUnder, fitWithin } from './photo-compression';
+import { adminErrorMessage } from './admin-errors';
+import { compressPhoto, encodeUnder, fitWithin } from './photo-compression';
 
 const blobOf = (bytes: number) => new Blob([new Uint8Array(bytes)]);
 
@@ -35,5 +36,21 @@ describe('encodeUnder', () => {
     const blob = await encodeUnder(async (quality) => blobOf(quality * 1000), 100, [0.9, 0.6]);
 
     expect(blob.size).toBe(600);
+  });
+});
+
+describe('compressPhoto', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('explains a photo the browser cannot read, such as HEIC in Chrome', async () => {
+    vi.stubGlobal('createImageBitmap', () => Promise.reject(new DOMException('decode failed')));
+
+    const error = await compressPhoto(new Blob(['heic'], { type: 'image/heic' })).catch(
+      (failure: unknown) => failure,
+    );
+
+    expect(adminErrorMessage(error)).toBe(
+      'No pudimos leer esta foto. Súbela en JPG o PNG, o desde la galería del celular.',
+    );
   });
 });
