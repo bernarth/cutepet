@@ -1,14 +1,5 @@
 import { ORDER_STATUS_LABELS, OrderStatus } from '@core/orders/order-status';
-
-export interface AuditEntry {
-  readonly id: number;
-  readonly action: string;
-  readonly oldData: Readonly<Record<string, unknown>> | null;
-  readonly newData: Readonly<Record<string, unknown>> | null;
-  readonly reason: string | null;
-  readonly actorLabel: string;
-  readonly createdAt: string;
-}
+import { AuditEntry } from './audit-entry';
 
 export interface TimelineEvent {
   readonly id: number;

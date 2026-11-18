@@ -1,7 +1,10 @@
-import { AuditEntry, toTimeline } from './order-timeline';
+import { AuditEntry } from './audit-entry';
+import { toTimeline } from './order-timeline';
 
 const entry = (overrides: Partial<AuditEntry>): AuditEntry => ({
   id: 1,
+  tableName: 'orders',
+  recordId: 'order-1',
   action: 'update',
   oldData: null,
   newData: null,

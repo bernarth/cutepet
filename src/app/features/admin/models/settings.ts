@@ -77,14 +77,6 @@ export function qrExpiryNotice(expiresOn: string, today: string): string | null 
 }
 
 /**
- * @description yyyy-mm-dd of the given moment in the browser's time zone
- */
-export function isoDate(moment: Date): string {
-  const offset = moment.getTimezoneOffset() * 60 * 1000;
-  return new Date(moment.getTime() - offset).toISOString().slice(0, 10);
-}
-
-/**
  * @description The form asks for the 8 digits only. An older value saved with 591 is shown without it
  */
 function localMobile(stored: string): string {

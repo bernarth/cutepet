@@ -15,3 +15,11 @@ const dateTime = new Intl.DateTimeFormat('es-BO', {
 export function formatDateTime(isoTimestamp: string): string {
   return dateTime.format(new Date(isoTimestamp));
 }
+
+/**
+ * @description yyyy-mm-dd of the given moment in the browser's time zone
+ */
+export function isoDate(moment: Date): string {
+  const offset = moment.getTimezoneOffset() * 60 * 1000;
+  return new Date(moment.getTime() - offset).toISOString().slice(0, 10);
+}

@@ -12,4 +12,5 @@ export const ADMIN_NAV_LINKS: readonly AdminNavLink[] = [
   { label: 'Venta rápida', path: '/admin/venta-rapida', icon: 'point_of_sale' },
   { label: 'Prendas', path: '/admin/prendas', icon: 'checkroom' },
   { label: 'Configuración', path: '/admin/configuracion', icon: 'settings' },
+  { label: 'Historial', path: '/admin/historial', icon: 'history' },
 ];

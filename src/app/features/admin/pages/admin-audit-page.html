@@ -1,0 +1,67 @@
+<h1>Historial</h1>
+<p class="intro">Todo lo que cambió en la tienda, quién lo hizo y por qué. Solo lectura.</p>
+
+<div class="filters">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Qué</mat-label>
+    <mat-select
+      [value]="store.table() ?? ''"
+      (selectionChange)="store.table.set($event.value || null)"
+    >
+      <mat-option value="">Todo</mat-option>
+      @for (entity of entities; track entity.table) {
+        <mat-option [value]="entity.table">{{ entity.label }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Desde</mat-label>
+    <input
+      matInput
+      type="date"
+      [value]="store.fromDate()"
+      (change)="store.fromDate.set(dateValue($event))"
+    />
+  </mat-form-field>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Hasta</mat-label>
+    <input
+      matInput
+      type="date"
+      [value]="store.toDate()"
+      (change)="store.toDate.set(dateValue($event))"
+    />
+  </mat-form-field>
+</div>
+@if (!store.hasValidRange()) {
+  <p class="error" role="alert">La fecha "Desde" es posterior a "Hasta".</p>
+}
+
+<cp-loading-bar [active]="store.isLoading()" />
+
+@if (store.hasError()) {
+  <cp-empty-state icon="info" message="No pudimos cargar el historial.">
+    <button mat-button type="button" (click)="store.reload()">Reintentar</button>
+  </cp-empty-state>
+} @else if (!store.isLoading() && store.rows().length === 0) {
+  <cp-empty-state icon="history" message="No hay cambios en esas fechas." />
+}
+
+<ol class="entries">
+  @for (row of store.rows(); track row.id) {
+    <li><cp-audit-entry-card [row]="row" /></li>
+  }
+</ol>
+
+@if (store.canLoadMore()) {
+  <div class="more">
+    <button
+      mat-stroked-button
+      type="button"
+      [disabled]="store.isLoading()"
+      (click)="store.loadMore()"
+    >
+      Ver más
+    </button>
+  </div>
+}

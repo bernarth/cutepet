@@ -1,5 +1,5 @@
 begin;
-select plan(11);
+select plan(13);
 
 select tests.set_settings('{"qr_checkout_enabled": true, "reservation_minutes": 15}');
 select tests.create_user('admin@test.bo') as admin_id \gset
@@ -11,6 +11,8 @@ select tests.create_variant() as pickup_variant \gset
 select tests.create_variant() as bus_variant \gset
 
 select tests.reserve(:'customer_id', tests.items(:web_variant)) as web_order \gset
+insert into public.audit_log (table_name, record_id, action, created_at)
+values ('time_zone_check', 'evening', 'update', '2026-11-19 01:00:00+00');
 
 select tests.authenticate_as(:'admin_id', as_admin => true);
 select (public.create_quick_sale(tests.items(:pickup_variant), 'Eva', '71234567', 'pickup_point')).id as pickup_order \gset
@@ -34,6 +36,13 @@ select is(
   0, 'before_id continues after the last entry seen');
 select is((select count(*)::integer from public.get_audit_log(from_date => current_date + 1)), 0,
   'filters by date');
+
+select is(
+  (select count(*)::integer from public.get_audit_log('time_zone_check', from_date => '2026-11-18', to_date => '2026-11-18')),
+  1, 'an entry at 21:00 in La Paz belongs to that day, not to the next day in UTC');
+select is(
+  (select count(*)::integer from public.get_audit_log('time_zone_check', from_date => '2026-11-19', to_date => '2026-11-19')),
+  0, 'and it is not counted in the next day');
 
 select throws_ok(
   format('update public.orders set shipping_receipt_path = %L where id = %L', 'x/guia.jpg', :'pickup_order'),

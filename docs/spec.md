@@ -374,7 +374,7 @@ There is no quantity stepper while every piece is unique; a line can only be rem
 - Marking an order "Enviado" without a receipt is allowed, with a warning.
 - The order list opens on "Por revisar" (orders in `proof_uploaded`, the `needs_attention` ones first); other statuses are a filter, and a search by code, name or phone looks in every status.
 - Payment proofs and shipping receipts live in private buckets and are shown only through signed links that expire after 5 minutes.
-- The shipping receipt photo is compressed like product photos. A replaced receipt stays in storage (admins can upload receipts but not delete them) and the audit log keeps the previous path.
+- The shipping receipt photo is compressed like product photos. A replaced receipt stays in storage on purpose: it is evidence of what was sent, and nothing is deleted (admins can upload receipts but not delete them). The audit log keeps the previous path.
 - Confirm and advance ask for confirmation; cancel, reject, revert and restore also ask for the reason.
 
 **WhatsApp messages to the customer** (draft, reviewed by the owner):

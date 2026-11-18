@@ -3,6 +3,7 @@ import { Service, computed, inject, resource, signal } from '@angular/core';
 import { AdminOrder } from '../models/admin-order';
 import { compressPhoto } from '../models/photo-compression';
 import { toTimeline } from '../models/order-timeline';
+import { AdminAuditRepository } from './admin-audit.repository';
 import { AdminOrderRepository, PrivateBucket } from './admin-order.repository';
 
 const NO_PICKUP_INFO = { address: '', hours: '', notice: '' };
@@ -10,6 +11,7 @@ const NO_PICKUP_INFO = { address: '', hours: '', notice: '' };
 @Service()
 export class AdminOrderStore {
   private readonly repository = inject(AdminOrderRepository);
+  private readonly auditRepository = inject(AdminAuditRepository);
   private readonly code = signal<string | null>(null);
 
   private readonly orderResource = resource({
@@ -18,7 +20,8 @@ export class AdminOrderStore {
   });
   private readonly timelineResource = resource({
     params: () => this.orderResource.value()?.id,
-    loader: ({ params: orderId }) => this.repository.getTimeline(orderId),
+    loader: ({ params: orderId }) =>
+      this.auditRepository.list({ table: 'orders', recordId: orderId, pageSize: 100 }),
   });
   private readonly pickupResource = resource({ loader: () => this.repository.getPickupInfo() });
 

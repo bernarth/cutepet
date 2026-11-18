@@ -10,7 +10,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { EmptyState } from '@shared/ui/empty-state';
 import { LoadingBar } from '@shared/ui/loading-bar';
 import { AdminSettingsStore } from '../data-access/admin-settings.store';
-import { isoDate, qrExpiryNotice } from '../models/settings';
+import { isoDate } from '../models/date-format';
+import { qrExpiryNotice } from '../models/settings';
 import {
   EMPTY_SETTINGS,
   QR_IMAGE_MAX_BYTES,

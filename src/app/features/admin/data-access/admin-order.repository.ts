@@ -4,7 +4,6 @@ import { SUPABASE } from '@core/supabase/supabase.client';
 import { AppError, unwrap, unwrapNullable } from '@shared/data-access/supabase-result';
 import { AdminOrder, AdminOrderSummary, OrderListFilter, PickupInfo } from '../models/admin-order';
 import { toAdminOrder, toAdminOrderSummary } from '../models/admin-order.mapper';
-import { AuditEntry } from '../models/order-timeline';
 
 const SUMMARY_COLUMNS = `id, code, status, needs_attention, channel, customer_name, customer_phone,
   delivery_method, items_total, created_at, order_items(quantity)` as const;
@@ -70,26 +69,6 @@ export class AdminOrderRepository {
     );
 
     return row ? toAdminOrder(row) : null;
-  }
-
-  async getTimeline(orderId: string): Promise<AuditEntry[]> {
-    const rows = unwrap(
-      await this.supabase.rpc('get_audit_log', {
-        target_table: 'orders',
-        target_record_id: orderId,
-        page_size: 100,
-      }),
-    );
-
-    return rows.map((row) => ({
-      id: row.id,
-      action: row.action,
-      oldData: asRecord(row.old_data),
-      newData: asRecord(row.new_data),
-      reason: row.reason ?? null,
-      actorLabel: row.actor_label,
-      createdAt: row.created_at,
-    }));
   }
 
   async getPickupInfo(): Promise<PickupInfo> {
@@ -163,10 +142,4 @@ export class AdminOrderRepository {
  */
 function searchTerm(text: string): string {
   return text.replace(/[^\p{L}\p{N} ]/gu, '').trim();
-}
-
-function asRecord(value: unknown): Readonly<Record<string, unknown>> | null {
-  return value && typeof value === 'object' && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
 }
