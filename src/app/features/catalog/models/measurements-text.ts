@@ -1,12 +1,7 @@
 import { Variant } from './product';
-import { MEASUREMENTS, MEASUREMENT_LABELS, Measurement, Size } from './size';
+import { MEASUREMENTS, MEASUREMENT_LABELS, Measurement, Size } from '@core/catalog/size';
+import { formatCm, formatCmRange } from '@shared/pipes/centimeters';
 import { FitIssue } from './size-calculator';
-
-const centimeters = new Intl.NumberFormat('es-BO', { maximumFractionDigits: 1 });
-
-export function formatCm(value: number): string {
-  return `${centimeters.format(value)} cm`;
-}
 
 /**
  * @description "Talla 2 · Medidas de esta prenda: cuello 25 cm, pecho 38,5 cm" or null without exact measurements
@@ -32,7 +27,7 @@ export function measurementsText(variant: Variant): string | null {
 export function referenceMeasurementsText(size: Size): string {
   const parts = MEASUREMENTS.map((measurement) => {
     const { min, max } = size[measurement];
-    return `${MEASUREMENT_LABELS[measurement]} ${centimeters.format(min)} a ${formatCm(max)}`;
+    return `${MEASUREMENT_LABELS[measurement]} ${formatCmRange(min, max)}`;
   });
   return `Talla ${size.label} · Medidas de referencia: ${parts.join(', ')}`;
 }

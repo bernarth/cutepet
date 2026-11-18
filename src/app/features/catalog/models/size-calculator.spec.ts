@@ -1,5 +1,5 @@
 import { Variant } from './product';
-import { Size } from './size';
+import { Size } from '@core/catalog/size';
 import { closestVariant, fitProduct, parseMeasurement, recommendSize } from './size-calculator';
 
 function size(id: number, label: string, [neck, chest, back]: number[][]): Size {

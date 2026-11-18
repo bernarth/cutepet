@@ -2,7 +2,7 @@ import { Component, input } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 
-import { Size } from '../models/size';
+import { Size } from '@core/catalog/size';
 
 @Component({
   selector: 'cp-size-table',

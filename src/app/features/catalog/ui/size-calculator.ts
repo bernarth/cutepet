@@ -4,7 +4,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 
 import { Variant } from '../models/product';
-import { Measurements, Size } from '../models/size';
+import { Measurements, Size } from '@core/catalog/size';
 import { fitProduct, parseMeasurement, recommendSize } from '../models/size-calculator';
 import { ProductFitList } from './product-fit-list';
 import { SizeRecommendationView } from './size-recommendation-view';

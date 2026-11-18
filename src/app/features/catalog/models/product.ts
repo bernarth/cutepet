@@ -1,6 +1,6 @@
 import { Database } from '@core/supabase/database.types';
 
-import { Measurements } from './size';
+import { Measurements } from '@core/catalog/size';
 
 export type CatalogStatus = Database['public']['Enums']['catalog_status'];
 

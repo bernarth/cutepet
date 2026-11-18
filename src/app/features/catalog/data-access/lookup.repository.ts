@@ -1,9 +1,8 @@
 import { Service, inject } from '@angular/core';
+import { Size, toSize } from '@core/catalog/size';
 import { SUPABASE } from '@core/supabase/supabase.client';
 import { AppError, unwrap } from '@shared/data-access/supabase-result';
 import { FilterOption } from '../models/catalog-filters';
-import { toSize } from '../models/product.mapper';
-import { Size } from '../models/size';
 
 /**
  * @description Lookup tables the admin edits: pet types, categories, sizes and the size tolerance setting

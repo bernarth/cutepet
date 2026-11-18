@@ -1,5 +1,5 @@
 import { Variant } from './product';
-import { MEASUREMENTS, Measurement, Measurements, Size } from './size';
+import { MEASUREMENTS, Measurement, Measurements, Size } from '@core/catalog/size';
 
 export interface SizeRecommendation {
   /** null means the pet is outside every size and should ask for a custom request */

@@ -1,5 +1,3 @@
-import { Tables } from '@core/supabase/database.types';
-
 import {
   CatalogStatus,
   Photo,
@@ -8,7 +6,7 @@ import {
   ProductSummary,
   Variant,
 } from './product';
-import { Measurements, Size } from './size';
+import { Measurements } from '@core/catalog/size';
 
 export type PhotoUrl = (storagePath: string) => string;
 
@@ -79,17 +77,6 @@ function toProductDetail(row: ProductDetailRow, photoUrl: PhotoUrl): ProductDeta
     categoryName: row.categories?.name ?? '',
     photos: toPhotos(row.product_photos, photoUrl),
     variants,
-  };
-}
-
-export function toSize(row: Tables<'sizes'>): Size {
-  return {
-    id: row.id,
-    label: row.label,
-    sortOrder: row.sort_order,
-    neck: { min: row.neck_min, max: row.neck_max },
-    chest: { min: row.chest_min, max: row.chest_max },
-    backLength: { min: row.back_length_min, max: row.back_length_max },
   };
 }
 

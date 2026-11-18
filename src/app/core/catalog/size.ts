@@ -1,3 +1,5 @@
+import { Tables } from '@core/supabase/database.types';
+
 export type Measurement = 'neck' | 'chest' | 'backLength';
 
 export const MEASUREMENTS: readonly Measurement[] = ['neck', 'chest', 'backLength'];
@@ -26,4 +28,15 @@ export interface Size {
   readonly neck: MeasurementRange;
   readonly chest: MeasurementRange;
   readonly backLength: MeasurementRange;
+}
+
+export function toSize(row: Tables<'sizes'>): Size {
+  return {
+    id: row.id,
+    label: row.label,
+    sortOrder: row.sort_order,
+    neck: { min: row.neck_min, max: row.neck_max },
+    chest: { min: row.chest_min, max: row.chest_max },
+    backLength: { min: row.back_length_min, max: row.back_length_max },
+  };
 }
