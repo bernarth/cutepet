@@ -1,0 +1,44 @@
+<div class="top">
+  <h1>Prendas</h1>
+  <a mat-flat-button routerLink="nueva">
+    <mat-icon>add</mat-icon>
+    Nueva prenda
+  </a>
+</div>
+
+<div class="tools">
+  <mat-form-field appearance="outline" class="search" subscriptSizing="dynamic">
+    <mat-label>Buscar por nombre</mat-label>
+    <mat-icon matPrefix aria-hidden="true">search</mat-icon>
+    <input matInput type="search" [value]="store.search()" (input)="onSearch($event)" />
+  </mat-form-field>
+
+  <mat-button-toggle-group
+    aria-label="Mostrar prendas"
+    hideSingleSelectionIndicator
+    [value]="store.filter()"
+    (change)="store.filter.set($event.value)"
+  >
+    @for (option of filters; track option.value) {
+      <mat-button-toggle [value]="option.value">
+        {{ option.label }} ({{ store.counts()[option.value] }})
+      </mat-button-toggle>
+    }
+  </mat-button-toggle-group>
+</div>
+
+<cp-loading-bar [active]="store.isLoading()" />
+
+@if (store.hasError()) {
+  <cp-empty-state icon="info" message="No pudimos cargar las prendas.">
+    <button mat-button type="button" (click)="store.reload()">Reintentar</button>
+  </cp-empty-state>
+} @else if (!store.isLoading() && store.visible().length === 0) {
+  <cp-empty-state icon="checkroom" message="No hay prendas para mostrar aquí." />
+}
+
+<ul class="grid">
+  @for (product of store.visible(); track product.id) {
+    <li><cp-admin-product-card [product]="product" /></li>
+  }
+</ul>

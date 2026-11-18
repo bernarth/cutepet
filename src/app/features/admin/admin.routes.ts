@@ -19,6 +19,22 @@ export const ADMIN_ROUTES: Routes = [
         loadComponent: () =>
           import('./pages/admin-dashboard-page').then((m) => m.AdminDashboardPage),
       },
+      {
+        path: 'prendas',
+        title: 'Prendas - Panel CutePet',
+        loadComponent: () => import('./pages/admin-products-page').then((m) => m.AdminProductsPage),
+      },
+      {
+        path: 'prendas/nueva',
+        title: 'Nueva prenda - Panel CutePet',
+        loadComponent: () =>
+          import('./pages/admin-product-new-page').then((m) => m.AdminProductNewPage),
+      },
+      {
+        path: 'prendas/:id',
+        title: 'Prenda - Panel CutePet',
+        loadComponent: () => import('./pages/admin-product-page').then((m) => m.AdminProductPage),
+      },
     ],
   },
 ];

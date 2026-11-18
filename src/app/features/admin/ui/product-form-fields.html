@@ -1,0 +1,41 @@
+<mat-form-field appearance="outline" class="wide">
+  <mat-label>Nombre</mat-label>
+  <input matInput [formField]="form().name" autocomplete="off" />
+  <mat-error>{{ form().name().errors()[0]?.message }}</mat-error>
+</mat-form-field>
+
+<mat-form-field appearance="outline">
+  <mat-label>Mascota</mat-label>
+  <mat-select [formField]="form().petTypeId">
+    @for (option of petTypeOptions(); track option.id) {
+      <mat-option [value]="option.id">{{ option.name }}</mat-option>
+    }
+  </mat-select>
+  <mat-error>{{ form().petTypeId().errors()[0]?.message }}</mat-error>
+</mat-form-field>
+
+<mat-form-field appearance="outline">
+  <mat-label>Categoría</mat-label>
+  <mat-select [formField]="form().categoryId">
+    @for (option of categoryOptions(); track option.id) {
+      <mat-option [value]="option.id">{{ option.name }}</mat-option>
+    }
+  </mat-select>
+  <mat-error>{{ form().categoryId().errors()[0]?.message }}</mat-error>
+</mat-form-field>
+
+<mat-form-field appearance="outline">
+  <mat-label>Precio</mat-label>
+  <span matTextPrefix>Bs&nbsp;</span>
+  <input matInput type="number" inputmode="decimal" [formField]="form().price" />
+  <mat-error>{{ form().price().errors()[0]?.message }}</mat-error>
+</mat-form-field>
+
+<mat-form-field appearance="outline" class="wide">
+  <mat-label>Descripción</mat-label>
+  <textarea matInput rows="4" [formField]="form().description"></textarea>
+  <mat-hint align="end">
+    {{ form().description().value().length }} / {{ descriptionMaxLength }}
+  </mat-hint>
+  <mat-error>{{ form().description().errors()[0]?.message }}</mat-error>
+</mat-form-field>

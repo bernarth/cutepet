@@ -1,0 +1,87 @@
+<a mat-button routerLink="/admin/prendas"><mat-icon>arrow_back</mat-icon>Prendas</a>
+<cp-loading-bar [active]="store.isLoading()" />
+
+@if (store.notFound()) {
+  <cp-empty-state icon="info" message="No encontramos esta prenda." />
+} @else if (store.hasError()) {
+  <cp-empty-state icon="info" message="No pudimos cargar la prenda. Revisa tu conexión." />
+} @else if (store.product(); as product) {
+  <header class="title">
+    <h1>{{ product.name }}</h1>
+    @if (status(); as productStatus) {
+      <cp-product-status-badge [status]="productStatus" />
+    }
+  </header>
+
+  <div class="columns">
+    <section class="panel" aria-labelledby="product-data">
+      <h2 id="product-data">Datos</h2>
+      <form novalidate (submit)="saveProduct($event)">
+        <cp-product-form-fields
+          [form]="form"
+          [petTypes]="store.lookups().petTypes"
+          [categories]="store.lookups().categories"
+        />
+        @if (saving.errorMessage(); as message) {
+          <p class="error" role="alert">{{ message }}</p>
+        }
+        <div class="actions">
+          <button mat-flat-button type="submit" [disabled]="!form().dirty() || saving.isSaving()">
+            Guardar cambios
+          </button>
+        </div>
+      </form>
+
+      <div class="row">
+        <p class="slug">Enlace: /catalogo/{{ product.slug }}</p>
+        <button mat-button type="button" (click)="openSlugDialog(product)">
+          <mat-icon>link</mat-icon>
+          Cambiar enlace
+        </button>
+      </div>
+
+      <div class="row">
+        <p class="hint">
+          {{
+            product.isActive
+              ? 'Archivarla la oculta de la tienda. Los pedidos en curso siguen.'
+              : 'Está archivada: los clientes no la ven.'
+          }}
+        </p>
+        <button
+          mat-stroked-button
+          type="button"
+          [disabled]="saving.isSaving()"
+          (click)="toggleActive(product)"
+        >
+          <mat-icon>{{ product.isActive ? 'archive' : 'unarchive' }}</mat-icon>
+          {{ product.isActive ? 'Archivar' : 'Volver a publicar' }}
+        </button>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="product-sizes">
+      <div class="section-head">
+        <h2 id="product-sizes">Tallas</h2>
+        <button mat-stroked-button type="button" (click)="openVariantDialog(product, null)">
+          <mat-icon>add</mat-icon>
+          Agregar talla
+        </button>
+      </div>
+
+      @if (product.variants.length === 0) {
+        <p class="hint">Agrega al menos una talla para que la prenda aparezca en la tienda.</p>
+      }
+      <div class="variants">
+        @for (variant of product.variants; track variant.id) {
+          <cp-variant-card
+            [variant]="variant"
+            [warnings]="variantWarnings().get(variant.id) ?? []"
+            (edit)="openVariantDialog(product, variant)"
+            (adjustStock)="openStockDialog(variant)"
+          />
+        }
+      </div>
+    </section>
+  </div>
+}

@@ -1,0 +1,79 @@
+<h2 mat-dialog-title>
+  {{ isNew ? 'Agregar talla' : 'Editar talla ' + data.variant?.sizeLabel }}
+</h2>
+
+<form novalidate (submit)="save($event)">
+  <mat-dialog-content>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Talla</mat-label>
+      <mat-select [formField]="form.sizeId">
+        @for (size of sizeOptions; track size.id) {
+          <mat-option [value]="size.id">Talla {{ size.label }}</mat-option>
+        }
+      </mat-select>
+      <mat-hint>{{ sizeHint() }}</mat-hint>
+      <mat-error>{{ form.sizeId().errors()[0]?.message }}</mat-error>
+    </mat-form-field>
+
+    @if (isNew) {
+      <mat-form-field appearance="outline">
+        <mat-label>Cuántas hay</mat-label>
+        <input matInput type="number" inputmode="numeric" [formField]="form.stock" />
+        <mat-error>{{ form.stock().errors()[0]?.message }}</mat-error>
+      </mat-form-field>
+    }
+
+    <fieldset>
+      <legend>Medidas de la mascota a la que le queda (opcional)</legend>
+      <div class="measurements">
+        <mat-form-field appearance="outline">
+          <mat-label>Cuello</mat-label>
+          <input matInput type="number" inputmode="decimal" [formField]="form.neckCm" />
+          <span matTextSuffix>cm</span>
+          <mat-error>{{ form.neckCm().errors()[0]?.message }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Pecho</mat-label>
+          <input matInput type="number" inputmode="decimal" [formField]="form.chestCm" />
+          <span matTextSuffix>cm</span>
+          <mat-error>{{ form.chestCm().errors()[0]?.message }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Largo</mat-label>
+          <input matInput type="number" inputmode="decimal" [formField]="form.backLengthCm" />
+          <span matTextSuffix>cm</span>
+          <mat-error>{{ form.backLengthCm().errors()[0]?.message }}</mat-error>
+        </mat-form-field>
+      </div>
+    </fieldset>
+
+    @if (warnings().length > 0) {
+      <div class="warning" role="status">
+        <mat-icon aria-hidden="true">warning</mat-icon>
+        <div>
+          @for (warning of warnings(); track warning) {
+            <p>{{ warning }}</p>
+          }
+          <p>Puedes guardar igual.</p>
+        </div>
+      </div>
+    }
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Tolerancia (opcional)</mat-label>
+      <input matInput type="number" inputmode="decimal" [formField]="form.toleranceCm" />
+      <span matTextSuffix>cm</span>
+      <mat-hint>Vacío usa la tolerancia general. Más para telas que estiran.</mat-hint>
+      <mat-error>{{ form.toleranceCm().errors()[0]?.message }}</mat-error>
+    </mat-form-field>
+
+    @if (saving.errorMessage(); as message) {
+      <p class="error" role="alert">{{ message }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" mat-dialog-close>Cancelar</button>
+    <button mat-flat-button type="submit" [disabled]="saving.isSaving()">Guardar</button>
+  </mat-dialog-actions>
+</form>
