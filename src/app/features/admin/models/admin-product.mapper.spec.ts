@@ -45,6 +45,28 @@ describe('matchesProductFilter', () => {
 });
 
 describe('toAdminProduct', () => {
+  it('orders photos so the cover comes first', () => {
+    const row: AdminProductRow = {
+      id: 1,
+      name: 'Abrigo',
+      slug: 'abrigo',
+      description: '',
+      pet_type_id: 1,
+      category_id: 1,
+      price: 120,
+      is_active: true,
+      catalog_variants: [],
+      product_photos: [
+        { id: 8, storage_path: 'b.jpg', alt_text: 'Abrigo foto 2', sort_order: 2 },
+        { id: 7, storage_path: 'a.jpg', alt_text: 'Abrigo foto 1', sort_order: 1 },
+      ],
+    };
+
+    const photos = toAdminProduct(row, (path) => `https://cdn/${path}`).photos;
+
+    expect(photos.map((photo) => photo.url)).toEqual(['https://cdn/a.jpg', 'https://cdn/b.jpg']);
+  });
+
   it('sorts sizes by the size table and flags sizes that have orders', () => {
     const row: AdminProductRow = {
       id: 1,
@@ -56,9 +78,10 @@ describe('toAdminProduct', () => {
       price: 120,
       is_active: true,
       catalog_variants: [variantRow(2, '2', 5, 3), variantRow(1, '000', 1, 0)],
+      product_photos: [],
     };
 
-    const product = toAdminProduct(row);
+    const product = toAdminProduct(row, (path) => path);
 
     expect(product.variants.map((variant) => variant.sizeLabel)).toEqual(['000', '2']);
     expect(product.variants.map((variant) => variant.hasOrders)).toEqual([false, true]);

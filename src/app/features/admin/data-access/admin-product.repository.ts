@@ -15,7 +15,8 @@ const SUMMARY_COLUMNS =
 
 const DETAIL_COLUMNS = `id, name, slug, description, pet_type_id, category_id, price, is_active,
   catalog_variants(id, size_id, stock, available_stock, neck_cm, chest_cm, back_length_cm, tolerance_cm,
-    sizes(label, sort_order), order_items(count))` as const;
+    sizes(label, sort_order), order_items(count)),
+  product_photos(id, storage_path, alt_text, sort_order)` as const;
 
 export interface AdminSize extends Size {
   readonly active: boolean;
@@ -54,7 +55,7 @@ export class AdminProductRepository {
       await this.supabase.from('products').select(DETAIL_COLUMNS).eq('id', id).maybeSingle(),
     );
 
-    return row ? toAdminProduct(row) : null;
+    return row ? toAdminProduct(row, (path) => storeImageUrl(this.supabase, path)) : null;
   }
 
   async listLookups(): Promise<CatalogLookups> {

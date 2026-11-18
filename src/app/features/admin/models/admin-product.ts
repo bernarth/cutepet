@@ -34,6 +34,14 @@ export interface AdminVariant {
   readonly hasOrders: boolean;
 }
 
+export interface AdminPhoto {
+  readonly id: number;
+  readonly url: string;
+  readonly storagePath: string;
+  readonly alt: string;
+  readonly sortOrder: number;
+}
+
 export interface AdminProduct {
   readonly id: number;
   readonly name: string;
@@ -44,6 +52,8 @@ export interface AdminProduct {
   readonly price: number;
   readonly isActive: boolean;
   readonly variants: readonly AdminVariant[];
+  /** Ordered by position. The first one is the cover used in link previews */
+  readonly photos: readonly AdminPhoto[];
 }
 
 export interface LookupOption {

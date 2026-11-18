@@ -1,16 +1,27 @@
 import { ComponentType } from '@angular/cdk/portal';
-import { Component, computed, effect, inject, input, linkedSignal, untracked } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  linkedSignal,
+  signal,
+  untracked,
+} from '@angular/core';
 import { form, submit } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 
+import { ConfirmDialog, ConfirmDialogData } from '@shared/ui/confirm-dialog';
 import { EmptyState } from '@shared/ui/empty-state';
 import { LoadingBar } from '@shared/ui/loading-bar';
 import { AdminProductStore } from '../data-access/admin-product.store';
-import { AdminProduct, AdminVariant } from '../models/admin-product';
+import { AdminPhoto, AdminProduct, AdminVariant } from '../models/admin-product';
 import { adminProductStatus } from '../models/admin-product.mapper';
 import { measurementWarnings } from '../models/measurement-warnings';
 import {
@@ -20,6 +31,8 @@ import {
   productFormSchema,
 } from '../models/product-form';
 import { variantMeasurements } from '../models/variant-form';
+import { PhotoAltDialog, PhotoAltDialogData } from '../ui/photo-alt-dialog';
+import { PhotoManager, PhotoMove } from '../ui/photo-manager';
 import { ProductFormFields } from '../ui/product-form-fields';
 import { ProductStatusBadge } from '../ui/product-status-badge';
 import { SaveState } from '../ui/save-state';
@@ -42,6 +55,7 @@ const DIALOG_CONFIG: MatDialogConfig = {
     MatIconModule,
     EmptyState,
     LoadingBar,
+    PhotoManager,
     ProductFormFields,
     ProductStatusBadge,
     VariantCard,
@@ -58,6 +72,8 @@ export class AdminProductPage {
   private readonly snackBar = inject(MatSnackBar);
 
   protected readonly saving = new SaveState();
+  protected readonly photoSaving = new SaveState();
+  protected readonly photoStatus = signal<string | null>(null);
   protected readonly status = computed(() => {
     const product = this.store.product();
     return product ? adminProductStatus(product) : null;
@@ -131,6 +147,50 @@ export class AdminProductPage {
       save: (newStock, reason) => this.store.adjustStock(variant, newStock, reason),
     };
     this.openDialog(StockAdjustmentDialog, data, 'Stock ajustado');
+  }
+
+  protected async addPhotos(files: readonly File[]): Promise<void> {
+    const total = files.length;
+    const progress = (done: number) => this.photoStatus.set(`Subiendo ${done} de ${total}…`);
+
+    progress(0);
+    const saved = await this.photoSaving.run(() => this.store.addPhotos(files, progress));
+    this.photoStatus.set(null);
+
+    if (saved) {
+      this.notify(total === 1 ? 'Foto agregada' : `${total} fotos agregadas`);
+    }
+  }
+
+  protected async movePhoto({ photo, targetIndex }: PhotoMove): Promise<void> {
+    if (await this.photoSaving.run(() => this.store.movePhoto(photo, targetIndex))) {
+      this.notify(targetIndex === 0 ? 'Ahora es la portada' : 'Foto movida');
+    }
+  }
+
+  protected openAltDialog(photo: AdminPhoto): void {
+    const data: PhotoAltDialogData = {
+      alt: photo.alt,
+      save: (alt) => this.store.updatePhotoAlt(photo, alt),
+    };
+    this.openDialog(PhotoAltDialog, data, 'Descripción guardada');
+  }
+
+  protected async confirmDeletePhoto(photo: AdminPhoto): Promise<void> {
+    const data: ConfirmDialogData = {
+      title: 'Eliminar foto',
+      message: 'La foto se borra de la tienda y no se puede recuperar.',
+      confirmLabel: 'Eliminar',
+    };
+    const confirmed = await firstValueFrom(
+      this.dialog
+        .open<ConfirmDialog, ConfirmDialogData, boolean>(ConfirmDialog, { ...DIALOG_CONFIG, data })
+        .afterClosed(),
+    );
+
+    if (confirmed && (await this.photoSaving.run(() => this.store.deletePhoto(photo)))) {
+      this.notify('Foto eliminada');
+    }
   }
 
   private openDialog<TDialog, TData>(

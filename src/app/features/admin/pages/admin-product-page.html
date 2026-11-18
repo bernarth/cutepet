@@ -13,6 +13,21 @@
     }
   </header>
 
+  <section class="panel photos" aria-labelledby="product-photos">
+    <cp-photo-manager
+      [photos]="product.photos"
+      [isBusy]="photoSaving.isSaving()"
+      [status]="photoStatus()"
+      (filesPicked)="addPhotos($event)"
+      (move)="movePhoto($event)"
+      (editAlt)="openAltDialog($event)"
+      (remove)="confirmDeletePhoto($event)"
+    />
+    @if (photoSaving.errorMessage(); as message) {
+      <p class="error" role="alert">{{ message }}</p>
+    }
+  </section>
+
   <div class="columns">
     <section class="panel" aria-labelledby="product-data">
       <h2 id="product-data">Datos</h2>

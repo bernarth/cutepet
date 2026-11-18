@@ -41,7 +41,17 @@ export interface AdminProductRow {
   readonly price: number;
   readonly is_active: boolean;
   readonly catalog_variants: readonly AdminVariantRow[];
+  readonly product_photos: readonly AdminPhotoRow[];
 }
+
+export interface AdminPhotoRow {
+  readonly id: number;
+  readonly storage_path: string;
+  readonly alt_text: string;
+  readonly sort_order: number;
+}
+
+export type PhotoUrl = (storagePath: string) => string;
 
 export function productStatus(
   isActive: boolean,
@@ -61,7 +71,7 @@ export function productStatus(
 
 export function toAdminProductSummary(
   row: AdminProductSummaryRow,
-  photoUrl: (storagePath: string) => string,
+  photoUrl: PhotoUrl,
 ): AdminProductSummary {
   const [photo] = row.product_photos;
 
@@ -76,7 +86,7 @@ export function toAdminProductSummary(
   };
 }
 
-export function toAdminProduct(row: AdminProductRow): AdminProduct {
+export function toAdminProduct(row: AdminProductRow, photoUrl: PhotoUrl): AdminProduct {
   return {
     id: row.id,
     name: row.name,
@@ -89,6 +99,15 @@ export function toAdminProduct(row: AdminProductRow): AdminProduct {
     variants: row.catalog_variants
       .map(toAdminVariant)
       .sort((a, b) => a.sizeSortOrder - b.sizeSortOrder),
+    photos: [...row.product_photos]
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((photo) => ({
+        id: photo.id,
+        url: photoUrl(photo.storage_path),
+        storagePath: photo.storage_path,
+        alt: photo.alt_text,
+        sortOrder: photo.sort_order,
+      })),
   };
 }
 

@@ -1,0 +1,84 @@
+<div class="head">
+  <h2 id="product-photos">Fotos</h2>
+  <button mat-stroked-button type="button" [disabled]="isBusy()" (click)="picker.click()">
+    <mat-icon>add_photo_alternate</mat-icon>
+    Agregar fotos
+  </button>
+  <input
+    #picker
+    type="file"
+    accept="image/jpeg,image/png,image/webp"
+    multiple
+    hidden
+    (change)="pick(picker)"
+  />
+</div>
+
+<p class="hint">
+  La primera es la portada: se ve en el catálogo y al compartir el enlace por WhatsApp.
+</p>
+<p class="status" role="status">{{ status() }}</p>
+
+<ol class="grid">
+  @for (photo of photos(); track photo.id; let index = $index, last = $last) {
+    <li class="tile">
+      <div class="photo">
+        <img [ngSrc]="photo.url" [alt]="photo.alt" fill sizes="(min-width: 1024px) 20vw, 50vw" />
+        @if (index === 0) {
+          <span class="cover">Portada</span>
+        }
+      </div>
+      <div class="footer">
+        <p class="alt" aria-hidden="true">{{ photo.alt }}</p>
+        <button
+          mat-icon-button
+          type="button"
+          [disabled]="isBusy()"
+          [attr.aria-label]="'Opciones de la foto ' + (index + 1)"
+          [matMenuTriggerFor]="menu"
+        >
+          <mat-icon>more_vert</mat-icon>
+        </button>
+      </div>
+      <mat-menu #menu="matMenu">
+        <button
+          mat-menu-item
+          type="button"
+          [disabled]="index === 0"
+          (click)="move.emit({ photo, targetIndex: 0 })"
+        >
+          <mat-icon>star</mat-icon>
+          Hacer portada
+        </button>
+        <button
+          mat-menu-item
+          type="button"
+          [disabled]="index === 0"
+          (click)="move.emit({ photo, targetIndex: index - 1 })"
+        >
+          <mat-icon>arrow_back</mat-icon>
+          Mover antes
+        </button>
+        <button
+          mat-menu-item
+          type="button"
+          [disabled]="last"
+          (click)="move.emit({ photo, targetIndex: index + 1 })"
+        >
+          <mat-icon>arrow_forward</mat-icon>
+          Mover después
+        </button>
+        <button mat-menu-item type="button" (click)="editAlt.emit(photo)">
+          <mat-icon>edit</mat-icon>
+          Editar descripción
+        </button>
+        <button mat-menu-item type="button" (click)="remove.emit(photo)">
+          <mat-icon>delete</mat-icon>
+          Eliminar
+        </button>
+      </mat-menu>
+    </li>
+  } @empty {
+    <li class="hint">Todavía no tiene fotos. Sin fotos, la tienda muestra un espacio vacío.</li>
+  }
+</ol>

@@ -1,9 +1,12 @@
 import { Service, computed, inject, resource, signal } from '@angular/core';
 
-import { AdminVariant } from '../models/admin-product';
+import { AdminPhoto, AdminProduct, AdminVariant } from '../models/admin-product';
+import { compressPhoto } from '../models/photo-compression';
+import { movePhoto, nextSortOrder } from '../models/photo-order';
 import { ProductFormModel, toProductInput } from '../models/product-form';
 import { slugify } from '../models/slugify';
 import { VariantFormModel } from '../models/variant-form';
+import { AdminPhotoRepository } from './admin-photo.repository';
 import { AdminProductRepository, CatalogLookups } from './admin-product.repository';
 
 const NO_LOOKUPS: CatalogLookups = { petTypes: [], categories: [], sizes: [] };
@@ -14,6 +17,7 @@ const NO_LOOKUPS: CatalogLookups = { petTypes: [], categories: [], sizes: [] };
 @Service()
 export class AdminProductStore {
   private readonly repository = inject(AdminProductRepository);
+  private readonly photoRepository = inject(AdminPhotoRepository);
   private readonly productId = signal<number | null>(null);
 
   private readonly productResource = resource({
@@ -74,6 +78,59 @@ export class AdminProductStore {
   async adjustStock(variant: AdminVariant, newStock: number, reason: string): Promise<void> {
     await this.repository.adjustStock(variant.id, newStock, reason);
     this.productResource.reload();
+  }
+
+  /**
+   * @description Compresses and uploads the photos one by one, after the current last photo
+   * @param onUploaded Called with how many photos are already uploaded
+   */
+  async addPhotos(files: readonly Blob[], onUploaded: (count: number) => void): Promise<void> {
+    const product = this.requireProduct();
+    let sortOrder = nextSortOrder(product.photos);
+
+    try {
+      for (const [index, file] of files.entries()) {
+        await this.photoRepository.addPhoto({
+          productId: product.id,
+          file: await compressPhoto(file),
+          alt: `${product.name} foto ${sortOrder}`,
+          sortOrder,
+        });
+        sortOrder++;
+        onUploaded(index + 1);
+      }
+    } finally {
+      this.productResource.reload();
+    }
+  }
+
+  async deletePhoto(photo: AdminPhoto): Promise<void> {
+    await this.photoRepository.deletePhoto(photo);
+    this.productResource.reload();
+  }
+
+  /**
+   * @param targetIndex 0 makes it the cover
+   */
+  async movePhoto(photo: AdminPhoto, targetIndex: number): Promise<void> {
+    const positions = movePhoto(this.requireProduct().photos, photo.id, targetIndex);
+    await this.photoRepository.savePositions(positions);
+    this.productResource.reload();
+  }
+
+  async updatePhotoAlt(photo: AdminPhoto, alt: string): Promise<void> {
+    await this.photoRepository.updateAlt(photo.id, alt.trim());
+    this.productResource.reload();
+  }
+
+  private requireProduct(): AdminProduct {
+    const product = this.product();
+
+    if (!product) {
+      throw new Error('No hay una prenda cargada');
+    }
+
+    return product;
   }
 
   private requireId(): number {
