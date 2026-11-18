@@ -21,7 +21,6 @@ export interface WhatsappOrder {
   readonly pickupFee: number;
 }
 
-const BOLIVIA_CODE = '591';
 const centimeters = new Intl.NumberFormat('es-BO', { maximumFractionDigits: 1 });
 
 export function whatsappOrderMessage(order: WhatsappOrder): string {
@@ -35,16 +34,6 @@ export function whatsappOrderMessage(order: WhatsappOrder): string {
     '',
     '¿Me confirmas para hacer el pago?',
   ].join('\n');
-}
-
-/**
- * @description wa.me needs the country code, so an 8 digit Bolivian number gets 591
- */
-export function whatsappOrderUrl(storeNumber: string, message: string): string {
-  const digits = storeNumber.replace(/\D/g, '');
-  const number = digits.length === 8 ? `${BOLIVIA_CODE}${digits}` : digits;
-
-  return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
 }
 
 function itemText(item: WhatsappOrderItem): string {

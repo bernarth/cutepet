@@ -4,9 +4,10 @@ import { countUnits } from '@core/cart/cart-line';
 import { itemsTotal, pickupFee } from '@core/cart/cart-summary';
 import { CartStore } from '@core/cart/cart.store';
 import { environment } from '@env/environment';
+import { whatsappLink } from '@shared/whatsapp/whatsapp-link';
 import { CartVariant, reviewCart, toCartItems } from '../models/cart-item';
 import { DeliveryMethod } from '../models/delivery';
-import { whatsappOrderMessage, whatsappOrderUrl } from '../models/whatsapp-order';
+import { whatsappOrderMessage } from '../models/whatsapp-order';
 import { CartRepository } from './cart.repository';
 
 /**
@@ -75,7 +76,7 @@ export class CartCheckStore {
       pickupFee: this.pickupFee(),
     });
 
-    return whatsappOrderUrl(storeNumber, message);
+    return whatsappLink(storeNumber, message);
   });
 
   readonly isLoading = computed(
