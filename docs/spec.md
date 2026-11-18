@@ -136,13 +136,21 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
 2. ~~Supabase schema: migrations, RLS, audit triggers, atomic reservation (RPC)~~ (done)
 3. ~~Catalog, product, size guide (with Open Graph)~~ (done)
 4. ~~Cart + WhatsApp order~~ (done)
-5. Admin panel: products, quick sale, orders, settings, audit log
+5. ~~Admin panel: products, quick sale, orders, settings, audit log~~ (done)
 6. Full QR checkout
 7. Notifications: `notify` Edge Function + `notification_channels`
 8. Account, my pets, custom requests
 9. Home: featured products and categories
 10. Keep-alive job, domain and launch
 11. (Optional) AI proof check with OpenRouter
+
+## Current status
+
+> Updated on 2026-11-18.
+
+- Steps 1 to 5 are done. Step 6 (full QR checkout) is next.
+- These migrations exist only in the local database and are not pushed to the remote project yet: `20261026001300_remove_made_to_order` (step 3) and `20261118000100` to `20261118000500` (step 5). Push them only after asking the owner.
+- Remote setup still pending: Google provider in the dashboard (the owner does it) and anonymous sign-ins, which are turned on again in step 6 together with Turnstile.
 
 ## Decisions
 
@@ -413,7 +421,12 @@ There is no quantity stepper while every piece is unique; a line can only be rem
 
 **Audit log.** Read only, no export. Filters by entity and date. The timeline and the audit page share one admin-only RPC that returns the actor label, because the admin cannot read `auth.users`.
 
-**Categories, pet types and sizes.** Edited in the last slice. They are deactivated, never deleted.
+**Categories, pet types and sizes.** Added, edited, deactivated and activated again from `/admin/categorias-y-tallas`; never deleted.
+
+- Deactivating does not change existing products: they stay on sale with that category, pet type or size. For that, everyone can read inactive rows (public catalog data); the store asks for active ones only where it builds the catalog filters, the size guide and the options of the product form. The product page reads every size, so a product with a deactivated size keeps its reference measurements.
+- Before deactivating, the panel warns how many published products use it ("3 prendas usan esta categoría"). It warns, never blocks.
+- A new category or pet type gets its slug from the name; the slug does not change when it is renamed, so filtered links keep working.
+- Sizes: `label` and `sort_order` are unique and each min is at most its max. Editing a range changes the size guide and the calculator, and the dialog says so.
 
 **Anonymous users.** Anonymous sign-ins are off on the remote project until step 6, which turns them on together with Turnstile and checks that RLS and RPCs exclude anonymous users (`is_anonymous` claim) where needed.
 
