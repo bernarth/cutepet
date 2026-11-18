@@ -1,7 +1,7 @@
 begin;
 select plan(24);
 
-select tests.set_settings('{"qr_checkout_enabled": true}');
+select tests.set_settings('{"qr_checkout_enabled": true, "reservation_minutes": 15}');
 select tests.create_variant() as variant_a \gset
 select tests.create_variant() as variant_b \gset
 select tests.create_variant() as variant_c \gset

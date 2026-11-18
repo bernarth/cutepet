@@ -106,6 +106,8 @@ begin
   update public.settings s
   set qr_checkout_enabled = coalesce((changes ->> 'qr_checkout_enabled')::boolean, s.qr_checkout_enabled),
       free_pickup_min_items = coalesce((changes ->> 'free_pickup_min_items')::integer, s.free_pickup_min_items),
+      pickup_fee = coalesce((changes ->> 'pickup_fee')::numeric, s.pickup_fee),
+      reservation_minutes = coalesce((changes ->> 'reservation_minutes')::integer, s.reservation_minutes),
       shipping_promo_enabled = coalesce((changes ->> 'shipping_promo_enabled')::boolean, s.shipping_promo_enabled),
       shipping_promo_min_items = coalesce((changes ->> 'shipping_promo_min_items')::integer, s.shipping_promo_min_items),
       shipping_promo_min_total = coalesce((changes ->> 'shipping_promo_min_total')::numeric, s.shipping_promo_min_total);

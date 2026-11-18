@@ -429,3 +429,7 @@ There is no quantity stepper while every piece is unique; a line can only be rem
 Apply new migrations with `supabase migration up`, which keeps `auth.users` and the admin row. Use `supabase db reset` only for a clean start; it deletes the users, so steps 2 to 4 must be repeated.
 
 **Remote project.** Migrations are pushed only when step 5 is done and `pnpm check` passes, after asking the owner. The owner configures the Google provider in the dashboard.
+
+### Step 10: launch checklist
+
+- Upload product photos from the owner's phone (gallery and camera) on the deployed site.

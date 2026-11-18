@@ -50,7 +50,8 @@ select is((select count(*)::integer from public.catalog_products where slug = 's
 select ok(
   'available'::public.catalog_status < 'reserved' and 'reserved'::public.catalog_status < 'sold_out',
   'ordering by catalog_status lists available items before reserved ones');
-select is((select size_tolerance_cm from public.settings), 2.0, 'the default size tolerance is 2 cm');
+select col_default_is('public', 'settings', 'size_tolerance_cm', '2'::text,
+  'the default size tolerance is 2 cm');
 select is(
   (select array_agg(slug order by sort_order) from public.categories
     where slug in ('abrigos', 'vestidos', 'otros')),

@@ -40,6 +40,10 @@ export class AdminSettingsRepository {
     return path;
   }
 
+  async deleteImage(path: string): Promise<void> {
+    unwrap(await this.supabase.storage.from('store-images').remove([path]));
+  }
+
   imageUrl(path: string): string {
     return storeImageUrl(this.supabase, path);
   }

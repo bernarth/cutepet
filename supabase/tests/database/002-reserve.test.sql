@@ -1,7 +1,7 @@
 begin;
 select plan(22);
 
-select tests.set_settings('{"qr_checkout_enabled": true}');
+select tests.set_settings('{"qr_checkout_enabled": true, "reservation_minutes": 15, "pickup_fee": 2, "free_pickup_min_items": 3}');
 select tests.create_variant(price => 100) as unique_variant \gset
 select tests.create_variant(price => 50) as second_variant \gset
 select tests.create_variant(stock => 0) as sold_variant \gset

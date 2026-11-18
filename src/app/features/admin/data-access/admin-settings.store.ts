@@ -24,12 +24,28 @@ export class AdminSettingsStore {
    * @param newQrImage A QR picked in this session, uploaded before saving the row
    */
   async save(model: SettingsFormModel, newQrImage: File | null): Promise<void> {
+    const previousQrPath = this.settings.value()?.qr_image_path ?? null;
     const qrImagePath = newQrImage
       ? await this.repository.uploadQrImage(newQrImage)
       : model.qrImage || null;
 
     await this.repository.updateSettings(toSettingsUpdate(model, qrImagePath));
     this.settings.reload();
+
+    if (previousQrPath && previousQrPath !== qrImagePath) {
+      await this.deleteReplacedQr(previousQrPath);
+    }
+  }
+
+  /**
+   * @description The settings are already saved at this point, so a failed delete only leaves an unused file behind
+   */
+  private async deleteReplacedQr(path: string): Promise<void> {
+    try {
+      await this.repository.deleteImage(path);
+    } catch {
+      return;
+    }
   }
 
   /**
