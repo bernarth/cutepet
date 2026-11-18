@@ -1,0 +1,48 @@
+<h1>Pedidos</h1>
+<p class="summary" role="status">{{ toReviewText() }}</p>
+
+<div class="tools">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Mostrar</mat-label>
+    <mat-select [value]="store.filter()" (selectionChange)="store.setFilter($event.value)">
+      @for (option of filters; track option.value) {
+        <mat-option [value]="option.value">{{ option.label }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field appearance="outline" class="search" subscriptSizing="dynamic">
+    <mat-label>Buscar código, nombre o celular</mat-label>
+    <mat-icon matPrefix aria-hidden="true">search</mat-icon>
+    <input matInput type="search" [value]="store.search()" (input)="onSearch($event)" />
+    <mat-hint>{{ store.search() ? 'Busca en todos los estados.' : '' }}</mat-hint>
+  </mat-form-field>
+</div>
+
+<cp-loading-bar [active]="store.isLoading()" />
+
+@if (store.hasError()) {
+  <cp-empty-state icon="info" message="No pudimos cargar los pedidos.">
+    <button mat-button type="button" (click)="store.reload()">Reintentar</button>
+  </cp-empty-state>
+} @else if (!store.isLoading() && store.list().length === 0) {
+  <cp-empty-state icon="receipt_long" message="No hay pedidos para mostrar aquí." />
+}
+
+<ul class="grid">
+  @for (order of store.list(); track order.id) {
+    <li><cp-order-card [order]="order" /></li>
+  }
+</ul>
+
+@if (store.canLoadMore()) {
+  <div class="more">
+    <button
+      mat-stroked-button
+      type="button"
+      [disabled]="store.isLoading()"
+      (click)="store.loadMore()"
+    >
+      Ver más pedidos
+    </button>
+  </div>
+}

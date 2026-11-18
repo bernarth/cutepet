@@ -1,0 +1,63 @@
+<a mat-button routerLink="/admin/pedidos"><mat-icon>arrow_back</mat-icon>Pedidos</a>
+<cp-loading-bar [active]="isBusy()" />
+
+@if (store.notFound()) {
+  <cp-empty-state icon="info" message="No encontramos este pedido." />
+} @else if (store.hasError()) {
+  <cp-empty-state icon="info" message="No pudimos cargar el pedido. Revisa tu conexión." />
+} @else if (store.order(); as order) {
+  <header class="title">
+    <h1>{{ order.code }}</h1>
+    <cp-order-status-badge [status]="order.status" />
+  </header>
+  <p class="meta">{{ order.createdAt | dateTime }} · {{ channelLabel(order) }}</p>
+
+  @if (notice(); as text) {
+    <p class="alert" role="alert"><mat-icon aria-hidden="true">warning</mat-icon>{{ text }}</p>
+  }
+
+  <div class="columns">
+    <div class="column">
+      @if (actions().length > 0) {
+        <cp-order-actions-panel
+          [actions]="actions()"
+          [isBusy]="saving.isSaving()"
+          [errorMessage]="saving.errorMessage()"
+          (run)="run($event, order)"
+        />
+      }
+      <cp-order-customer-panel [order]="order" [chatUrl]="chatUrl()" [messages]="messages()" />
+      <cp-order-items-panel [items]="order.items" [total]="order.itemsTotal" />
+    </div>
+
+    <div class="column">
+      @if (order.paymentProofPath; as proofPath) {
+        <section class="panel" aria-labelledby="order-proof">
+          <h2 id="order-proof">Comprobante</h2>
+          <cp-private-document
+            label="comprobante"
+            [url]="proofUrl()"
+            [isPdf]="isPdf(proofPath)"
+            [isLoading]="isLoadingDocument()"
+            (show)="showDocument('payment-proofs', proofPath)"
+          />
+        </section>
+      }
+      @if (canAttachReceipt()) {
+        <cp-order-receipt-panel
+          [hasReceipt]="!!order.shippingReceiptPath"
+          [url]="receiptUrl()"
+          [isLoading]="isLoadingDocument()"
+          [isSaving]="receiptSaving.isSaving()"
+          [errorMessage]="receiptSaving.errorMessage()"
+          (show)="showDocument('shipping-receipts', order.shippingReceiptPath ?? '')"
+          (photoPicked)="attachReceipt($event, order)"
+        />
+      }
+      <section class="panel" aria-labelledby="order-history">
+        <h2 id="order-history">Historial</h2>
+        <cp-order-timeline [events]="store.timeline()" />
+      </section>
+    </div>
+  </div>
+}

@@ -417,6 +417,11 @@ isOneToOne: false
 "custom_access_token_hook":
 { Args: { "event": Json }; Returns: Json
                            },
+"get_audit_log":
+{ Args: { "before_id"?: number,"from_date"?: string,"page_size"?: number,"target_record_id"?: string,"target_table"?: string,"to_date"?: string }; Returns: {
+              "action": string,"actor_label": string,"created_at": string,"id": number,"new_data": Json,"old_data": Json,"reason": string,"record_id": string,"table_name": string
+            }[]
+                           },
 "reserve_order":
 { Args: { "customer_name": string,"customer_phone": string,"delivery_method": Database["public"]['Enums']["delivery_method"],"destination_city"?: string,"items": Json,"recipient_id_number"?: string,"recipient_name"?: string }; Returns: {
               "cancel_reason": string | null,

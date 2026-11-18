@@ -12,8 +12,11 @@ const MESSAGES_BY_CODE: Readonly<Record<string, string>> = {
   PHOTO_UNREADABLE:
     'No pudimos leer esta foto. Súbela en JPG o PNG, o desde la galería del celular.',
   ITEMS_UNAVAILABLE:
-    'Alguna prenda ya se vendió o alguien la está pagando. Revisa la lista e inténtalo de nuevo.',
+    'Alguna prenda ya se vendió o alguien la está pagando, así que no se puede hacer.',
   INVALID_ITEMS: 'Revisa las prendas de la venta.',
+  INVALID_STATUS: 'El pedido cambió de estado mientras tanto. Recarga la página.',
+  PENDING_ORDER_EXISTS: 'Ese cliente ya tiene otro pedido pendiente de pago.',
+  ORDER_NOT_FOUND: 'No encontramos ese pedido. Recarga la página.',
   FORBIDDEN: 'Tu cuenta no tiene permiso para hacer esto. Vuelve a ingresar.',
 };
 

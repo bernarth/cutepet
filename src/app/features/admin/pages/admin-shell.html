@@ -25,7 +25,6 @@
             [routerLink]="link.path"
             routerLinkActive
             #active="routerLinkActive"
-            [routerLinkActiveOptions]="{ exact: link.path === '/admin' }"
             [activated]="active.isActive"
             (click)="closeOnPhone(menu)"
           >

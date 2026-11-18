@@ -13,11 +13,16 @@ export const ADMIN_ROUTES: Routes = [
     canMatch: [adminGuard],
     loadComponent: () => import('./pages/admin-shell').then((m) => m.AdminShell),
     children: [
+      { path: '', pathMatch: 'full', redirectTo: 'pedidos' },
       {
-        path: '',
-        title: 'Panel - CutePet',
-        loadComponent: () =>
-          import('./pages/admin-dashboard-page').then((m) => m.AdminDashboardPage),
+        path: 'pedidos',
+        title: 'Pedidos - Panel CutePet',
+        loadComponent: () => import('./pages/admin-orders-page').then((m) => m.AdminOrdersPage),
+      },
+      {
+        path: 'pedidos/:code',
+        title: 'Pedido - Panel CutePet',
+        loadComponent: () => import('./pages/admin-order-page').then((m) => m.AdminOrderPage),
       },
       {
         path: 'venta-rapida',
