@@ -151,6 +151,7 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
 - Steps 1 to 5 are done. Step 6 (full QR checkout) is next.
 - These migrations exist only in the local database and are not pushed to the remote project yet: `20261026001300_remove_made_to_order` (step 3) and `20261118000100` to `20261118000500` (step 5). Push them only after asking the owner.
 - Remote setup still pending: Google provider in the dashboard (the owner does it) and anonymous sign-ins, which are turned on again in step 6 together with Turnstile.
+- Before go-live: anonymous sign-ins and Turnstile are still pending.
 
 ## Decisions
 
