@@ -146,12 +146,22 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
 
 ## Current status
 
-> Updated on 2026-11-18.
+> Updated on 2026-11-19.
 
 - Steps 1 to 5 are done. Step 6 (full QR checkout) is next.
+- QA deployment is prepared (`Dockerfile`, `docs/deploy.md`). The owner deploys it and pushes the migrations to the QA project.
 - These migrations exist only in the local database and are not pushed to the remote project yet: `20261026001300_remove_made_to_order` (step 3) and `20261118000100` to `20261118000500` (step 5). Push them only after asking the owner.
 - Remote setup still pending: Google provider in the dashboard (the owner does it) and anonymous sign-ins, which are turned on again in step 6 together with Turnstile.
 - Before go-live: anonymous sign-ins and Turnstile are still pending.
+
+## QA environment
+
+- Purpose: try the deployed site on real phones before launch. No real customers, orders or payments.
+- Runs on the owner's VPS with Coolify, behind Cloudflare, on the launch domain (`<domain>` and `www`). How to deploy: `docs/deploy.md`.
+- Uses its own free Supabase project (the QA project). It is deleted at launch and replaced by a new production project (step 10). The Docker image is the same; only the environment variables change.
+- `NO_INDEX=true` the whole time: `robots.txt` disallows everything and every response carries `noindex`.
+- Only test data. `supabase/seed.sql` is for the local stack and is never pushed. Products are added from the admin panel.
+- Dashboard setup (done by the owner): Site URL and Redirect URLs, Google provider, the custom access token hook, and the admin row. Anonymous sign-ins stay off until step 6.
 
 ## Decisions
 
@@ -233,7 +243,8 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
 
 ### Hosting
 
-- Hosting the SSR app is handled by the owner; where it runs is not decided yet. Only the domain is paid.
+- Hosting the SSR app is handled by the owner: a Docker image on the owner's VPS with Coolify, behind Cloudflare (`docs/deploy.md`). Only the domain is paid.
+- Configuration is read from environment variables when the server starts (`SITE_URL`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `NG_ALLOWED_HOSTS`, `NO_INDEX`), so one image serves QA and production. The browser gets them from `/runtime-config.js`, so they must never include a secret.
 - Angular SSR answers only the hosts in `NG_ALLOWED_HOSTS`, so that variable must list the production domain (and `www` if used).
 - The free Supabase project pauses after a week without activity. A free scheduled job (e.g. a GitHub Action) queries it daily to keep it alive (step 10).
 
@@ -450,4 +461,17 @@ Apply new migrations with `supabase migration up`, which keeps `auth.users` and 
 
 ### Step 10: launch checklist
 
-- Upload product photos from the owner's phone (gallery and camera) on the deployed site.
+Commands and dashboard paths are in `docs/deploy.md`.
+
+1. Delete the QA Supabase project.
+2. Create the production project (free plan, region closest to Bolivia, e.g. São Paulo).
+3. Push the migrations to it (`supabase link`, dry run, `supabase db push`, `supabase migration list`). Never with `--include-seed`.
+4. Google provider: in Google Cloud, add the redirect URI `https://<new-ref>.supabase.co/auth/v1/callback` to the OAuth client and remove the QA one. Publish the consent screen (Testing mode only lets listed test users sign in). Then enable Google in the Supabase dashboard with the client ID and secret.
+5. Authentication → Hooks: enable the custom access token hook with `public.custom_access_token_hook`.
+6. Turn on anonymous sign-ins together with Turnstile (Authentication → Attack Protection → CAPTCHA), as built in step 6.
+7. The owner signs in with Google once, then add the admin row (`insert into public.user_roles ...`, see "Local admin user") and sign out and in again.
+8. Authentication → URL Configuration: Site URL `https://<domain>`, Redirect URLs `https://<domain>/**` and `https://www.<domain>/**`.
+9. Coolify: set the new `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` (and `SITE_URL` and `NG_ALLOWED_HOSTS` if the domain changes), then redeploy.
+10. Turn noindex off: `NO_INDEX=false`, redeploy, and check that `/robots.txt` allows everything and responses have no `x-robots-tag`.
+11. Point the keep-alive job to the production project.
+12. Upload product photos from the owner's phone (gallery and camera) on the deployed site.

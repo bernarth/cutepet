@@ -90,7 +90,7 @@ Order statuses live in English in the database (`pending_payment`, `proof_upload
 - **Mobile first.** Most customers arrive from WhatsApp on a phone. Design at 360px first, then scale up with `min-width` media queries. Check every page at 360px, 768px and 1280px with no horizontal overflow.
 - SSR: no `window`/`document`/`localStorage` without `isPlatformBrowser` or `afterNextRender`.
 - Auth: guests (anonymous) by default; Google OAuth is the only login for customers and admins, linking the anonymous identity on sign-in. No email or magic link.
-- Hosting: handled by the owner, not decided yet. Wherever it runs, `NG_ALLOWED_HOSTS` must list the production domain.
+- Hosting: Docker image on the owner's VPS with Coolify (`docs/deploy.md`). Config comes from runtime environment variables through `RUNTIME_CONFIG` (`core/config`); app code reads config only through that token. `NG_ALLOWED_HOSTS` must list the production domain.
 
 ## TypeScript
 

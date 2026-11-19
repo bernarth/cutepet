@@ -2,7 +2,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { InjectionToken, PLATFORM_ID, inject } from '@angular/core';
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
 
-import { environment } from '@env/environment';
+import { RUNTIME_CONFIG } from '@core/config/runtime-config';
 import { Database } from './database.types';
 
 export type CutePetSupabase = SupabaseClient<Database>;
@@ -16,8 +16,9 @@ export const SUPABASE = new InjectionToken<CutePetSupabase>('SUPABASE', {
   providedIn: 'root',
   factory: () => {
     const isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+    const config = inject(RUNTIME_CONFIG);
 
-    return createClient<Database>(environment.supabase.url, environment.supabase.publishableKey, {
+    return createClient<Database>(config.supabaseUrl, config.supabasePublishableKey, {
       auth: {
         persistSession: isBrowser,
         autoRefreshToken: isBrowser,

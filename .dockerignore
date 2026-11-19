@@ -1,0 +1,12 @@
+.git
+.angular
+.claude
+.vscode
+.env
+.env.*
+coverage
+dist
+docs
+node_modules
+supabase
+**/.DS_Store

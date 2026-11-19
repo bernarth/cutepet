@@ -3,7 +3,7 @@ import { Service, computed, effect, inject, resource, signal, untracked } from '
 import { countUnits } from '@core/cart/cart-line';
 import { itemsTotal, pickupFee } from '@core/cart/cart-summary';
 import { CartStore } from '@core/cart/cart.store';
-import { environment } from '@env/environment';
+import { RUNTIME_CONFIG } from '@core/config/runtime-config';
 import { whatsappLink } from '@shared/whatsapp/whatsapp-link';
 import { CartVariant, reviewCart, toCartItems } from '../models/cart-item';
 import { DeliveryMethod } from '../models/delivery';
@@ -19,6 +19,7 @@ import { CartRepository } from './cart.repository';
 export class CartCheckStore {
   private readonly cart = inject(CartStore);
   private readonly repository = inject(CartRepository);
+  private readonly siteUrl = inject(RUNTIME_CONFIG).siteUrl;
 
   private readonly settingsResource = resource({ loader: () => this.repository.getSettings() });
   private readonly variants = signal<ReadonlyMap<number, CartVariant> | null>(null);
@@ -68,7 +69,7 @@ export class CartCheckStore {
         measurements: item.variant.measurements,
         unitPrice: item.unitPrice,
         quantity: item.quantity,
-        productUrl: `${environment.siteUrl}/catalogo/${item.variant.slug}`,
+        productUrl: `${this.siteUrl}/catalogo/${item.variant.slug}`,
       })),
       total: this.total(),
       units: this.units(),

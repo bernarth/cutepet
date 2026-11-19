@@ -1,8 +1,4 @@
 export interface Environment {
-  production: boolean;
-  siteUrl: string;
-  supabase: {
-    url: string;
-    publishableKey: string;
-  };
+  /** Fallback for the runtime environment variables. Only the development build sets them */
+  readonly defaultEnv: Readonly<Record<string, string>>;
 }

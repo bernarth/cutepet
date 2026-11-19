@@ -2,12 +2,20 @@ import { PLATFORM_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { CartLine } from '@core/cart/cart-line';
+import { RUNTIME_CONFIG, RuntimeConfig } from '@core/config/runtime-config';
 import { CartStore } from '@core/cart/cart.store';
 import { CartVariant } from '../models/cart-item';
 import { CartCheckStore } from './cart-check.store';
 import { CartRepository, CartSettings } from './cart.repository';
 
 const STORAGE_KEY = 'cutepet.cart.v1';
+
+const runtimeConfig: RuntimeConfig = {
+  siteUrl: 'http://localhost:4200',
+  supabaseUrl: 'http://127.0.0.1:54321',
+  supabasePublishableKey: 'sb_publishable_test',
+  noIndex: true,
+};
 
 const settings: CartSettings = {
   storeWhatsapp: '70000000',
@@ -41,6 +49,7 @@ async function setUp(lines: readonly CartLine[], findVariants: CartRepository['f
   TestBed.configureTestingModule({
     providers: [
       { provide: PLATFORM_ID, useValue: 'browser' },
+      { provide: RUNTIME_CONFIG, useValue: runtimeConfig },
       { provide: CartRepository, useValue: { findVariants, getSettings: async () => settings } },
       CartCheckStore,
     ],

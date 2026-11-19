@@ -7,22 +7,32 @@ import {
 import express from 'express';
 import { join } from 'node:path';
 
+import { runtimeConfigScript } from '@core/config/runtime-config';
+import { serverRuntimeConfig } from '@core/config/server-runtime-config';
+import { robotsTxt } from '@core/seo/robots-txt';
+
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
 const angularApp = new AngularNodeAppEngine();
 
-/**
- * Example Express Rest API endpoints can be defined here.
- * Uncomment and define endpoints as necessary.
- *
- * Example:
- * ```ts
- * app.get('/api/{*splat}', (req, res) => {
- *   // Handle API request
- * });
- * ```
- */
+app.use((_req, res, next) => {
+  if (serverRuntimeConfig().noIndex) {
+    res.set('X-Robots-Tag', 'noindex');
+  }
+  next();
+});
+
+app.get('/runtime-config.js', (_req, res) => {
+  res
+    .type('text/javascript')
+    .set('Cache-Control', 'no-cache')
+    .send(runtimeConfigScript(serverRuntimeConfig()));
+});
+
+app.get('/robots.txt', (_req, res) => {
+  res.type('text/plain').send(robotsTxt(serverRuntimeConfig().noIndex));
+});
 
 /**
  * Serve static files from /browser
@@ -50,6 +60,7 @@ app.use((req, res, next) => {
  * The server listens on the port defined by the `PORT` environment variable, or defaults to 4000.
  */
 if (isMainModule(import.meta.url) || process.env['pm_id']) {
+  serverRuntimeConfig();
   const port = process.env['PORT'] || 4000;
   app.listen(port, (error) => {
     if (error) {

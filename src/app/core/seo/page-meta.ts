@@ -1,7 +1,7 @@
 import { RESPONSE_INIT, Service, inject } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 
-import { environment } from '@env/environment';
+import { RUNTIME_CONFIG } from '@core/config/runtime-config';
 
 export interface PageMetaData {
   readonly title: string;
@@ -24,6 +24,7 @@ export class PageMeta {
   private readonly title = inject(Title);
   private readonly meta = inject(Meta);
   private readonly response = inject(RESPONSE_INIT, { optional: true });
+  private readonly config = inject(RUNTIME_CONFIG);
 
   set(page: PageMetaData): void {
     const fullTitle = `${page.title} - ${SITE_NAME}`;
@@ -33,8 +34,8 @@ export class PageMeta {
       'og:site_name': SITE_NAME,
       'og:title': page.title,
       'og:description': page.description,
-      'og:url': `${environment.siteUrl}${page.path}`,
-      'og:image': page.imageUrl ?? `${environment.siteUrl}${DEFAULT_IMAGE_PATH}`,
+      'og:url': `${this.config.siteUrl}${page.path}`,
+      'og:image': page.imageUrl ?? `${this.config.siteUrl}${DEFAULT_IMAGE_PATH}`,
       'og:type': page.price === undefined ? 'website' : 'product',
       'og:locale': 'es_BO',
     };
@@ -47,7 +48,7 @@ export class PageMeta {
     this.meta.updateTag({ name: 'twitter:card', content: 'summary_large_image' });
     this.setPrice(page.price);
 
-    if (page.noIndex) {
+    if (page.noIndex || this.config.noIndex) {
       this.meta.updateTag({ name: 'robots', content: 'noindex' });
     } else {
       this.meta.removeTag("name='robots'");

@@ -23,9 +23,9 @@ pnpm db:types         # generate src/app/core/supabase/database.types.ts
 pnpm start            # http://localhost:4200
 ```
 
-- `pnpm start` uses `src/environments/environment.development.ts`, which points to the local stack. If `supabase status` shows a different API URL or publishable key, update that file.
+- `pnpm start` uses the fallback values in `src/environments/environment.development.ts`, which point to the local stack. If `supabase status` shows a different API URL or publishable key, update that file.
 - Local Studio (tables, users, SQL editor) runs at http://127.0.0.1:54323.
-- Production builds use `src/environments/environment.ts`, which points to the remote Supabase project.
+- Production builds have no configuration inside. The server reads `SITE_URL`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `NG_ALLOWED_HOSTS` and `NO_INDEX` when it starts (see `docs/deploy.md`).
 
 ## Scripts
 
@@ -86,7 +86,7 @@ supabase db push             # apply them
 
 ## Hosting
 
-Hosting is handled by the owner. The SSR app is started with `pnpm build`, then `node dist/cutepet/server/server.mjs`. Angular SSR only answers hosts listed in `NG_ALLOWED_HOSTS`, so set it to the domain, e.g. `NG_ALLOWED_HOSTS=example.com,www.example.com`. A free scheduled job (e.g. a GitHub Action) queries Supabase daily so the free project is not paused.
+The app ships as a Docker image (`Dockerfile`, port 4000) deployed with Coolify. Environment variables, Cloudflare, Supabase and rollback: `docs/deploy.md`. A free scheduled job (e.g. a GitHub Action) queries Supabase daily so the free project is not paused.
 
 ## Dependency security
 
