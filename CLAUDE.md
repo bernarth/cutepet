@@ -129,6 +129,7 @@ Order statuses live in English in the database (`pending_payment`, `proof_upload
 
 Priority: this CLAUDE.md and docs/ always win over any skill.
 
+- Skills are not committed. Reinstall them from `skills-lock.json` with `pnpm dlx skills experimental_install`.
 - Database work (migrations, RLS, RPC, triggers): `supabase` + `supabase-postgres-best-practices`.
 - Large features (schema, QR checkout, admin panel): Superpowers flow (brainstorm → write-plan → execute-plan). Small changes: skip it.
 - Tests: follow the "Tests" section above (test logic, not trivial components), even if a skill asks for TDD on everything.

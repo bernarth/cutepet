@@ -6,7 +6,7 @@
     },
     "supabase": {
       "type": "http",
-      "url": "https://mcp.supabase.com/mcp?project_ref=ljhydejghdcgwmyfroxp"
+      "url": "https://mcp.supabase.com/mcp?project_ref=ljhydejghdcgwmyfroxp&read_only=true"
     }
   }
 }
