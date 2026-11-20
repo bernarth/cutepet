@@ -5,6 +5,8 @@ export interface RuntimeConfig {
   readonly siteUrl: string;
   readonly supabaseUrl: string;
   readonly supabasePublishableKey: string;
+  /** Public Cloudflare Turnstile site key for the anonymous sign-in of QR checkout. Its secret lives only in Supabase */
+  readonly turnstileSiteKey: string;
   readonly noIndex: boolean;
 }
 
@@ -27,6 +29,7 @@ export function readRuntimeConfig(env: EnvVariables): RuntimeConfig {
     siteUrl: requiredVariable(env, 'SITE_URL').replace(/\/+$/, ''),
     supabaseUrl: requiredVariable(env, 'SUPABASE_URL'),
     supabasePublishableKey,
+    turnstileSiteKey: requiredVariable(env, 'TURNSTILE_SITE_KEY'),
     noIndex: env['NO_INDEX']?.trim() !== 'false',
   };
 }

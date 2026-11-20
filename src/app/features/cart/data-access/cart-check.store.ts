@@ -8,8 +8,9 @@ import { DeliveryMethod } from '@core/orders/customer-details';
 import { SettingsRepository } from '@core/settings/settings.repository';
 import { whatsappLink } from '@shared/whatsapp/whatsapp-link';
 import { CartVariant, reviewCart, toCartItems } from '../models/cart-item';
+import { shippingPromoNotice } from '../models/qr-checkout';
 import { whatsappOrderMessage } from '../models/whatsapp-order';
-import { CartRepository } from './cart.repository';
+import { CartRepository, OrderItemRequest } from './cart.repository';
 
 /**
  * @description Provided by CartPage. Checks the stored cart against the database when the cart is
@@ -55,6 +56,13 @@ export class CartCheckStore {
   );
   readonly total = computed(() => itemsTotal(this.orderItems()));
   readonly units = computed(() => countUnits(this.orderItems()));
+  readonly reserveItems = computed<OrderItemRequest[]>(() =>
+    this.orderItems().map((item) => ({ variant_id: item.line.variantId, quantity: item.quantity })),
+  );
+  readonly qrCheckoutAvailable = computed(() => this.settings()?.qrCheckoutAvailable ?? false);
+  readonly shippingPromo = computed(() =>
+    shippingPromoNotice(this.settings()?.shippingPromo ?? null, this.units(), this.total()),
+  );
   readonly pickupFee = computed(() => {
     const settings = this.settings();
     return settings ? pickupFee(this.orderItems(), settings.pickupRule) : 0;
@@ -129,6 +137,10 @@ export class CartCheckStore {
         this.checking.set(false);
       }
     }
+  }
+
+  reloadSettings(): void {
+    this.settingsResource.reload();
   }
 
   retry(): void {

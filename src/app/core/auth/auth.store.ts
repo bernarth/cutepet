@@ -58,16 +58,19 @@ export class AuthStore {
 
   /**
    * @description Guarantees a session (anonymous if needed) before creating an order.
+   * @param captchaToken Turnstile token, required by Supabase only when a guest has to be created
    * @returns Session
    */
-  async ensureSession(): Promise<Session> {
+  async ensureSession(captchaToken?: string): Promise<Session> {
     const current = this.session();
 
     if (current) {
       return current;
     }
 
-    const { session } = unwrap(await this.supabase.auth.signInAnonymously());
+    const { session } = unwrap(
+      await this.supabase.auth.signInAnonymously({ options: { captchaToken } }),
+    );
 
     if (!session) {
       throw new Error('No se pudo iniciar la sesión de invitado');

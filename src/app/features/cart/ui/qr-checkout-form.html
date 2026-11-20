@@ -1,0 +1,74 @@
+<form novalidate aria-labelledby="qr-checkout-title" (submit)="onSubmit($event)">
+  <h2 id="qr-checkout-title">Tus datos</h2>
+  <p class="hint">Reservamos tus prendas mientras pagas con QR.</p>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Tu nombre</mat-label>
+    <input matInput autocomplete="name" [formField]="details().customerName" />
+    <mat-error>{{ details().customerName().errors()[0]?.message }}</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Celular</mat-label>
+    <input
+      matInput
+      type="tel"
+      inputmode="numeric"
+      autocomplete="tel-national"
+      [formField]="details().customerPhone"
+    />
+    <mat-hint>Te escribiremos a este número por WhatsApp</mat-hint>
+    <mat-error>{{ details().customerPhone().errors()[0]?.message }}</mat-error>
+  </mat-form-field>
+
+  <p class="delivery"><span class="label">Entrega:</span> {{ deliveryLabel() }}</p>
+
+  @if (isBusParcel()) {
+    <mat-form-field appearance="outline">
+      <mat-label>Ciudad de destino</mat-label>
+      <input matInput autocomplete="address-level2" [formField]="details().destinationCity" />
+      <mat-error>{{ details().destinationCity().errors()[0]?.message }}</mat-error>
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Quién recibe (opcional)</mat-label>
+      <input matInput autocomplete="off" [formField]="details().recipientName" />
+      <mat-hint>Si lo dejas vacío, recibes tú</mat-hint>
+      <mat-error>{{ details().recipientName().errors()[0]?.message }}</mat-error>
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Carnet de quien recibe (opcional)</mat-label>
+      <input matInput autocomplete="off" [formField]="details().recipientIdNumber" />
+      <mat-hint>Solo si la flota lo pide</mat-hint>
+      <mat-error>{{ details().recipientIdNumber().errors()[0]?.message }}</mat-error>
+    </mat-form-field>
+  }
+
+  <p class="total">
+    <span>Total ({{ unitsLabel() }})</span>
+    <span>{{ total() | price }}</span>
+  </p>
+
+  @if (needsCaptcha()) {
+    <cp-turnstile
+      [siteKey]="turnstileSiteKey()"
+      (token)="captchaToken.emit($event)"
+      (failed)="captchaFailed.set(true)"
+    />
+    @if (captchaFailed()) {
+      <p class="error" role="alert">
+        No pudimos cargar la verificación de seguridad. Revisa tu conexión y recarga la página.
+      </p>
+    } @else if (waitingForCaptcha()) {
+      <p class="hint" role="status">Verificando tu conexión…</p>
+    }
+  }
+
+  @if (failureMessage(); as message) {
+    <p class="error" role="alert">{{ message }}</p>
+  }
+
+  <button mat-flat-button class="cp-cta" type="submit" [disabled]="!canReserve()">
+    {{ isReserving() ? 'Reservando…' : 'Reservar y pagar' }}
+  </button>
+  <button mat-button type="button" (click)="back.emit()">Volver al carrito</button>
+</form>

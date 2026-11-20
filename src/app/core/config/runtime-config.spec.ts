@@ -4,6 +4,7 @@ const validEnv = {
   SITE_URL: 'https://qa.example.com/',
   SUPABASE_URL: 'https://ref.supabase.co',
   SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_abc',
+  TURNSTILE_SITE_KEY: '0x4AAAAAAAtest',
 };
 
 describe('readRuntimeConfig', () => {
@@ -12,6 +13,7 @@ describe('readRuntimeConfig', () => {
       siteUrl: 'https://qa.example.com',
       supabaseUrl: 'https://ref.supabase.co',
       supabasePublishableKey: 'sb_publishable_abc',
+      turnstileSiteKey: '0x4AAAAAAAtest',
       noIndex: false,
     });
   });
@@ -27,6 +29,9 @@ describe('readRuntimeConfig', () => {
     );
     expect(() => readRuntimeConfig({ ...validEnv, SITE_URL: ' ' })).toThrow(
       'Missing environment variable SITE_URL',
+    );
+    expect(() => readRuntimeConfig({ ...validEnv, TURNSTILE_SITE_KEY: undefined })).toThrow(
+      'Missing environment variable TURNSTILE_SITE_KEY',
     );
   });
 

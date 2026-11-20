@@ -18,10 +18,11 @@ Placeholders: `<domain>` is the site domain, `<ref>` is the Supabase project ref
 | `SITE_URL`                 | `https://<domain>`          | Used for Open Graph URLs and the product links in WhatsApp messages                                                      |
 | `SUPABASE_URL`             | `https://<ref>.supabase.co` |                                                                                                                          |
 | `SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_...`        | Dashboard → Project Settings → API Keys. The server refuses any value that does not start with `sb_publishable_`         |
+| `TURNSTILE_SITE_KEY`       | `0x4AAAAAA...`              | Cloudflare → Turnstile → the widget's **Site Key** (public). Its **Secret Key** goes only in Supabase (see below)        |
 | `NG_ALLOWED_HOSTS`         | `<domain>,www.<domain>`     | Angular SSR answers 400 to any other host                                                                                |
 | `NO_INDEX`                 | `true`                      | Anything except `false` keeps search engines out: `robots.txt` disallows all, pages get `meta robots` and `X-Robots-Tag` |
 
-- The server exits on start if `SITE_URL`, `SUPABASE_URL` or `SUPABASE_PUBLISHABLE_KEY` is missing.
+- The server exits on start if `SITE_URL`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` or `TURNSTILE_SITE_KEY` is missing.
 - The browser receives these values from `/runtime-config.js`, so they are public. Never put a secret here. Secrets belong only to Edge Functions.
 - Locally, `pnpm start` uses the values in `src/environments/environment.development.ts`.
 
@@ -75,6 +76,15 @@ Start with **DNS only**, so Let's Encrypt can reach the VPS and issue the first 
 - **Redirect URLs:** `https://<domain>/**` and `https://www.<domain>/**`. Sign-in returns to the page where it started, on the same host.
 
 Google sign-in keeps using the Supabase callback `https://<ref>.supabase.co/auth/v1/callback` as the redirect URI in Google Cloud. The domain does not change it.
+
+**Anonymous sign-ins with Turnstile** (QR checkout creates a guest only when the customer starts paying):
+
+1. Cloudflare dashboard → **Turnstile** → **Add widget**: hostnames `<domain>` and `www.<domain>`, mode **Managed**. Copy the **Site Key** and the **Secret Key**.
+2. Supabase → **Authentication** → **Attack Protection** → **Enable CAPTCHA protection**: provider **Turnstile**, paste the **Secret Key**, save. The secret never goes in the repo or in Coolify.
+3. Supabase → **Authentication** → **Sign In / Providers** → turn on **Allow anonymous sign-ins**.
+4. Coolify: set `TURNSTILE_SITE_KEY` to the **Site Key** and redeploy.
+
+Turn on the captcha before anonymous sign-ins, so there is no moment when guests can be created without it. Locally, `supabase/config.toml` enables Turnstile and reads `SUPABASE_AUTH_CAPTCHA_SECRET` from `supabase/.env` (gitignored). Use Cloudflare's always-pass test secret there (developers.cloudflare.com/turnstile/troubleshooting/testing). The development build already uses the matching always-pass site key.
 
 ## Database migrations
 

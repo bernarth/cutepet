@@ -16,6 +16,7 @@ const runtimeConfig: RuntimeConfig = {
   siteUrl: 'http://localhost:4200',
   supabaseUrl: 'http://127.0.0.1:54321',
   supabasePublishableKey: 'sb_publishable_test',
+  turnstileSiteKey: '1x00000000000000000000AA',
   noIndex: true,
 };
 

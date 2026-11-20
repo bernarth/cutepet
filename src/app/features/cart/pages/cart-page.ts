@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, viewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, RouterLink } from '@angular/router';
@@ -8,8 +8,10 @@ import { EmptyState } from '@shared/ui/empty-state';
 import { LoadingBar } from '@shared/ui/loading-bar';
 import { PageHeader } from '@shared/ui/page-header';
 import { CartCheckStore } from '../data-access/cart-check.store';
+import { QrCheckoutStore } from '../data-access/qr-checkout.store';
 import { CartItemRow } from '../ui/cart-item-row';
 import { CartSummaryPanel } from '../ui/cart-summary-panel';
+import { QrCheckoutForm } from '../ui/qr-checkout-form';
 
 @Component({
   selector: 'cp-cart-page',
@@ -21,8 +23,9 @@ import { CartSummaryPanel } from '../ui/cart-summary-panel';
     LoadingBar,
     CartItemRow,
     CartSummaryPanel,
+    QrCheckoutForm,
   ],
-  providers: [CartCheckStore],
+  providers: [CartCheckStore, QrCheckoutStore],
   templateUrl: './cart-page.html',
   styles: `
     .notices {
@@ -48,7 +51,8 @@ import { CartSummaryPanel } from '../ui/cart-summary-panel';
       .layout {
         grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
       }
-      cp-cart-summary-panel {
+      cp-cart-summary-panel,
+      cp-qr-checkout-form {
         position: sticky;
         top: var(--cp-space-lg);
       }
@@ -72,10 +76,22 @@ import { CartSummaryPanel } from '../ui/cart-summary-panel';
 export class CartPage {
   protected readonly cart = inject(CartStore);
   protected readonly check = inject(CartCheckStore);
+  protected readonly qr = inject(QrCheckoutStore);
   private readonly snackBar = inject(MatSnackBar);
   private readonly router = inject(Router);
 
   protected readonly sent = signal(false);
+  private readonly checkoutForm = viewChild(QrCheckoutForm);
+
+  protected async reserve(): Promise<void> {
+    const code = await this.qr.reserve();
+
+    if (code) {
+      await this.router.navigate(['/pagar', code]);
+    } else if (this.qr.needsCaptcha() && this.qr.captchaToken() === null) {
+      this.checkoutForm()?.resetCaptcha();
+    }
+  }
 
   protected finishOrder(): void {
     this.cart.clear();

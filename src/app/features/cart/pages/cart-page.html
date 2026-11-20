@@ -9,6 +9,12 @@
   </div>
 }
 
+@if (!qr.isOpen() && qr.failureMessage(); as message) {
+  <div class="notices" role="alert">
+    <p class="notice">{{ message }}</p>
+  </div>
+}
+
 @if (sent()) {
   <cp-empty-state
     icon="check_circle"
@@ -41,16 +47,37 @@
         </li>
       }
     </ul>
-    <cp-cart-summary-panel
-      [total]="check.total()"
-      [units]="check.units()"
-      [pickupRule]="settings.pickupRule"
-      [pickupFee]="check.pickupFee()"
-      [whatsappUrl]="check.whatsappUrl()"
-      [hasReserved]="check.hasReserved()"
-      [(delivery)]="check.delivery"
-      (ordered)="sent.set(true)"
-      (recheck)="check.revalidate()"
-    />
+    @if (qr.isOpen()) {
+      <cp-qr-checkout-form
+        [details]="qr.form"
+        [total]="check.total()"
+        [units]="check.units()"
+        [needsCaptcha]="qr.needsCaptcha()"
+        [waitingForCaptcha]="qr.waitingForCaptcha()"
+        [turnstileSiteKey]="qr.turnstileSiteKey"
+        [canReserve]="qr.canReserve()"
+        [isReserving]="qr.isReserving()"
+        [failureMessage]="qr.failureMessage()"
+        (captchaToken)="qr.captchaToken.set($event)"
+        (reserve)="reserve()"
+        (back)="qr.close()"
+      />
+    } @else {
+      <cp-cart-summary-panel
+        [total]="check.total()"
+        [units]="check.units()"
+        [pickupRule]="settings.pickupRule"
+        [pickupFee]="check.pickupFee()"
+        [whatsappUrl]="check.whatsappUrl()"
+        [hasReserved]="check.hasReserved()"
+        [qrCheckoutAvailable]="check.qrCheckoutAvailable()"
+        [qrDisabledMessage]="settings.qrDisabledMessage"
+        [shippingPromo]="check.shippingPromo()"
+        [(delivery)]="check.delivery"
+        (ordered)="sent.set(true)"
+        (recheck)="check.revalidate()"
+        (payWithQr)="qr.open()"
+      />
+    }
   </div>
 }

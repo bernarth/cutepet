@@ -29,6 +29,12 @@ export const routes: Routes = [
           import('@features/checkout/pages/checkout-page').then((m) => m.CheckoutPage),
       },
       {
+        path: 'pagar/:code',
+        title: 'Pagar - CutePet',
+        loadComponent: () =>
+          import('@features/checkout/pages/checkout-page').then((m) => m.CheckoutPage),
+      },
+      {
         path: 'guia-de-tallas',
         title: 'Guía de tallas - CutePet',
         loadComponent: () =>
