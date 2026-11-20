@@ -422,6 +422,11 @@ isOneToOne: false
               "action": string,"actor_label": string,"created_at": string,"id": number,"new_data": Json,"old_data": Json,"reason": string,"record_id": string,"table_name": string
             }[]
                            },
+"my_checkout_order":
+{ Args: { "order_code"?: string }; Returns: {
+              "cancel_reason": string,"code": string,"delivery_method": Database["public"]['Enums']["delivery_method"],"destination_city": string,"id": string,"items_total": number,"needs_attention": boolean,"pickup_fee": number,"seconds_left": number,"shipping_paid_by_store": boolean,"status": Database["public"]['Enums']["order_status"]
+            }[]
+                           },
 "reserve_order":
 { Args: { "customer_name": string,"customer_phone": string,"delivery_method": Database["public"]['Enums']["delivery_method"],"destination_city"?: string,"items": Json,"recipient_id_number"?: string,"recipient_name"?: string }; Returns: {
               "cancel_reason": string | null,

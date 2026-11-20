@@ -22,7 +22,8 @@ run_id=$(date +%s)
 work_dir=$(mktemp -d)
 trap 'rm -rf "$work_dir"' EXIT
 
-previous_qr_setting=$(run_sql -c "select qr_checkout_enabled from public.settings")
+previous_qr_settings=$(run_sql -c "select qr_checkout_enabled, coalesce(qr_image_path, ''), coalesce(qr_expires_on::text, '') from public.settings")
+IFS='|' read -r previous_qr_enabled previous_qr_image previous_qr_expiry <<< "$previous_qr_settings"
 without_audit() {
   run_sql <<SQL
 begin;
@@ -32,7 +33,7 @@ commit;
 SQL
 }
 
-without_audit "update public.settings set qr_checkout_enabled = true;" > /dev/null
+without_audit "update public.settings set qr_checkout_enabled = true, qr_image_path = coalesce(qr_image_path, 'qr/concurrency.png'), qr_expires_on = null;" > /dev/null
 
 create_variant() {
   without_audit "
@@ -89,7 +90,9 @@ delete from public.variants where id in (select id from run_variants);
 delete from public.products where id in (select product_id from run_variants);
 delete from public.categories where slug like 'concurrencia-$run_id-%';
 delete from auth.users where email like 'race-$run_id-%';
-update public.settings set qr_checkout_enabled = '$previous_qr_setting';
+update public.settings set qr_checkout_enabled = '$previous_qr_enabled',
+  qr_image_path = nullif('$previous_qr_image', ''),
+  qr_expires_on = nullif('$previous_qr_expiry', '')::date;
 commit;
 SQL
 }

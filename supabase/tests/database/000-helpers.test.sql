@@ -29,6 +29,34 @@ begin
 end;
 $$;
 
+-- A guest from signInAnonymously: same authenticated role, with the is_anonymous claim
+create or replace function tests.create_guest()
+returns uuid
+language sql
+security definer
+set search_path = ''
+as $$
+  insert into auth.users (id, instance_id, aud, role, is_anonymous)
+  values (gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', true)
+  returning id;
+$$;
+
+create or replace function tests.authenticate_as_guest(user_id uuid)
+returns void
+language plpgsql
+set search_path = ''
+as $$
+begin
+  perform set_config('request.jwt.claims', json_build_object(
+    'sub', user_id,
+    'role', 'authenticated',
+    'is_anonymous', true,
+    'app_metadata', '{}'::json
+  )::text, true);
+  perform set_config('role', 'authenticated', true);
+end;
+$$;
+
 create or replace function tests.authenticate_as_anon()
 returns void
 language plpgsql
@@ -110,7 +138,9 @@ begin
       reservation_minutes = coalesce((changes ->> 'reservation_minutes')::integer, s.reservation_minutes),
       shipping_promo_enabled = coalesce((changes ->> 'shipping_promo_enabled')::boolean, s.shipping_promo_enabled),
       shipping_promo_min_items = coalesce((changes ->> 'shipping_promo_min_items')::integer, s.shipping_promo_min_items),
-      shipping_promo_min_total = coalesce((changes ->> 'shipping_promo_min_total')::numeric, s.shipping_promo_min_total);
+      shipping_promo_min_total = coalesce((changes ->> 'shipping_promo_min_total')::numeric, s.shipping_promo_min_total),
+      qr_image_path = case when changes ? 'qr_image_path' then changes ->> 'qr_image_path' else s.qr_image_path end,
+      qr_expires_on = case when changes ? 'qr_expires_on' then (changes ->> 'qr_expires_on')::date else s.qr_expires_on end;
 end;
 $$;
 

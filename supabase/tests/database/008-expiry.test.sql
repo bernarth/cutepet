@@ -1,7 +1,7 @@
 begin;
 select plan(5);
 
-select tests.set_settings('{"qr_checkout_enabled": true}');
+select tests.set_settings('{"qr_checkout_enabled": true, "qr_image_path": "qr/test.png", "qr_expires_on": null}');
 select tests.create_variant() as expiring_variant \gset
 select tests.create_variant() as active_variant \gset
 select tests.create_user('a@test.bo') as customer_a \gset

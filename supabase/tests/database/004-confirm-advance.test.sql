@@ -1,7 +1,7 @@
 begin;
 select plan(14);
 
-select tests.set_settings('{"qr_checkout_enabled": true}');
+select tests.set_settings('{"qr_checkout_enabled": true, "qr_image_path": "qr/test.png", "qr_expires_on": null}');
 select tests.create_variant(stock => 1) as pickup_variant \gset
 select tests.create_variant(stock => 1) as bus_variant \gset
 select tests.create_variant(stock => 1) as contested_variant \gset

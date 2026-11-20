@@ -1,7 +1,7 @@
 begin;
 select plan(17);
 
-select tests.set_settings('{"qr_checkout_enabled": true}');
+select tests.set_settings('{"qr_checkout_enabled": true, "qr_image_path": "qr/test.png", "qr_expires_on": null}');
 select tests.create_variant() as variant_on_time \gset
 select tests.create_variant() as variant_late_free \gset
 select tests.create_variant() as variant_late_gone \gset

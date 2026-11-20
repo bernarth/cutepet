@@ -1,7 +1,7 @@
 begin;
 select plan(7);
 
-select tests.set_settings('{"qr_checkout_enabled": true}');
+select tests.set_settings('{"qr_checkout_enabled": true, "qr_image_path": "qr/test.png", "qr_expires_on": null}');
 select tests.create_user('customer@test.bo') as customer_id \gset
 select tests.create_user('guest@test.bo') as guest_id \gset
 update auth.users set is_anonymous = true where id = :'guest_id';
