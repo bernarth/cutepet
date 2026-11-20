@@ -2,6 +2,7 @@ import { Service, computed, inject, resource } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 
+import { SettingsRepository } from '@core/settings/settings.repository';
 import { LookupRepository } from './lookup.repository';
 import { ProductRepository } from './product.repository';
 
@@ -13,6 +14,7 @@ export class ProductStore {
   private readonly route = inject(ActivatedRoute);
   private readonly products = inject(ProductRepository);
   private readonly lookups = inject(LookupRepository);
+  private readonly settings = inject(SettingsRepository);
 
   private readonly params = toSignal(this.route.paramMap, {
     initialValue: this.route.snapshot.paramMap,
@@ -28,12 +30,12 @@ export class ProductStore {
   private readonly sizing = resource({
     id: 'product-sizing',
     loader: async () => {
-      const [sizes, toleranceCm] = await Promise.all([
+      const [sizes, settings] = await Promise.all([
         this.lookups.listAllSizes(),
-        this.lookups.getSizeToleranceCm(),
+        this.settings.getStoreSettings(),
       ]);
 
-      return { sizes, toleranceCm };
+      return { sizes, toleranceCm: settings.sizeToleranceCm };
     },
   });
 

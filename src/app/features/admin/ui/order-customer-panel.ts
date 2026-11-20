@@ -4,7 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { formatPrice } from '@shared/pipes/price';
 import { AdminOrder } from '../models/admin-order';
-import { DELIVERY_LABELS } from '../models/quick-sale';
+import { DELIVERY_LABELS } from '@core/orders/customer-details';
 
 export interface MessageLink {
   readonly label: string;

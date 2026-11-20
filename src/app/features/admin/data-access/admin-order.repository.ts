@@ -1,8 +1,8 @@
 import { Service, inject } from '@angular/core';
 
 import { SUPABASE } from '@core/supabase/supabase.client';
-import { AppError, unwrap, unwrapNullable } from '@shared/data-access/supabase-result';
-import { AdminOrder, AdminOrderSummary, OrderListFilter, PickupInfo } from '../models/admin-order';
+import { unwrap, unwrapNullable } from '@shared/data-access/supabase-result';
+import { AdminOrder, AdminOrderSummary, OrderListFilter } from '../models/admin-order';
 import { toAdminOrder, toAdminOrderSummary } from '../models/admin-order.mapper';
 
 const SUMMARY_COLUMNS = `id, code, status, needs_attention, channel, customer_name, customer_phone,
@@ -69,25 +69,6 @@ export class AdminOrderRepository {
     );
 
     return row ? toAdminOrder(row) : null;
-  }
-
-  async getPickupInfo(): Promise<PickupInfo> {
-    const [settings] = unwrap(
-      await this.supabase
-        .from('settings')
-        .select('pickup_address, pickup_hours, pickup_notice')
-        .limit(1),
-    );
-
-    if (!settings) {
-      throw new AppError('Faltan los ajustes de la tienda', 'NOT_FOUND');
-    }
-
-    return {
-      address: settings.pickup_address,
-      hours: settings.pickup_hours,
-      notice: settings.pickup_notice,
-    };
   }
 
   async confirm(orderId: string): Promise<void> {

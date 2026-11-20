@@ -1,7 +1,7 @@
 import { Service, inject } from '@angular/core';
 import { Size, toSize } from '@core/catalog/size';
 import { SUPABASE } from '@core/supabase/supabase.client';
-import { AppError, unwrap } from '@shared/data-access/supabase-result';
+import { unwrap } from '@shared/data-access/supabase-result';
 import { FilterOption } from '../models/catalog-filters';
 
 /**
@@ -54,17 +54,5 @@ export class LookupRepository {
   async listAllSizes(): Promise<Size[]> {
     const rows = unwrap(await this.supabase.from('sizes').select('*').order('sort_order'));
     return rows.map(toSize);
-  }
-
-  async getSizeToleranceCm(): Promise<number> {
-    const [settings] = unwrap(
-      await this.supabase.from('settings').select('size_tolerance_cm').limit(1),
-    );
-
-    if (!settings) {
-      throw new AppError('Faltan los ajustes de la tienda', 'NOT_FOUND');
-    }
-
-    return settings.size_tolerance_cm;
   }
 }

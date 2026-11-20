@@ -3,8 +3,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatRadioModule } from '@angular/material/radio';
 
 import { PickupRule } from '@core/cart/cart-summary';
+import { DeliveryMethod } from '@core/orders/customer-details';
 import { PricePipe } from '@shared/pipes/price';
-import { DeliveryMethod, pickupRuleText, unitsText } from '../models/delivery';
+import { pickupRuleText, unitsText } from '../models/delivery';
 
 @Component({
   selector: 'cp-cart-summary-panel',

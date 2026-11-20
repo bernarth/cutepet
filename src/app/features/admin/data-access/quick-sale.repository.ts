@@ -1,9 +1,8 @@
 import { Service, inject } from '@angular/core';
 
-import { PickupRule } from '@core/cart/cart-summary';
 import { storeImageUrl } from '@core/supabase/store-image-url';
 import { SUPABASE } from '@core/supabase/supabase.client';
-import { AppError, unwrap } from '@shared/data-access/supabase-result';
+import { unwrap } from '@shared/data-access/supabase-result';
 import { QuickSaleRequest, SaleProduct } from '../models/quick-sale';
 
 const SALE_COLUMNS = `id, name, price,
@@ -53,18 +52,6 @@ export class QuickSaleRepository {
           })),
       }))
       .filter((product) => product.options.length > 0);
-  }
-
-  async getPickupRule(): Promise<PickupRule> {
-    const [settings] = unwrap(
-      await this.supabase.from('settings').select('pickup_fee, free_pickup_min_items').limit(1),
-    );
-
-    if (!settings) {
-      throw new AppError('Faltan los ajustes de la tienda', 'NOT_FOUND');
-    }
-
-    return { fee: settings.pickup_fee, freeFromUnits: settings.free_pickup_min_items };
   }
 
   /**

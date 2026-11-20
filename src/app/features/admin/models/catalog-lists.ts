@@ -1,7 +1,7 @@
 import { maxLength, min, required, schema, validate } from '@angular/forms/signals';
 
 import { MEASUREMENTS, MEASUREMENT_LABELS, Size } from '@core/catalog/size';
-import { maxDecimals, requiredText } from './form-rules';
+import { maxDecimals, requiredText } from '@shared/forms/form-rules';
 
 export type LookupTable = 'categories' | 'pet_types';
 

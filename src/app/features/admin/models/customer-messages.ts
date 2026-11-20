@@ -1,6 +1,7 @@
+import { DeliveryMethod } from '@core/orders/customer-details';
+import { PickupInfo } from '@core/settings/store-settings';
 import { formatPrice } from '@shared/pipes/price';
-import { AdminOrder, PickupInfo, wasProofRejected } from './admin-order';
-import { DeliveryMethod } from './quick-sale';
+import { AdminOrder, wasProofRejected } from './admin-order';
 
 export interface ConfirmedOrder {
   readonly customerName: string;

@@ -3,10 +3,12 @@ import { TestBed } from '@angular/core/testing';
 
 import { CartLine } from '@core/cart/cart-line';
 import { RUNTIME_CONFIG, RuntimeConfig } from '@core/config/runtime-config';
+import { SettingsRepository } from '@core/settings/settings.repository';
+import { StoreSettings } from '@core/settings/store-settings';
 import { CartStore } from '@core/cart/cart.store';
 import { CartVariant } from '../models/cart-item';
 import { CartCheckStore } from './cart-check.store';
-import { CartRepository, CartSettings } from './cart.repository';
+import { CartRepository } from './cart.repository';
 
 const STORAGE_KEY = 'cutepet.cart.v1';
 
@@ -17,9 +19,16 @@ const runtimeConfig: RuntimeConfig = {
   noIndex: true,
 };
 
-const settings: CartSettings = {
+const settings: StoreSettings = {
+  qrCheckoutAvailable: false,
+  qrDisabledMessage: '',
+  qrImagePath: null,
+  validationHours: '',
   storeWhatsapp: '70000000',
+  pickup: { address: '', hours: '', notice: '' },
   pickupRule: { fee: 2, freeFromUnits: 3 },
+  shippingPromo: null,
+  sizeToleranceCm: 2,
 };
 
 function line(variantId: number, productName: string, quantity = 1): CartLine {
@@ -50,7 +59,8 @@ async function setUp(lines: readonly CartLine[], findVariants: CartRepository['f
     providers: [
       { provide: PLATFORM_ID, useValue: 'browser' },
       { provide: RUNTIME_CONFIG, useValue: runtimeConfig },
-      { provide: CartRepository, useValue: { findVariants, getSettings: async () => settings } },
+      { provide: CartRepository, useValue: { findVariants } },
+      { provide: SettingsRepository, useValue: { getStoreSettings: async () => settings } },
       CartCheckStore,
     ],
   });

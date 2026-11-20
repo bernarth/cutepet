@@ -4,9 +4,10 @@ import { countUnits } from '@core/cart/cart-line';
 import { itemsTotal, pickupFee } from '@core/cart/cart-summary';
 import { CartStore } from '@core/cart/cart.store';
 import { RUNTIME_CONFIG } from '@core/config/runtime-config';
+import { DeliveryMethod } from '@core/orders/customer-details';
+import { SettingsRepository } from '@core/settings/settings.repository';
 import { whatsappLink } from '@shared/whatsapp/whatsapp-link';
 import { CartVariant, reviewCart, toCartItems } from '../models/cart-item';
-import { DeliveryMethod } from '../models/delivery';
 import { whatsappOrderMessage } from '../models/whatsapp-order';
 import { CartRepository } from './cart.repository';
 
@@ -19,9 +20,12 @@ import { CartRepository } from './cart.repository';
 export class CartCheckStore {
   private readonly cart = inject(CartStore);
   private readonly repository = inject(CartRepository);
+  private readonly settingsRepository = inject(SettingsRepository);
   private readonly siteUrl = inject(RUNTIME_CONFIG).siteUrl;
 
-  private readonly settingsResource = resource({ loader: () => this.repository.getSettings() });
+  private readonly settingsResource = resource({
+    loader: () => this.settingsRepository.getStoreSettings(),
+  });
   private readonly variants = signal<ReadonlyMap<number, CartVariant> | null>(null);
   private readonly checking = signal(false);
   private readonly checkFailed = signal(false);

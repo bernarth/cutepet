@@ -1,7 +1,7 @@
 import { max, maxLength, min, pattern, required, schema } from '@angular/forms/signals';
 
 import { AdminProduct } from './admin-product';
-import { maxDecimals, requiredText } from './form-rules';
+import { maxDecimals, requiredText } from '@shared/forms/form-rules';
 import { SLUG_PATTERN } from './slugify';
 
 export interface ProductFormModel {

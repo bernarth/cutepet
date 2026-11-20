@@ -9,8 +9,8 @@ import {
   validate,
 } from '@angular/forms/signals';
 
-import { maxDecimals, requiredText } from './form-rules';
-import { MOBILE_PATTERN } from './quick-sale';
+import { maxDecimals, requiredText } from '@shared/forms/form-rules';
+import { MOBILE_PATTERN } from '@core/orders/customer-details';
 
 export const QR_IMAGE_MAX_BYTES = 2 * 1024 * 1024;
 export const QR_IMAGE_TYPES: readonly string[] = ['image/png', 'image/jpeg'];

@@ -1,8 +1,9 @@
 import { itemsTotal } from '@core/cart/cart-summary';
+import { DeliveryMethod } from '@core/orders/customer-details';
 import { formatPrice } from '@shared/pipes/price';
 
 import { ItemMeasurements } from './cart-item';
-import { DeliveryMethod, unitsText } from './delivery';
+import { unitsText } from './delivery';
 
 export interface WhatsappOrderItem {
   readonly productName: string;

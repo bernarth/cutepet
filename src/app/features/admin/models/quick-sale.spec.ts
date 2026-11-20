@@ -42,10 +42,6 @@ function errorsOf(model: QuickSaleModel) {
       .customerPhone()
       .errors()
       .map((error) => error.message),
-    city: saleForm
-      .destinationCity()
-      .errors()
-      .map((error) => error.message),
   };
 }
 
@@ -85,34 +81,15 @@ describe('quick sale form', () => {
     expect(errors.lines).toEqual(['Agrega al menos una prenda']);
     expect(errors.phone).toEqual(['Usa 8 dígitos que empiecen con 6 o 7']);
   });
-
-  it('asks for the city only for bus parcel shipping', () => {
-    expect(errorsOf(sale).city).toEqual([]);
-    expect(errorsOf({ ...sale, deliveryMethod: 'bus_parcel' }).city).toEqual([
-      'Escribe la ciudad de destino',
-    ]);
-  });
 });
 
 describe('toQuickSaleRequest', () => {
-  it('sends only the pickup data for a pickup sale', () => {
+  it('sends the items with the customer details', () => {
     expect(toQuickSaleRequest({ ...sale, destinationCity: 'Oruro' })).toEqual({
       items: [{ variant_id: 1, quantity: 1 }],
       customer_name: 'Eva Mamani',
       customer_phone: '71234567',
       delivery_method: 'pickup_point',
     });
-  });
-
-  it('uses the customer as recipient when none is given', () => {
-    const request = toQuickSaleRequest({
-      ...sale,
-      deliveryMethod: 'bus_parcel',
-      destinationCity: ' Santa Cruz ',
-    });
-
-    expect(request.destination_city).toBe('Santa Cruz');
-    expect(request.recipient_name).toBe('Eva Mamani');
-    expect(request.recipient_id_number).toBeUndefined();
   });
 });

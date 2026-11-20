@@ -1,7 +1,7 @@
 import { maxLength, min, required, schema, validate } from '@angular/forms/signals';
 
 import { AdminVariant, heldUnits } from './admin-product';
-import { maxDecimals, requiredText } from './form-rules';
+import { maxDecimals, requiredText } from '@shared/forms/form-rules';
 
 export interface StockAdjustmentModel {
   newStock: number | null;

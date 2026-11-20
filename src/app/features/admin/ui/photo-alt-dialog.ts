@@ -5,7 +5,7 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 
-import { requiredText } from '../models/form-rules';
+import { requiredText } from '@shared/forms/form-rules';
 import { SaveState } from './save-state';
 
 export interface PhotoAltDialogData {

@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 
 import { PricePipe } from '@shared/pipes/price';
 import { AdminOrderSummary } from '../models/admin-order';
-import { DELIVERY_LABELS } from '../models/quick-sale';
+import { DELIVERY_LABELS } from '@core/orders/customer-details';
 import { DateTimePipe } from './date-time.pipe';
 import { OrderStatusBadge } from './order-status-badge';
 

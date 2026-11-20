@@ -1,8 +1,5 @@
-import { Database } from '@core/supabase/database.types';
 import { PickupRule } from '@core/cart/cart-summary';
 import { formatPrice } from '@shared/pipes/price';
-
-export type DeliveryMethod = Database['public']['Enums']['delivery_method'];
 
 export function unitsText(units: number): string {
   return `${units} ${units === 1 ? 'prenda' : 'prendas'}`;

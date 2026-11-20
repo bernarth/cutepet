@@ -1,6 +1,6 @@
 import { OrderStatus } from '@core/orders/order-status';
 import { Database } from '@core/supabase/database.types';
-import { DeliveryMethod } from './quick-sale';
+import { DeliveryMethod } from '@core/orders/customer-details';
 
 export type OrderChannel = Database['public']['Enums']['order_channel'];
 
@@ -40,12 +40,6 @@ export interface AdminOrder extends AdminOrderSummary {
   readonly paymentProofPath: string | null;
   readonly shippingReceiptPath: string | null;
   readonly items: readonly AdminOrderItem[];
-}
-
-export interface PickupInfo {
-  readonly address: string;
-  readonly hours: string;
-  readonly notice: string;
 }
 
 /**

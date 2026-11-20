@@ -1,7 +1,7 @@
 import { ORDER_STATUS_LABELS, OrderStatus } from '@core/orders/order-status';
 import { formatCm } from '@shared/pipes/centimeters';
 import { formatPrice } from '@shared/pipes/price';
-import { DELIVERY_LABELS, DeliveryMethod } from './quick-sale';
+import { DELIVERY_LABELS, DeliveryMethod } from '@core/orders/customer-details';
 
 /** Names of sizes, categories and pet types, so ids read as words */
 export interface AuditLookups {

@@ -2,7 +2,7 @@ import { SchemaPath, apply, max, min, required, schema } from '@angular/forms/si
 
 import { Measurements } from '@core/catalog/size';
 import { AdminVariant } from './admin-product';
-import { maxDecimals } from './form-rules';
+import { maxDecimals } from '@shared/forms/form-rules';
 
 export interface VariantFormModel {
   sizeId: number | null;

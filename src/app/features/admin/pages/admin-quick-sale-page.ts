@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 
 import { itemsTotal, pickupFee } from '@core/cart/cart-summary';
+import { DELIVERY_LABELS } from '@core/orders/customer-details';
 import { PricePipe, formatPrice } from '@shared/pipes/price';
 import { EmptyState } from '@shared/ui/empty-state';
 import { LoadingBar } from '@shared/ui/loading-bar';
@@ -14,7 +15,6 @@ import { whatsappLink } from '@shared/whatsapp/whatsapp-link';
 import { QuickSaleStore } from '../data-access/quick-sale.store';
 import { confirmedMessage } from '../models/customer-messages';
 import {
-  DELIVERY_LABELS,
   EMPTY_QUICK_SALE,
   QuickSaleModel,
   SaleOption,

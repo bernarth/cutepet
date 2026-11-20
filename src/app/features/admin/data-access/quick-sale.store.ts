@@ -1,6 +1,7 @@
 import { Service, computed, inject, resource, signal } from '@angular/core';
 
 import { PickupRule } from '@core/cart/cart-summary';
+import { SettingsRepository } from '@core/settings/settings.repository';
 import { normalizeText } from '../models/admin-product.mapper';
 import { QuickSaleRequest, SaleOption } from '../models/quick-sale';
 import { QuickSaleRepository, RecordedSale } from './quick-sale.repository';
@@ -13,10 +14,11 @@ const NO_PICKUP_RULE: PickupRule = { fee: 0, freeFromUnits: 1 };
 @Service()
 export class QuickSaleStore {
   private readonly repository = inject(QuickSaleRepository);
+  private readonly settings = inject(SettingsRepository);
 
   private readonly products = resource({ loader: () => this.repository.listSaleProducts() });
   private readonly pickupRuleResource = resource({
-    loader: () => this.repository.getPickupRule(),
+    loader: async () => (await this.settings.getStoreSettings()).pickupRule,
   });
 
   readonly search = signal('');

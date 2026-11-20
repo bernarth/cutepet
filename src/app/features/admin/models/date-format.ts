@@ -1,4 +1,4 @@
-const STORE_TIME_ZONE = 'America/La_Paz';
+import { STORE_TIME_ZONE } from '@core/settings/store-settings';
 
 const dateTime = new Intl.DateTimeFormat('es-BO', {
   timeZone: STORE_TIME_ZONE,
