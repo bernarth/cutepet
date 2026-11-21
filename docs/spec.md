@@ -137,7 +137,7 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
 3. ~~Catalog, product, size guide (with Open Graph)~~ (done)
 4. ~~Cart + WhatsApp order~~ (done)
 5. ~~Admin panel: products, quick sale, orders, settings, audit log~~ (done)
-6. Full QR checkout
+6. ~~Full QR checkout~~ (done)
 7. Notifications: `notify` Edge Function + `notification_channels`
 8. Account, my pets, custom requests
 9. Home: featured products and categories
@@ -159,7 +159,7 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
 - Uses its own free Supabase project (the QA project). It is deleted at launch and replaced by a new production project (step 10). The Docker image is the same; only the environment variables change.
 - `NO_INDEX=true` the whole time: `robots.txt` disallows everything and every response carries `noindex`.
 - Only test data. `supabase/seed.sql` is for the local stack and is never pushed. Products are added from the admin panel.
-- Dashboard setup (done by the owner): Site URL and Redirect URLs, Google provider, the custom access token hook, and the admin row. Anonymous sign-ins are turned on together with Turnstile when step 6 is deployed.
+- Dashboard setup (done by the owner): Site URL and Redirect URLs, Google provider, the custom access token hook, the admin row, and anonymous sign-ins with the Turnstile captcha (step 6).
 
 ## Decisions
 
