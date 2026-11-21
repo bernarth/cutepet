@@ -43,11 +43,6 @@
     </mat-form-field>
   }
 
-  <p class="total">
-    <span>Total ({{ unitsLabel() }})</span>
-    <span>{{ total() | price }}</span>
-  </p>
-
   @if (needsCaptcha()) {
     <cp-turnstile
       [siteKey]="turnstileSiteKey()"
@@ -67,8 +62,10 @@
     <p class="error" role="alert">{{ message }}</p>
   }
 
-  <button mat-flat-button class="cp-cta" type="submit" [disabled]="!canReserve()">
-    {{ isReserving() ? 'Reservando…' : 'Reservar y pagar' }}
-  </button>
+  <cp-checkout-bar [total]="total()" [units]="units()">
+    <button mat-flat-button class="cp-cta" type="submit" [disabled]="!canReserve()">
+      {{ isReserving() ? 'Reservando…' : 'Reservar y pagar' }}
+    </button>
+  </cp-checkout-bar>
   <button mat-button type="button" (click)="back.emit()">Volver al carrito</button>
 </form>

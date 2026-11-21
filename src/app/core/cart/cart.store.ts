@@ -1,6 +1,8 @@
 import { isPlatformBrowser } from '@angular/common';
 import { PLATFORM_ID, Service, afterNextRender, computed, inject, signal } from '@angular/core';
 
+import { DeliveryMethod } from '@core/orders/customer-details';
+
 import {
   CartLine,
   NewCartLine,
@@ -26,6 +28,8 @@ export class CartStore {
   readonly lines = this.storedLines.asReadonly();
   readonly restored = this.isRestored.asReadonly();
   readonly unitCount = computed(() => countUnits(this.storedLines()));
+  /** Kept in memory only, so it lasts for the visit and is never stored */
+  readonly delivery = signal<DeliveryMethod>('pickup_point');
 
   constructor() {
     afterNextRender(() => {

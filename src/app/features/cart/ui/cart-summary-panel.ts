@@ -4,13 +4,13 @@ import { MatRadioModule } from '@angular/material/radio';
 
 import { PickupRule } from '@core/cart/cart-summary';
 import { DeliveryMethod } from '@core/orders/customer-details';
-import { PricePipe } from '@shared/pipes/price';
-import { pickupRuleText, unitsText } from '../models/delivery';
+import { busParcelPayerText, pickupRuleText } from '../models/delivery';
 import { ShippingPromoNotice } from '../models/qr-checkout';
+import { CheckoutBar } from './checkout-bar';
 
 @Component({
   selector: 'cp-cart-summary-panel',
-  imports: [MatButtonModule, MatRadioModule, PricePipe],
+  imports: [MatButtonModule, MatRadioModule, CheckoutBar],
   templateUrl: './cart-summary-panel.html',
   styles: `
     :host {
@@ -38,19 +38,9 @@ import { ShippingPromoNotice } from '../models/qr-checkout';
     p {
       margin: 0;
     }
-    .total {
-      display: flex;
-      justify-content: space-between;
-      gap: var(--cp-space-sm);
-      font: var(--mat-sys-title-medium);
-      font-weight: 700;
-    }
     .hint {
       font: var(--mat-sys-body-medium);
       color: var(--mat-sys-on-surface-variant);
-    }
-    .order {
-      width: 100%;
     }
     .promo {
       margin-top: calc(-1 * var(--cp-space-sm));
@@ -69,6 +59,7 @@ export class CartSummaryPanel {
   readonly qrCheckoutAvailable = input.required<boolean>();
   readonly qrDisabledMessage = input.required<string>();
   readonly shippingPromo = input.required<ShippingPromoNotice | null>();
+  readonly hasDeliveryCost = input.required<boolean>();
   readonly delivery = model.required<DeliveryMethod>();
   readonly ordered = output();
   readonly recheck = output();
@@ -77,5 +68,27 @@ export class CartSummaryPanel {
   protected readonly pickupText = computed(() =>
     pickupRuleText(this.pickupRule(), this.pickupFee()),
   );
-  protected readonly unitsLabel = computed(() => unitsText(this.units()));
+  protected readonly hints = computed(() => {
+    const hints: string[] = [];
+    if (this.hasDeliveryCost()) {
+      hints.push('El costo de la entrega no está incluido en el total.');
+    }
+    if (!this.qrCheckoutAvailable()) {
+      hints.push(
+        this.whatsappUrl() ? this.qrDisabledMessage() : 'Muy pronto podrás hacer tu pedido aquí.',
+      );
+    }
+    if (this.units() === 0) {
+      hints.push('Tus prendas están reservadas por alguien más en este momento.');
+    }
+    return hints;
+  });
+  protected readonly secondaryWhatsappUrl = computed(() =>
+    this.qrCheckoutAvailable() ? this.whatsappUrl() : null,
+  );
+  protected readonly busParcelText = computed(() =>
+    this.shippingPromo()?.paidByStore
+      ? 'Envío por flota a otro departamento'
+      : `Envío por flota a otro departamento: ${busParcelPayerText(false)}`,
+  );
 }

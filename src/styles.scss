@@ -45,6 +45,13 @@ body {
   font-family: var(--cp-font-body);
 }
 
+// Room under the page for the checkout bar fixed to the bottom on phones
+@media (max-width: 767.98px) {
+  mat-sidenav-content:has(cp-checkout-bar) {
+    padding-bottom: calc(var(--cp-checkout-bar-height) + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 h1,
 h2,
 h3 {

@@ -5,13 +5,13 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 
 import { CustomerDetails, DELIVERY_LABELS } from '@core/orders/customer-details';
-import { PricePipe } from '@shared/pipes/price';
 import { Turnstile } from '@shared/ui/turnstile';
-import { unitsText } from '../models/delivery';
+import { busParcelPayerText } from '../models/delivery';
+import { CheckoutBar } from './checkout-bar';
 
 @Component({
   selector: 'cp-qr-checkout-form',
-  imports: [FormField, MatButtonModule, MatFormFieldModule, MatInputModule, PricePipe, Turnstile],
+  imports: [FormField, MatButtonModule, MatFormFieldModule, MatInputModule, Turnstile, CheckoutBar],
   templateUrl: './qr-checkout-form.html',
   styles: `
     :host {
@@ -45,14 +45,6 @@ import { unitsText } from '../models/delivery';
     .delivery {
       margin-bottom: var(--cp-space-sm);
     }
-    .total {
-      display: flex;
-      justify-content: space-between;
-      gap: var(--cp-space-sm);
-      margin-block: var(--cp-space-sm);
-      font: var(--mat-sys-title-medium);
-      font-weight: 700;
-    }
     .error {
       color: var(--mat-sys-error);
     }
@@ -62,6 +54,7 @@ export class QrCheckoutForm {
   readonly details = input.required<FieldTree<CustomerDetails>>();
   readonly total = input.required<number>();
   readonly units = input.required<number>();
+  readonly shippingPaidByStore = input.required<boolean>();
   readonly needsCaptcha = input.required<boolean>();
   readonly waitingForCaptcha = input.required<boolean>();
   readonly turnstileSiteKey = input.required<string>();
@@ -74,13 +67,15 @@ export class QrCheckoutForm {
 
   private readonly turnstile = viewChild(Turnstile);
   protected readonly captchaFailed = signal(false);
-  protected readonly unitsLabel = computed(() => unitsText(this.units()));
   protected readonly isBusParcel = computed(
     () => this.details().deliveryMethod().value() === 'bus_parcel',
   );
-  protected readonly deliveryLabel = computed(
-    () => DELIVERY_LABELS[this.details().deliveryMethod().value()],
-  );
+  protected readonly deliveryLabel = computed(() => {
+    const label = DELIVERY_LABELS[this.details().deliveryMethod().value()];
+    return this.isBusParcel()
+      ? `${label}, ${busParcelPayerText(this.shippingPaidByStore())}`
+      : label;
+  });
 
   /** A Turnstile token works once, so a failed attempt needs a new check */
   resetCaptcha(): void {

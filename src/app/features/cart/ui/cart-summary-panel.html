@@ -7,78 +7,53 @@
   (change)="delivery.set($event.value)"
 >
   <mat-radio-button value="pickup_point">{{ pickupText() }}</mat-radio-button>
-  <mat-radio-button value="bus_parcel">
-    {{
-      shippingPromo()?.paidByStore
-        ? 'Envío por flota a otro departamento'
-        : 'Envío por flota a otro departamento: lo pagas en la terminal'
-    }}
-  </mat-radio-button>
+  <mat-radio-button value="bus_parcel">{{ busParcelText() }}</mat-radio-button>
 </mat-radio-group>
 @if (shippingPromo(); as promo) {
   <p class="promo">{{ promo.text }}</p>
 }
 
-<p class="total">
-  <span>Total ({{ unitsLabel() }})</span>
-  <span>{{ total() | price }}</span>
-</p>
-<p class="hint">El costo de la entrega no está incluido en el total.</p>
-
-@if (qrCheckoutAvailable()) {
-  <button
-    mat-flat-button
-    class="cp-cta order"
-    type="button"
-    [disabled]="units() === 0"
-    (click)="payWithQr.emit()"
-  >
-    Pagar con QR
-  </button>
-} @else if (whatsappUrl()) {
-  <p class="hint">{{ qrDisabledMessage() }}</p>
+@for (hint of hints(); track hint) {
+  <p class="hint">{{ hint }}</p>
 }
 
-@if (!qrCheckoutAvailable() && !whatsappUrl()) {
-  <p class="hint">Muy pronto podrás hacer tu pedido aquí.</p>
-} @else if (whatsappUrl() && units() === 0) {
-  <button
-    mat-flat-button
-    type="button"
-    disabled
-    class="order"
-    [class.cp-cta]="!qrCheckoutAvailable()"
-  >
-    Pedir por WhatsApp
-  </button>
-} @else if (whatsappUrl(); as url) {
+<cp-checkout-bar [total]="total()" [units]="units()">
   @if (qrCheckoutAvailable()) {
-    <a
-      mat-stroked-button
-      class="order"
-      target="_blank"
-      rel="noopener"
-      [href]="url"
-      (click)="ordered.emit()"
+    <button
+      mat-flat-button
+      class="cp-cta"
+      type="button"
+      [disabled]="units() === 0"
+      (click)="payWithQr.emit()"
     >
-      Pedir por WhatsApp
-    </a>
-  } @else {
+      Pagar con QR
+    </button>
+  } @else if (whatsappUrl(); as url) {
     <a
       mat-flat-button
-      class="cp-cta order"
+      class="cp-cta"
       target="_blank"
       rel="noopener"
       [href]="url"
+      [disabled]="units() === 0"
       (click)="ordered.emit()"
     >
       Pedir por WhatsApp
     </a>
   }
-}
+</cp-checkout-bar>
 
-@if (units() === 0) {
-  <p class="hint">Tus prendas están reservadas por alguien más en este momento.</p>
+@if (secondaryWhatsappUrl(); as url) {
+  <a
+    mat-stroked-button
+    target="_blank"
+    rel="noopener"
+    [href]="url"
+    [disabled]="units() === 0"
+    (click)="ordered.emit()"
+  >
+    Pedir por WhatsApp
+  </a>
 }
 
 @if (hasReserved()) {

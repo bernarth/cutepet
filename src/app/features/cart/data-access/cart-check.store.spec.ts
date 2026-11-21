@@ -122,6 +122,17 @@ describe('CartCheckStore', () => {
     expect(check.notices()).toEqual([]);
   });
 
+  it('remembers the delivery choice in memory when the cart page is opened again', async () => {
+    const { check, cart } = await setUp([coat], async () => [variant(1, 1, 1)]);
+    check.delivery.set('bus_parcel');
+
+    const reopened = TestBed.runInInjectionContext(() => new CartCheckStore());
+
+    expect(reopened.delivery()).toBe('bus_parcel');
+    expect(cart.delivery()).toBe('bus_parcel');
+    expect(localStorage.getItem(STORAGE_KEY)).not.toContain('bus_parcel');
+  });
+
   it('ignores a slower older check that answers after a newer one', async () => {
     const answers: ((variants: CartVariant[]) => void)[] = [];
     const findVariants = () => new Promise<CartVariant[]>((resolve) => answers.push(resolve));

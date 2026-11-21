@@ -4,10 +4,10 @@ import { countUnits } from '@core/cart/cart-line';
 import { itemsTotal, pickupFee } from '@core/cart/cart-summary';
 import { CartStore } from '@core/cart/cart.store';
 import { RUNTIME_CONFIG } from '@core/config/runtime-config';
-import { DeliveryMethod } from '@core/orders/customer-details';
 import { SettingsRepository } from '@core/settings/settings.repository';
 import { whatsappLink } from '@shared/whatsapp/whatsapp-link';
 import { CartVariant, reviewCart, toCartItems } from '../models/cart-item';
+import { hasDeliveryCost } from '../models/delivery';
 import { shippingPromoNotice } from '../models/qr-checkout';
 import { whatsappOrderMessage } from '../models/whatsapp-order';
 import { CartRepository, OrderItemRequest } from './cart.repository';
@@ -33,7 +33,7 @@ export class CartCheckStore {
   private readonly reviewNotices = signal<readonly string[]>([]);
   private latestCheck = 0;
 
-  readonly delivery = signal<DeliveryMethod>('pickup_point');
+  readonly delivery = this.cart.delivery;
   readonly notices = this.reviewNotices.asReadonly();
 
   readonly settings = computed(() =>
@@ -67,6 +67,10 @@ export class CartCheckStore {
     const settings = this.settings();
     return settings ? pickupFee(this.orderItems(), settings.pickupRule) : 0;
   });
+  readonly shippingPaidByStore = computed(() => this.shippingPromo()?.paidByStore ?? false);
+  readonly hasDeliveryCost = computed(() =>
+    hasDeliveryCost(this.delivery(), this.pickupFee(), this.shippingPaidByStore()),
+  );
 
   readonly whatsappUrl = computed(() => {
     const storeNumber = this.settings()?.storeWhatsapp;

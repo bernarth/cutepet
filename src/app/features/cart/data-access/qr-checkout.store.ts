@@ -32,7 +32,15 @@ export class QrCheckoutStore {
   readonly captchaToken = signal<string | null>(null);
   readonly isOpen = signal(false);
   readonly isReserving = this.reserving.asReadonly();
-  readonly failureMessage = computed(() => this.failure()?.message ?? null);
+  readonly failureKind = computed(() => this.failure()?.kind ?? null);
+  /** Sold and reserved pieces are explained next to the piece itself, so they need no message here */
+  readonly failureMessage = computed(() => {
+    const failure = this.failure();
+    const shownOnPiece =
+      failure?.kind === 'items_changed' ||
+      (failure?.kind === 'reserved' && this.check.hasReserved());
+    return shownOnPiece ? null : (failure?.message ?? null);
+  });
   readonly needsCaptcha = computed(() => this.auth.user() === null);
   readonly waitingForCaptcha = computed(() => this.needsCaptcha() && this.captchaToken() === null);
   readonly canReserve = computed(
@@ -79,9 +87,6 @@ export class QrCheckoutStore {
     }
   }
 
-  /**
-   * @description Sold pieces are explained by the cart check itself, so only the other failures keep a message
-   */
   private async recover(failure: ReserveFailure): Promise<void> {
     if (failure.kind === 'qr_disabled') {
       this.close();
@@ -92,6 +97,6 @@ export class QrCheckoutStore {
       await this.check.revalidate();
     }
 
-    this.failure.set(failure.kind === 'items_changed' ? null : failure);
+    this.failure.set(failure);
   }
 }

@@ -1,5 +1,8 @@
 import { CartLine } from '@core/cart/cart-line';
 
+export const RESERVED_NOTE =
+  'Alguien está comprando esta prenda. Si no completa su compra, volverá a estar disponible en unos minutos.';
+
 export interface CartPhoto {
   readonly url: string;
   readonly alt: string;
