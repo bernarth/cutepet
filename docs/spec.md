@@ -146,11 +146,11 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
 
 ## Current status
 
-> Updated on 2026-11-20.
+> Updated on 2026-11-21.
 
-- Steps 1 to 6 are done in code. Step 7 (notifications) is next.
-- The QA project has every migration up to `20261118000500`. Step 6 adds `20261120000100_qr_checkout`, `20261120000200_cancel_own_order` and `20261121000100_checkout_order_phone`, which exist only locally. Push them only after asking the owner.
-- Remote setup still pending for step 6: the Turnstile widget, the Supabase captcha, anonymous sign-ins and the `TURNSTILE_SITE_KEY` variable in Coolify (`docs/deploy.md`).
+- Steps 1 to 6 are done and deployed to QA. Step 7 (notifications) is next.
+- The QA project has every migration up to `20261121000100_checkout_order_phone`. No migrations are pending.
+- The remote QA setup for step 6 is complete: the Turnstile widget, the Supabase captcha, anonymous sign-ins and the `TURNSTILE_SITE_KEY` variable in Coolify (`docs/deploy.md`).
 
 ## QA environment
 
