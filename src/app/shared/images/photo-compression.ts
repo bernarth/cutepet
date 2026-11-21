@@ -50,7 +50,7 @@ export async function encodeUnder(
 
 /**
  * @description Resizes and re-encodes a photo as JPEG in the browser. Re-encoding also drops EXIF data such as the phone location.
- * Only runs after the admin picks a file, so it is never called on the server
+ * Only runs after someone picks a file, so it is never called on the server
  */
 export async function compressPhoto(file: Blob): Promise<Blob> {
   const bitmap = await decodePhoto(file);

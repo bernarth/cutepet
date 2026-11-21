@@ -6,6 +6,8 @@ export interface ConfirmDialogData {
   readonly title: string;
   readonly message: string;
   readonly confirmLabel: string;
+  /** Use it when "Cancelar" would be confusing, for example when the action itself cancels something */
+  readonly cancelLabel?: string;
 }
 
 /**
@@ -20,7 +22,9 @@ export interface ConfirmDialogData {
       <p>{{ data.message }}</p>
     </mat-dialog-content>
     <mat-dialog-actions align="end">
-      <button mat-button type="button" [mat-dialog-close]="false">Cancelar</button>
+      <button mat-button type="button" [mat-dialog-close]="false">
+        {{ data.cancelLabel ?? 'Cancelar' }}
+      </button>
       <button mat-flat-button type="button" [mat-dialog-close]="true">
         {{ data.confirmLabel }}
       </button>

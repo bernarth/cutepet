@@ -2,7 +2,7 @@ import { Service, computed, inject, resource, signal } from '@angular/core';
 
 import { SettingsRepository } from '@core/settings/settings.repository';
 import { AdminOrder } from '../models/admin-order';
-import { compressPhoto } from '../models/photo-compression';
+import { compressPhoto } from '@shared/images/photo-compression';
 import { toTimeline } from '../models/order-timeline';
 import { AdminAuditRepository } from './admin-audit.repository';
 import { AdminOrderRepository, PrivateBucket } from './admin-order.repository';

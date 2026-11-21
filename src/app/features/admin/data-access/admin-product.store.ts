@@ -1,7 +1,7 @@
 import { Service, computed, inject, resource, signal } from '@angular/core';
 
 import { AdminPhoto, AdminProduct, AdminVariant } from '../models/admin-product';
-import { compressPhoto } from '../models/photo-compression';
+import { compressPhoto } from '@shared/images/photo-compression';
 import { movePhoto } from '../models/photo-order';
 import { nextSortOrder } from '../models/sort-order';
 import { ProductFormModel, toProductInput } from '../models/product-form';

@@ -1,5 +1,5 @@
-import { adminErrorMessage } from './admin-errors';
-import { compressPhoto, encodeUnder, fitWithin } from './photo-compression';
+import { AppError } from '@shared/data-access/supabase-result';
+import { PHOTO_UNREADABLE, compressPhoto, encodeUnder, fitWithin } from './photo-compression';
 
 const blobOf = (bytes: number) => new Blob([new Uint8Array(bytes)]);
 
@@ -49,8 +49,7 @@ describe('compressPhoto', () => {
       (failure: unknown) => failure,
     );
 
-    expect(adminErrorMessage(error)).toBe(
-      'No pudimos leer esta foto. Súbela en JPG o PNG, o desde la galería del celular.',
-    );
+    expect(error).toBeInstanceOf(AppError);
+    expect((error as AppError).message).toBe(PHOTO_UNREADABLE);
   });
 });

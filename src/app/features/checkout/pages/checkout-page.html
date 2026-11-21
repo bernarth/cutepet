@@ -1,0 +1,53 @@
+<cp-page-header title="Pagar con QR" />
+<cp-loading-bar [active]="isBusy()" label="Buscando tu pedido" />
+
+@if (store.hasError()) {
+  <cp-empty-state
+    icon="info"
+    message="No pudimos cargar tu pedido. Revisa tu conexión e inténtalo de nuevo."
+  >
+    <button mat-stroked-button type="button" (click)="store.retry()">Reintentar</button>
+  </cp-empty-state>
+} @else if (store.view() === 'pay' && store.order(); as order) {
+  <div class="pay">
+    <section class="summary" aria-labelledby="amount-label">
+      <p class="label" id="amount-label">Monto exacto a pagar</p>
+      <p class="amount">{{ order.itemsTotal | price }}</p>
+      <div class="code">
+        <p>
+          Escribe <strong>{{ order.code }}</strong> en la glosa
+        </p>
+        <button mat-stroked-button type="button" (click)="copyCode(order.code)">
+          <mat-icon>content_copy</mat-icon>
+          Copiar
+        </button>
+      </div>
+    </section>
+
+    @if (store.qrImageUrl(); as imageUrl) {
+      <cp-qr-card class="qr" [imageUrl]="imageUrl" [code]="order.code" />
+    }
+
+    <section class="steps" aria-label="Después de pagar">
+      <p class="countdown" role="timer" aria-live="off">
+        <mat-icon aria-hidden="true">timer</mat-icon>
+        <span>
+          Tus prendas están reservadas por <strong>{{ countdown() }}</strong>
+        </span>
+      </p>
+      @if (store.validationHours(); as hours) {
+        <p class="hours">Validamos los pagos: {{ hours }}</p>
+      }
+      <cp-proof-upload
+        [uploading]="store.isUploading()"
+        [error]="store.uploadError()"
+        (file)="store.uploadProof($event)"
+      />
+      <button mat-button class="cancel" type="button" (click)="cancel()">Cancelar pedido</button>
+    </section>
+  </div>
+} @else if (notice(); as notice) {
+  <cp-empty-state [icon]="notice.icon" [message]="notice.message">
+    <a mat-flat-button [routerLink]="notice.actionLink">{{ notice.actionLabel }}</a>
+  </cp-empty-state>
+}
