@@ -15,6 +15,8 @@ import { PageHeader } from '@shared/ui/page-header';
 import { CheckoutStore } from '../data-access/checkout.store';
 import { checkoutNotice } from '../models/checkout-notice';
 import { formatCountdown } from '../models/countdown';
+import { ExpiredOrderCard } from '../ui/expired-order-card';
+import { OrderReceivedCard } from '../ui/order-received-card';
 import { ProofUpload } from '../ui/proof-upload';
 import { QrCard } from '../ui/qr-card';
 
@@ -37,6 +39,8 @@ const CANCEL_DIALOG: ConfirmDialogData = {
     LoadingBar,
     QrCard,
     ProofUpload,
+    ExpiredOrderCard,
+    OrderReceivedCard,
   ],
   providers: [CheckoutStore],
   templateUrl: './checkout-page.html',
@@ -55,6 +59,7 @@ export class CheckoutPage {
   private readonly lookingUp = signal(false);
   protected readonly isBusy = computed(() => this.store.isLoading() || this.lookingUp());
   protected readonly countdown = computed(() => formatCountdown(this.store.secondsLeft()));
+  protected readonly title = computed(() => (this.store.received() ? 'Tu pedido' : 'Pagar con QR'));
   protected readonly notice = computed(() =>
     this.isBusy() || this.store.hasError() ? null : checkoutNotice(this.store.view()),
   );

@@ -22,6 +22,7 @@ import { QrCheckoutStore } from '../data-access/qr-checkout.store';
 import { RESERVED_NOTE } from '../models/cart-item';
 import { CartItemRow } from '../ui/cart-item-row';
 import { CartSummaryPanel } from '../ui/cart-summary-panel';
+import { PendingPaymentNotice } from '../ui/pending-payment-notice';
 import { QrCheckoutForm } from '../ui/qr-checkout-form';
 
 @Component({
@@ -35,6 +36,7 @@ import { QrCheckoutForm } from '../ui/qr-checkout-form';
     CartItemRow,
     CartSummaryPanel,
     QrCheckoutForm,
+    PendingPaymentNotice,
   ],
   providers: [CartCheckStore, QrCheckoutStore],
   templateUrl: './cart-page.html',

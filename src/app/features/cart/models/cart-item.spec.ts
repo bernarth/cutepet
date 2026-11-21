@@ -55,4 +55,12 @@ describe('toCartItems', () => {
       [2, true],
     ]);
   });
+
+  it('tells pieces held by the customer own pending order from pieces held by someone else', () => {
+    const items = toCartItems([line(1), line(2)], variants, new Set([1, 2]));
+    expect(items.map((item) => [item.line.variantId, item.isReservedByYou])).toEqual([
+      [1, false],
+      [2, true],
+    ]);
+  });
 });

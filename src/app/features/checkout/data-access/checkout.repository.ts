@@ -41,6 +41,13 @@ export class CheckoutRepository {
     );
   }
 
+  async orderVariantIds(orderId: string): Promise<number[]> {
+    const rows = unwrap(
+      await this.supabase.from('order_items').select('variant_id').eq('order_id', orderId),
+    );
+    return rows.map((row) => row.variant_id);
+  }
+
   async cancelOrder(orderId: string): Promise<void> {
     unwrap(await this.supabase.rpc('cancel_order', { order_id: orderId }));
   }

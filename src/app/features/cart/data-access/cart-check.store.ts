@@ -2,6 +2,7 @@ import { Service, computed, effect, inject, resource, signal, untracked } from '
 
 import { countUnits } from '@core/cart/cart-line';
 import { itemsTotal, pickupFee } from '@core/cart/cart-summary';
+import { AuthStore } from '@core/auth/auth.store';
 import { CartStore } from '@core/cart/cart.store';
 import { RUNTIME_CONFIG } from '@core/config/runtime-config';
 import { SettingsRepository } from '@core/settings/settings.repository';
@@ -19,6 +20,7 @@ import { CartRepository, OrderItemRequest } from './cart.repository';
  */
 @Service({ autoProvided: false })
 export class CartCheckStore {
+  private readonly auth = inject(AuthStore);
   private readonly cart = inject(CartStore);
   private readonly repository = inject(CartRepository);
   private readonly settingsRepository = inject(SettingsRepository);
@@ -27,6 +29,14 @@ export class CartCheckStore {
   private readonly settingsResource = resource({
     loader: () => this.settingsRepository.getStoreSettings(),
   });
+  /** Never creates a session: only a customer who already started a QR checkout has one */
+  private readonly pendingPaymentResource = resource({
+    params: () => this.auth.user()?.id,
+    loader: () => this.repository.findPendingPayment(),
+  });
+  private readonly pendingPayment = computed(() =>
+    this.pendingPaymentResource.hasValue() ? this.pendingPaymentResource.value() : null,
+  );
   private readonly variants = signal<ReadonlyMap<number, CartVariant> | null>(null);
   private readonly checking = signal(false);
   private readonly checkFailed = signal(false);
@@ -41,9 +51,16 @@ export class CartCheckStore {
   );
   readonly items = computed(() => {
     const variants = this.variants();
-    return variants ? toCartItems(this.cart.lines(), variants) : [];
+    return variants
+      ? toCartItems(this.cart.lines(), variants, this.pendingPayment()?.variantIds)
+      : [];
   });
   readonly hasReserved = computed(() => this.items().some((item) => item.isReserved));
+  readonly pendingPaymentCode = computed(() => this.pendingPayment()?.code ?? null);
+  readonly allReservedByYou = computed(() => {
+    const reserved = this.items().filter((item) => item.isReserved);
+    return reserved.length > 0 && reserved.every((item) => item.isReservedByYou);
+  });
 
   private readonly orderItems = computed(() =>
     this.items()
@@ -91,6 +108,7 @@ export class CartCheckStore {
       units: this.units(),
       delivery: this.delivery(),
       pickupFee: this.pickupFee(),
+      shippingPaidByStore: this.shippingPaidByStore(),
     });
 
     return whatsappLink(storeNumber, message);

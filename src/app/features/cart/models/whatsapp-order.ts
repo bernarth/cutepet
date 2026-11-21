@@ -20,6 +20,7 @@ export interface WhatsappOrder {
   readonly units: number;
   readonly delivery: DeliveryMethod;
   readonly pickupFee: number;
+  readonly shippingPaidByStore: boolean;
 }
 
 const centimeters = new Intl.NumberFormat('es-BO', { maximumFractionDigits: 1 });
@@ -31,7 +32,7 @@ export function whatsappOrderMessage(order: WhatsappOrder): string {
     ...order.items.map(itemText),
     '',
     `Total: ${formatPrice(order.total)} (${unitsText(order.units)})`,
-    `Entrega: ${deliveryText(order.delivery, order.pickupFee)}`,
+    `Entrega: ${deliveryText(order)}`,
     '',
     '¿Me confirmas para hacer el pago?',
   ].join('\n');
@@ -60,9 +61,10 @@ function measurementsText({ neck, chest, backLength }: ItemMeasurements): string
   return parts.length ? `${parts.join(', ')} cm` : '';
 }
 
-function deliveryText(delivery: DeliveryMethod, pickupFee: number): string {
+function deliveryText({ delivery, pickupFee, shippingPaidByStore }: WhatsappOrder): string {
   if (delivery === 'bus_parcel') {
-    return 'envío por flota a otro departamento (el envío lo pago en la terminal)';
+    const payer = shippingPaidByStore ? 'lo paga CutePet' : 'lo pago en la terminal';
+    return `envío por flota a otro departamento (el envío ${payer})`;
   }
 
   return `recojo en La Paz (${pickupFee === 0 ? 'gratis' : `${formatPrice(pickupFee)} al recoger`})`;

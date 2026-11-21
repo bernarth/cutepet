@@ -13,10 +13,12 @@ import {
 } from '@angular/core';
 
 import { AuthStore } from '@core/auth/auth.store';
+import { CartStore } from '@core/cart/cart.store';
 import { SettingsRepository } from '@core/settings/settings.repository';
 import { compressPhoto } from '@shared/images/photo-compression';
 import { CheckoutOrder, checkoutView } from '../models/checkout-order';
 import { remainingSeconds } from '../models/countdown';
+import { orderReceived } from '../models/order-received';
 import { planProofUpload, proofErrorMessage } from '../models/payment-proof';
 import { CheckoutRepository } from './checkout.repository';
 
@@ -33,6 +35,7 @@ interface LoadedOrder {
 @Service({ autoProvided: false })
 export class CheckoutStore {
   private readonly auth = inject(AuthStore);
+  private readonly cart = inject(CartStore);
   private readonly repository = inject(CheckoutRepository);
   private readonly settingsRepository = inject(SettingsRepository);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
@@ -70,15 +73,21 @@ export class CheckoutStore {
     const order = this.order();
     return order ? checkoutView(order, this.secondsLeft()) : null;
   });
+  private readonly settings = computed(() =>
+    this.settingsResource.hasValue() ? this.settingsResource.value() : null,
+  );
   readonly qrImageUrl = computed(() => {
-    const path = this.settingsResource.hasValue()
-      ? this.settingsResource.value().qrImagePath
-      : null;
+    const path = this.settings()?.qrImagePath;
     return path ? this.repository.qrImageUrl(path) : null;
   });
-  readonly validationHours = computed(() =>
-    this.settingsResource.hasValue() ? this.settingsResource.value().validationHours : '',
-  );
+  readonly validationHours = computed(() => this.settings()?.validationHours ?? '');
+  readonly received = computed(() => {
+    const order = this.order();
+    const settings = this.settings();
+    return order && settings && this.view() === 'proof_received'
+      ? orderReceived(order, settings.pickup)
+      : null;
+  });
   readonly isUploading = this.uploading.asReadonly();
   readonly uploadError = this.uploadFailure.asReadonly();
 
@@ -124,6 +133,7 @@ export class CheckoutStore {
       const proof = plan.kind === 'compress' ? await compressPhoto(file) : file;
       await this.repository.submitProof(order.id, proof);
       this.orderResource.reload();
+      void this.removeOrderedFromCart(order.id);
     } catch (error) {
       this.uploadFailure.set(proofErrorMessage(error));
     } finally {
@@ -172,5 +182,17 @@ export class CheckoutStore {
       clearInterval(tick);
       document.removeEventListener('visibilitychange', onVisible);
     });
+  }
+
+  /**
+   * @description The proof is already stored, so a failure here only leaves the pieces in the cart,
+   * where the cart check shows them as taken
+   */
+  private async removeOrderedFromCart(orderId: string): Promise<void> {
+    try {
+      this.cart.remove(await this.repository.orderVariantIds(orderId));
+    } catch {
+      console.warn('The ordered pieces could not be removed from the cart');
+    }
   }
 }

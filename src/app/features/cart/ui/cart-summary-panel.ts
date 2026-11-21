@@ -56,6 +56,7 @@ export class CartSummaryPanel {
   readonly pickupFee = input.required<number>();
   readonly whatsappUrl = input.required<string | null>();
   readonly hasReserved = input.required<boolean>();
+  readonly allReservedByYou = input.required<boolean>();
   readonly qrCheckoutAvailable = input.required<boolean>();
   readonly qrDisabledMessage = input.required<string>();
   readonly shippingPromo = input.required<ShippingPromoNotice | null>();
@@ -79,7 +80,11 @@ export class CartSummaryPanel {
       );
     }
     if (this.units() === 0) {
-      hints.push('Tus prendas están reservadas por alguien más en este momento.');
+      hints.push(
+        this.allReservedByYou()
+          ? 'Tus prendas están reservadas en tu pago pendiente.'
+          : 'Tus prendas están reservadas por alguien más en este momento.',
+      );
     }
     return hints;
   });

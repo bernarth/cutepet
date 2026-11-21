@@ -55,8 +55,14 @@ describe('checkoutView', () => {
 });
 
 describe('checkoutNotice', () => {
-  it('has nothing to say while paying', () => {
+  it('has nothing to say on the views with their own screen', () => {
     expect(checkoutNotice('pay')).toBeNull();
+    expect(checkoutNotice('expired')).toBeNull();
+    expect(checkoutNotice('proof_received')).toBeNull();
+  });
+
+  it('says when the order was cancelled', () => {
+    expect(checkoutNotice('cancelled')?.message).toBe('Este pedido fue cancelado.');
   });
 
   it('says there is no pending payment when no order was found', () => {

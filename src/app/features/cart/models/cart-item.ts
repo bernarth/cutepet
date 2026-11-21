@@ -8,6 +8,8 @@ export interface CartPhoto {
   readonly alt: string;
 }
 
+export const OWN_RESERVED_NOTE = 'Está reservada en tu pago pendiente.';
+
 export interface ItemMeasurements {
   readonly neck: number | null;
   readonly chest: number | null;
@@ -32,6 +34,8 @@ export interface CartItem {
   readonly line: CartLine;
   readonly variant: CartVariant;
   readonly isReserved: boolean;
+  /** Reserved by this customer's own pending order, not by someone else */
+  readonly isReservedByYou: boolean;
 }
 
 export interface QuantityLimit {
@@ -75,12 +79,22 @@ export function reviewCart(
 export function toCartItems(
   lines: readonly CartLine[],
   variants: ReadonlyMap<number, CartVariant>,
+  ownPendingIds: ReadonlySet<number> = new Set(),
 ): CartItem[] {
   return lines.flatMap((line) => {
     const variant = variants.get(line.variantId);
-    return variant && variant.stock > 0
-      ? [{ line, variant, isReserved: variant.availableStock <= 0 }]
-      : [];
+    if (!variant || variant.stock <= 0) {
+      return [];
+    }
+    const isReserved = variant.availableStock <= 0;
+    return [
+      {
+        line,
+        variant,
+        isReserved,
+        isReservedByYou: isReserved && ownPendingIds.has(line.variantId),
+      },
+    ];
   });
 }
 

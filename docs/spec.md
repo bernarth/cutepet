@@ -146,13 +146,11 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
 
 ## Current status
 
-> Updated on 2026-11-19.
+> Updated on 2026-11-20.
 
-- Steps 1 to 5 are done. Step 6 (full QR checkout) is next.
-- QA deployment is prepared (`Dockerfile`, `docs/deploy.md`). The owner deploys it and pushes the migrations to the QA project.
-- These migrations exist only in the local database and are not pushed to the remote project yet: `20261026001300_remove_made_to_order` (step 3) and `20261118000100` to `20261118000500` (step 5). Push them only after asking the owner.
-- Remote setup still pending: Google provider in the dashboard (the owner does it) and anonymous sign-ins, which are turned on again in step 6 together with Turnstile.
-- Before go-live: anonymous sign-ins and Turnstile are still pending.
+- Steps 1 to 6 are done in code. Step 7 (notifications) is next.
+- The QA project has every migration up to `20261118000500`. Step 6 adds `20261120000100_qr_checkout` and `20261120000200_cancel_own_order`, which exist only locally. Push them only after asking the owner.
+- Remote setup still pending for step 6: the Turnstile widget, the Supabase captcha, anonymous sign-ins and the `TURNSTILE_SITE_KEY` variable in Coolify (`docs/deploy.md`).
 
 ## QA environment
 
@@ -161,7 +159,7 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
 - Uses its own free Supabase project (the QA project). It is deleted at launch and replaced by a new production project (step 10). The Docker image is the same; only the environment variables change.
 - `NO_INDEX=true` the whole time: `robots.txt` disallows everything and every response carries `noindex`.
 - Only test data. `supabase/seed.sql` is for the local stack and is never pushed. Products are added from the admin panel.
-- Dashboard setup (done by the owner): Site URL and Redirect URLs, Google provider, the custom access token hook, and the admin row. Anonymous sign-ins stay off until step 6.
+- Dashboard setup (done by the owner): Site URL and Redirect URLs, Google provider, the custom access token hook, and the admin row. Anonymous sign-ins are turned on together with Turnstile when step 6 is deployed.
 
 ## Decisions
 
@@ -229,7 +227,6 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
   - Each measurement is matched on its own. The calculator recommends the **largest** match and shows a note if the matches differ.
   - Outside every size → suggest a custom request.
   - If the item has exact measurements, compare against those instead of the table (details in "Step 3" below).
-- **Settings reader (step 6):** `settings` is read in two places today (the catalog size tolerance and the cart). QR checkout is the third reader, so step 6 extracts one shared settings reader in `core/` and moves both existing readers to it.
 
 ### Delivery and pricing
 
@@ -238,13 +235,13 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
 
 ### Security
 
-- Cloudflare Turnstile protects anonymous sign-in. Implemented in step 6 (QR checkout); nothing in the schema.
+- Cloudflare Turnstile protects anonymous sign-in (step 6). The site key is the public `TURNSTILE_SITE_KEY` variable; the secret lives only in the Supabase captcha setting.
 - Dependency security: `pnpm-workspace.yaml` only allows install scripts for the packages listed in `allowBuilds` and enforces `trustPolicy: no-downgrade`. No exceptions are added without asking the owner.
 
 ### Hosting
 
 - Hosting the SSR app is handled by the owner: a Docker image on the owner's VPS with Coolify, behind Cloudflare (`docs/deploy.md`). Only the domain is paid.
-- Configuration is read from environment variables when the server starts (`SITE_URL`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `NG_ALLOWED_HOSTS`, `NO_INDEX`), so one image serves QA and production. The browser gets them from `/runtime-config.js`, so they must never include a secret.
+- Configuration is read from environment variables when the server starts (`SITE_URL`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `TURNSTILE_SITE_KEY`, `NG_ALLOWED_HOSTS`, `NO_INDEX`), so one image serves QA and production. The browser gets them from `/runtime-config.js`, so they must never include a secret.
 - Angular SSR answers only the hosts in `NG_ALLOWED_HOSTS`, so that variable must list the production domain (and `www` if used).
 - The free Supabase project pauses after a week without activity. A free scheduled job (e.g. a GitHub Action) queries it daily to keep it alive (step 10).
 
@@ -328,7 +325,7 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
 
 There is no quantity stepper while every piece is unique; a line can only be removed.
 
-**Cart page.** Items, a delivery choice (pickup point in La Paz by default, or bus parcel shipping) and a summary. The total is the items only. The pickup rule comes from settings and is always shown: "Recojo en La Paz: Bs 2, gratis desde 3 prendas", or "Recojo en La Paz: gratis" once the cart reaches the threshold (counted in units). Bus parcel shipping says the customer pays it at the terminal. The shipping promotion is left for step 6. Only the delivery method is asked here; no name, phone or city.
+**Cart page.** Items, a delivery choice (pickup point in La Paz by default, or bus parcel shipping) and a summary. The total is the items only. The pickup rule comes from settings and is always shown: "Recojo en La Paz: Bs 2, gratis desde 3 prendas", or "Recojo en La Paz: gratis" once the cart reaches the threshold (counted in units). Bus parcel shipping says the customer pays it at the terminal, unless the shipping promotion applies (step 6). Only the delivery method is asked here; no name, phone or city.
 
 **WhatsApp order.**
 
@@ -458,6 +455,25 @@ There is no quantity stepper while every piece is unique; a line can only be rem
 Apply new migrations with `supabase migration up`, which keeps `auth.users` and the admin row. Use `supabase db reset` only for a clean start; it deletes the users, so steps 2 to 4 must be repeated.
 
 **Remote project.** Migrations are pushed only when step 5 is done and `pnpm check` passes, after asking the owner. The owner configures the Google provider in the dashboard.
+
+### Step 6: QR checkout
+
+> Recorded on 2026-11-20.
+
+- **One settings reader:** `core/settings` reads the public columns once and maps them to `StoreSettings`, including `qrCheckoutAvailable` (on, with an image, and not past its expiry date in La Paz time). The cart, the catalog tolerance, quick sale, the admin order page and checkout all use it. The settings form keeps its own full read because it edits the row.
+- **Shared customer rules:** `core/orders/customer-details` has the delivery type and labels, the phone pattern and the Signal Forms schema used by quick sale and QR checkout.
+- **Expired QR:** a daily pg_cron job (00:05 La Paz) turns QR checkout off with the audit reason `qr_expired`, and `reserve_order` also refuses an expired QR or a missing image.
+- **Cart:** with QR available, "Pagar con QR" is the `.cp-cta` and WhatsApp is secondary. Below 768px the total and the main button sit in a fixed bottom bar. The delivery choice is kept in memory for the visit, never stored. "El costo de la entrega no está incluido en el total." appears only when delivery costs the customer something.
+- **Shipping promotion:** shown only when it is on. The cart, the form, the confirmation and the WhatsApp message say when CutePet pays the bus parcel.
+- **Form inside `/carrito`:** name, phone and the bus parcel fields. Name and phone are not remembered. The guest session is created only when the customer reserves, after the Turnstile check, and only if there is no session yet.
+- **Conflicts:** a reserved piece is explained in its own row; the page scrolls to it and announces it through a polite live region.
+- **Payment screen `/pagar/:code`:** exact amount, the code to type in the glosa with a copy button, the QR with "Descargar QR" as the `.cp-cta`, the countdown, validation hours, proof upload and "Cancelar pedido". The countdown starts from the `seconds_left` the server sends and asks the server again at 0 and when the tab becomes visible. `/pagar` without a code opens the latest pending or expired order.
+- **Proof files:** images over 5 MB are compressed in the browser; PDFs over 5 MB and other types are rejected with a message.
+- **Expired reservation:** "Tu reserva venció" offers "Ya pagué, subir comprobante" (a late proof, always accepted for the latest expired order) and "Volver a intentarlo".
+- **Confirmation:** the pickup address, hours, `pickup_notice` and fee, or the bus parcel destination, the promise of the shipping receipt by WhatsApp and who pays it. A `needs_attention` order only says: "Recibimos tu comprobante 🐾. Una de las prendas ya no estaba disponible, así que te escribiremos por WhatsApp para resolverlo." After the proof, the ordered pieces are removed from the cart.
+- **Coming back:** when a session already exists, the cart asks `my_checkout_order()` and shows "Tienes un pago pendiente: CODE · Continuar" for an order still on time. Pieces held by that order read "Está reservada en tu pago pendiente." instead of the note about someone else. Another device or cleared browser data means contacting the store by WhatsApp; finding orders by link is step 8.
+- **Admins buying in the store** cancel their own order without a reason, like any customer. The admin panel always sends a reason, so it keeps the admin rules.
+- **Anonymous users** have the `authenticated` role. Nothing in step 6 needs to block them; pgTAP tests show they reach only their own orders and proofs. `is_anonymous` restrictions belong to step 8.
 
 ### Step 10: launch checklist
 

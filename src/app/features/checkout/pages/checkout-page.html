@@ -1,4 +1,4 @@
-<cp-page-header title="Pagar con QR" />
+<cp-page-header [title]="title()" />
 <cp-loading-bar [active]="isBusy()" label="Buscando tu pedido" />
 
 @if (store.hasError()) {
@@ -46,8 +46,17 @@
       <button mat-button class="cancel" type="button" (click)="cancel()">Cancelar pedido</button>
     </section>
   </div>
+} @else if (store.view() === 'expired' && store.order(); as order) {
+  <cp-expired-order-card
+    [code]="order.code"
+    [uploading]="store.isUploading()"
+    [error]="store.uploadError()"
+    (file)="store.uploadProof($event)"
+  />
+} @else if (store.received(); as received) {
+  <cp-order-received-card [received]="received" [code]="store.order()?.code ?? ''" />
 } @else if (notice(); as notice) {
   <cp-empty-state [icon]="notice.icon" [message]="notice.message">
-    <a mat-flat-button [routerLink]="notice.actionLink">{{ notice.actionLabel }}</a>
+    <a mat-flat-button routerLink="/carrito">Ir al carrito</a>
   </cp-empty-state>
 }

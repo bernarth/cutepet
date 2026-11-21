@@ -6,7 +6,7 @@ import { RouterLink } from '@angular/router';
 
 import { itemsTotal } from '@core/cart/cart-summary';
 import { PricePipe } from '@shared/pipes/price';
-import { CartItem, RESERVED_NOTE } from '../models/cart-item';
+import { CartItem, OWN_RESERVED_NOTE, RESERVED_NOTE } from '../models/cart-item';
 
 @Component({
   selector: 'cp-cart-item-row',
@@ -29,7 +29,7 @@ import { CartItem, RESERVED_NOTE } from '../models/cart-item';
       </span>
       <span class="price">{{ lineTotal() | price }}</span>
       @if (item().isReserved) {
-        <span class="reserved-note">{{ reservedNote }}</span>
+        <span class="reserved-note">{{ reservedNote() }}</span>
       }
     </div>
     <button mat-icon-button type="button" [attr.aria-label]="removeLabel()" (click)="remove.emit()">
@@ -85,7 +85,9 @@ export class CartItemRow {
   readonly item = input.required<CartItem>();
   readonly remove = output();
 
-  protected readonly reservedNote = RESERVED_NOTE;
+  protected readonly reservedNote = computed(() =>
+    this.item().isReservedByYou ? OWN_RESERVED_NOTE : RESERVED_NOTE,
+  );
 
   protected readonly lineTotal = computed(() =>
     itemsTotal([{ unitPrice: this.item().variant.unitPrice, quantity: this.item().line.quantity }]),

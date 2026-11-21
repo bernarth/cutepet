@@ -1,6 +1,7 @@
 <cp-page-header title="Tu carrito" />
 <cp-loading-bar [active]="check.isLoading()" label="Revisando tu carrito" />
 
+<cp-pending-payment-notice [code]="check.pendingPaymentCode()" />
 @if (check.notices().length) {
   <div class="notices" role="status">
     @for (notice of check.notices(); track notice) {
@@ -71,6 +72,7 @@
         [pickupFee]="check.pickupFee()"
         [whatsappUrl]="check.whatsappUrl()"
         [hasReserved]="check.hasReserved()"
+        [allReservedByYou]="check.allReservedByYou()"
         [qrCheckoutAvailable]="check.qrCheckoutAvailable()"
         [qrDisabledMessage]="settings.qrDisabledMessage"
         [shippingPromo]="check.shippingPromo()"

@@ -25,6 +25,7 @@ function order(overrides: Partial<WhatsappOrder>): WhatsappOrder {
     units: 1,
     delivery: 'pickup_point',
     pickupFee: 2,
+    shippingPaidByStore: false,
     ...overrides,
   };
 }
@@ -67,5 +68,11 @@ describe('whatsappOrderMessage', () => {
     expect(whatsappOrderMessage(order({ delivery: 'bus_parcel' }))).toContain(
       'Entrega: envío por flota a otro departamento (el envío lo pago en la terminal)',
     );
+  });
+
+  it('says CutePet pays the bus parcel when the shipping promotion applies', () => {
+    expect(
+      whatsappOrderMessage(order({ delivery: 'bus_parcel', shippingPaidByStore: true })),
+    ).toContain('Entrega: envío por flota a otro departamento (el envío lo paga CutePet)');
   });
 });

@@ -7,6 +7,11 @@ import { unwrap } from '@shared/data-access/supabase-result';
 import { CartVariant } from '../models/cart-item';
 import { toCartVariant } from '../models/cart-variant.mapper';
 
+export interface PendingPayment {
+  readonly code: string;
+  readonly variantIds: ReadonlySet<number>;
+}
+
 export interface OrderItemRequest {
   readonly variant_id: number;
   readonly quantity: number;
@@ -46,5 +51,21 @@ export class CartRepository {
     const rpcItems = items.map(({ variant_id, quantity }) => ({ variant_id, quantity }));
     const order = unwrap(await this.supabase.rpc('reserve_order', { items: rpcItems, ...details }));
     return order.code;
+  }
+
+  /**
+   * @description Only for a customer who already has a session. The latest order still waiting for
+   * payment within its reservation, or null
+   */
+  async findPendingPayment(): Promise<PendingPayment | null> {
+    const [order] = unwrap(await this.supabase.rpc('my_checkout_order', {}));
+    if (order?.status !== 'pending_payment' || (order.seconds_left ?? 0) <= 0) {
+      return null;
+    }
+
+    const items = unwrap(
+      await this.supabase.from('order_items').select('variant_id').eq('order_id', order.id),
+    );
+    return { code: order.code, variantIds: new Set(items.map((item) => item.variant_id)) };
   }
 }
