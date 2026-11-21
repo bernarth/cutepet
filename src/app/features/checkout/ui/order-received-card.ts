@@ -14,6 +14,9 @@ import { OrderReceived } from '../models/order-received';
       [message]="received().message"
     >
       <p class="code">Pedido {{ code() }}</p>
+      @if (received().contact; as contact) {
+        <p>{{ contact }}</p>
+      }
       @if (received().delivery; as delivery) {
         <section class="delivery" aria-labelledby="delivery-title">
           <h2 id="delivery-title">{{ delivery.title }}</h2>

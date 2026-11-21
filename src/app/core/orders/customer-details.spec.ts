@@ -7,6 +7,7 @@ import {
   EMPTY_CUSTOMER_DETAILS,
   customerDetailsSchema,
   toCustomerDetailsRequest,
+  whatsappContactText,
 } from './customer-details';
 
 const customer: CustomerDetails = {
@@ -91,5 +92,16 @@ describe('toCustomerDetailsRequest', () => {
 
     expect(request.recipient_name).toBe('Ana Quispe');
     expect(request.recipient_id_number).toBe('1234567 LP');
+  });
+});
+
+describe('whatsappContactText', () => {
+  it('shows a valid phone as 4 and 4 digits', () => {
+    expect(whatsappContactText(' 71234567 ')).toBe('Te escribiremos al 7123 4567 por WhatsApp.');
+  });
+
+  it('says nothing while the phone is not valid', () => {
+    expect(whatsappContactText('7123456')).toBeNull();
+    expect(whatsappContactText('51234567')).toBeNull();
   });
 });

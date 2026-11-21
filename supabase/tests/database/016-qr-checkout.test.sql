@@ -1,5 +1,5 @@
 begin;
-select plan(25);
+select plan(27);
 
 select tests.set_settings('{"qr_checkout_enabled": true, "qr_image_path": "qr/test.png", "qr_expires_on": null, "reservation_minutes": 15}');
 select tests.create_variant() as guest_variant \gset
@@ -10,6 +10,7 @@ select tests.create_variant() as qr_variant \gset
 select tests.create_guest() as guest \gset
 select tests.create_guest() as other_guest \gset
 select tests.create_user('late@test.bo') as late_customer \gset
+select tests.create_user('admin@test.bo') as admin_id \gset
 
 -- Guests (anonymous users) can do the whole QR checkout on their own orders
 
@@ -92,6 +93,18 @@ select is(
 select is(
   (select m.seconds_left from public.my_checkout_order((tests.order_row(:'newer_order')).code) m),
   null, 'only pending orders have seconds left');
+select is(
+  (select m.customer_phone from public.my_checkout_order((tests.order_row(:'newer_order')).code) m),
+  (tests.order_row(:'newer_order')).customer_phone, 'the customer gets the phone the owner will write to');
+select tests.clear_authentication();
+
+select tests.authenticate_as(:'admin_id', true);
+select public.cancel_order(:'newer_order', 'Pago no recibido');
+select tests.clear_authentication();
+select tests.authenticate_as(:'late_customer');
+select is(
+  (select m.status_before_cancel from public.my_checkout_order((tests.order_row(:'newer_order')).code) m),
+  'proof_uploaded', 'a rejected proof is told apart from other cancellations');
 select tests.clear_authentication();
 
 -- Expired QR

@@ -4,7 +4,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 
-import { CustomerDetails, DELIVERY_LABELS } from '@core/orders/customer-details';
+import {
+  CustomerDetails,
+  DELIVERY_LABELS,
+  whatsappContactText,
+} from '@core/orders/customer-details';
 import { Turnstile } from '@shared/ui/turnstile';
 import { busParcelPayerText } from '../models/delivery';
 import { CheckoutBar } from './checkout-bar';
@@ -48,6 +52,10 @@ import { CheckoutBar } from './checkout-bar';
     .error {
       color: var(--mat-sys-error);
     }
+    .contact {
+      font: var(--mat-sys-body-medium);
+      text-align: center;
+    }
   `,
 })
 export class QrCheckoutForm {
@@ -69,6 +77,9 @@ export class QrCheckoutForm {
   protected readonly captchaFailed = signal(false);
   protected readonly isBusParcel = computed(
     () => this.details().deliveryMethod().value() === 'bus_parcel',
+  );
+  protected readonly contactText = computed(() =>
+    whatsappContactText(this.details().customerPhone().value()),
   );
   protected readonly deliveryLabel = computed(() => {
     const label = DELIVERY_LABELS[this.details().deliveryMethod().value()];

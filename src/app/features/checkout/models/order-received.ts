@@ -1,3 +1,4 @@
+import { whatsappContactText } from '@core/orders/customer-details';
 import { PickupInfo } from '@core/settings/store-settings';
 import { formatPrice } from '@shared/pipes/price';
 
@@ -8,6 +9,8 @@ export const NEEDS_ATTENTION_MESSAGE =
 
 export interface OrderReceived {
   readonly message: string;
+  /** The phone the owner will write to, so a typo is easy to notice */
+  readonly contact: string | null;
   /** Null when the order needs the owner first, so no delivery promise is made yet */
   readonly delivery: DeliveryDetails | null;
 }
@@ -22,7 +25,7 @@ export interface DeliveryDetails {
  */
 export function orderReceived(order: CheckoutOrder, pickup: PickupInfo): OrderReceived {
   if (order.needsAttention) {
-    return { message: NEEDS_ATTENTION_MESSAGE, delivery: null };
+    return { message: NEEDS_ATTENTION_MESSAGE, contact: contactText(order), delivery: null };
   }
 
   const message =
@@ -30,7 +33,11 @@ export function orderReceived(order: CheckoutOrder, pickup: PickupInfo): OrderRe
       ? 'Recibimos tu comprobante 🐾 Te escribiremos por WhatsApp cuando confirmemos tu pago.'
       : 'Tu pago está confirmado 🐾 ¡Gracias por tu compra!';
 
-  return { message, delivery: deliveryDetails(order, pickup) };
+  return { message, contact: contactText(order), delivery: deliveryDetails(order, pickup) };
+}
+
+function contactText(order: CheckoutOrder): string | null {
+  return whatsappContactText(order.customerPhone);
 }
 
 function deliveryDetails(order: CheckoutOrder, pickup: PickupInfo): DeliveryDetails {

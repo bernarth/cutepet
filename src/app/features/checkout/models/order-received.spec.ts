@@ -14,12 +14,14 @@ const order = (changes: Partial<CheckoutOrder>): CheckoutOrder => ({
   code: 'CP10023',
   status: 'proof_uploaded',
   cancelReason: null,
+  statusBeforeCancel: null,
   needsAttention: false,
   deliveryMethod: 'pickup_point',
   destinationCity: null,
   itemsTotal: 350,
   pickupFee: 2,
   shippingPaidByStore: false,
+  customerPhone: '71234567',
   secondsLeft: null,
   ...changes,
 });
@@ -29,6 +31,7 @@ describe('orderReceived', () => {
     expect(orderReceived(order({}), pickup)).toEqual({
       message:
         'Recibimos tu comprobante 🐾 Te escribiremos por WhatsApp cuando confirmemos tu pago.',
+      contact: 'Te escribiremos al 7123 4567 por WhatsApp.',
       delivery: {
         title: 'Recojo en La Paz',
         lines: [
@@ -62,6 +65,7 @@ describe('orderReceived', () => {
   it('only says the owner will write when a piece was no longer free', () => {
     expect(orderReceived(order({ needsAttention: true }), pickup)).toEqual({
       message: NEEDS_ATTENTION_MESSAGE,
+      contact: 'Te escribiremos al 7123 4567 por WhatsApp.',
       delivery: null,
     });
   });

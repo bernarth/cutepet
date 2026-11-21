@@ -38,6 +38,7 @@
       @if (store.validationHours(); as hours) {
         <p class="hours">Validamos los pagos: {{ hours }}</p>
       }
+      <p class="contact">{{ contactText() }}</p>
       <cp-proof-upload
         [uploading]="store.isUploading()"
         [error]="store.uploadError()"
@@ -57,6 +58,6 @@
   <cp-order-received-card [received]="received" [code]="store.order()?.code ?? ''" />
 } @else if (notice(); as notice) {
   <cp-empty-state [icon]="notice.icon" [message]="notice.message">
-    <a mat-flat-button routerLink="/carrito">Ir al carrito</a>
+    <a mat-flat-button [routerLink]="notice.link">{{ notice.linkLabel }}</a>
   </cp-empty-state>
 }

@@ -7,6 +7,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
+import { whatsappContactText } from '@core/orders/customer-details';
 import { PricePipe } from '@shared/pipes/price';
 import { ConfirmDialog, ConfirmDialogData } from '@shared/ui/confirm-dialog';
 import { EmptyState } from '@shared/ui/empty-state';
@@ -59,6 +60,9 @@ export class CheckoutPage {
   private readonly lookingUp = signal(false);
   protected readonly isBusy = computed(() => this.store.isLoading() || this.lookingUp());
   protected readonly countdown = computed(() => formatCountdown(this.store.secondsLeft()));
+  protected readonly contactText = computed(() =>
+    whatsappContactText(this.store.order()?.customerPhone ?? ''),
+  );
   protected readonly title = computed(() => (this.store.received() ? 'Tu pedido' : 'Pagar con QR'));
   protected readonly notice = computed(() =>
     this.isBusy() || this.store.hasError() ? null : checkoutNotice(this.store.view()),

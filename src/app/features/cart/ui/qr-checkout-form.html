@@ -67,5 +67,8 @@
       {{ isReserving() ? 'Reservando…' : 'Reservar y pagar' }}
     </button>
   </cp-checkout-bar>
+  @if (contactText(); as contact) {
+    <p class="contact">{{ contact }}</p>
+  }
   <button mat-button type="button" (click)="back.emit()">Volver al carrito</button>
 </form>

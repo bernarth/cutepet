@@ -14,6 +14,17 @@ export const DELIVERY_LABELS: Readonly<Record<DeliveryMethod, string>> = {
 export const MOBILE_PATTERN = /^[67]\d{7}$/;
 
 /**
+ * @description Shown wherever the customer can still notice a typo in their phone. Null while the
+ * phone is not valid yet
+ */
+export function whatsappContactText(phone: string): string | null {
+  const digits = phone.trim();
+  return MOBILE_PATTERN.test(digits)
+    ? `Te escribiremos al ${digits.slice(0, 4)} ${digits.slice(4)} por WhatsApp.`
+    : null;
+}
+
+/**
  * @description Who receives the order and how. Shared by the quick sale and QR checkout
  */
 export interface CustomerDetails {
