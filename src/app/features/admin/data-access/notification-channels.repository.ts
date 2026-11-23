@@ -1,7 +1,7 @@
 import { Service, inject } from '@angular/core';
 
 import { SUPABASE } from '@core/supabase/supabase.client';
-import { unwrap } from '@shared/data-access/supabase-result';
+import { unwrap, unwrapNullable } from '@shared/data-access/supabase-result';
 import {
   NotificationChannel,
   NotificationChannelChanges,
@@ -28,16 +28,16 @@ export class NotificationChannelsRepository {
 
   async save(id: number | null, changes: NotificationChannelChanges): Promise<void> {
     if (id === null) {
-      unwrap(
+      unwrapNullable(
         await this.supabase.from('notification_channels').insert({ ...changes, type: 'telegram' }),
       );
       return;
     }
-    unwrap(await this.supabase.from('notification_channels').update(changes).eq('id', id));
+    unwrapNullable(await this.supabase.from('notification_channels').update(changes).eq('id', id));
   }
 
   async setActive(id: number, isActive: boolean): Promise<void> {
-    unwrap(
+    unwrapNullable(
       await this.supabase
         .from('notification_channels')
         .update({ is_active: isActive })
