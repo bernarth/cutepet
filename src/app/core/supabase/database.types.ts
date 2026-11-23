@@ -33,6 +33,46 @@ export type Database = {
                   Relationships: [
                     
                   ]
+                },"notification_channels": {
+                  Row: {
+                    "created_at": string,"destination": string,"events": (Database["public"]['Enums']["notification_event"])[],"id": number,"is_active": boolean,"name": string,"type": Database["public"]['Enums']["notification_channel_type"]
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"destination": string,"events": (Database["public"]['Enums']["notification_event"])[],"id"?: never,"is_active"?: boolean,"name": string,"type": Database["public"]['Enums']["notification_channel_type"]
+                  }
+                  Update: {
+                    "created_at"?: string,"destination"?: string,"events"?: (Database["public"]['Enums']["notification_event"])[],"id"?: never,"is_active"?: boolean,"name"?: string,"type"?: Database["public"]['Enums']["notification_channel_type"]
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"notifications": {
+                  Row: {
+                    "attempts": number,"channel_id": number,"created_at": string,"event": Database["public"]['Enums']["notification_event"],"id": number,"is_silent": boolean,"last_error": string | null,"locked_at": string | null,"message": string,"sent_at": string | null,"status": Database["public"]['Enums']["notification_status"]
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "attempts"?: number,"channel_id": number,"created_at"?: string,"event": Database["public"]['Enums']["notification_event"],"id"?: never,"is_silent"?: boolean,"last_error"?: string | null,"locked_at"?: string | null,"message": string,"sent_at"?: string | null,"status"?: Database["public"]['Enums']["notification_status"]
+                  }
+                  Update: {
+                    "attempts"?: number,"channel_id"?: number,"created_at"?: string,"event"?: Database["public"]['Enums']["notification_event"],"id"?: never,"is_silent"?: boolean,"last_error"?: string | null,"locked_at"?: string | null,"message"?: string,"sent_at"?: string | null,"status"?: Database["public"]['Enums']["notification_status"]
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "notifications_channel_id_fkey"
+      columns: ["channel_id"]
+isOneToOne: false
+      referencedRelation: "notification_channels"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "notifications_channel_id_fkey"
+      columns: ["channel_id"]
+isOneToOne: false
+      referencedRelation: "notification_channels_overview"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"order_items": {
                   Row: {
                     "id": number,"order_id": string,"product_name": string,"quantity": number,"unit_price": number,"variant_id": number
@@ -274,6 +314,14 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"notification_channels_overview": {
+                  Row: {
+                    "created_at": string,"destination": string,"events": (Database["public"]['Enums']["notification_event"])[],"id": number,"is_active": boolean,"last_error": string | null,"name": string,"type": Database["public"]['Enums']["notification_channel_type"]
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    
+                  ]
                 }
           }
           Functions: {
@@ -354,6 +402,11 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"claim_notifications":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "destination": string,"id": number,"is_silent": boolean,"message": string
+            }[]
+                           },
 "confirm_order":
 { Args: { "order_id": string }; Returns: {
               "cancel_reason": string | null,
@@ -416,6 +469,9 @@ isOneToOne: false
       } },
 "custom_access_token_hook":
 { Args: { "event": Json }; Returns: Json
+                           },
+"finish_notification":
+{ Args: { "error_message"?: string,"notification_id": number }; Returns: undefined
                            },
 "get_audit_log":
 { Args: { "before_id"?: number,"from_date"?: string,"page_size"?: number,"target_record_id"?: string,"target_table"?: string,"to_date"?: string }; Returns: {
@@ -517,6 +573,9 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"send_test_notification":
+{ Args: { "channel_id": number }; Returns: number
+                           },
 "submit_payment_proof":
 { Args: { "order_id": string,"proof_path": string }; Returns: {
               "cancel_reason": string | null,
@@ -549,7 +608,7 @@ isOneToOne: false
       } }
           }
           Enums: {
-            "app_role": "admin","catalog_status": "available"|"reserved"|"sold_out","delivery_method": "pickup_point"|"bus_parcel","order_channel": "web"|"whatsapp","order_status": "pending_payment"|"proof_uploaded"|"confirmed"|"ready_for_pickup"|"shipped"|"delivered"|"cancelled"
+            "app_role": "admin","catalog_status": "available"|"reserved"|"sold_out","delivery_method": "pickup_point"|"bus_parcel","notification_channel_type": "telegram"|"email","notification_event": "proof_uploaded"|"qr_expiry"|"channel_test","notification_status": "pending"|"sending"|"sent"|"failed","order_channel": "web"|"whatsapp","order_status": "pending_payment"|"proof_uploaded"|"confirmed"|"ready_for_pickup"|"shipped"|"delivered"|"cancelled"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -665,7 +724,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "app_role": ["admin"],"catalog_status": ["available", "reserved", "sold_out"],"delivery_method": ["pickup_point", "bus_parcel"],"order_channel": ["web", "whatsapp"],"order_status": ["pending_payment", "proof_uploaded", "confirmed", "ready_for_pickup", "shipped", "delivered", "cancelled"]
+            "app_role": ["admin"],"catalog_status": ["available", "reserved", "sold_out"],"delivery_method": ["pickup_point", "bus_parcel"],"notification_channel_type": ["telegram", "email"],"notification_event": ["proof_uploaded", "qr_expiry", "channel_test"],"notification_status": ["pending", "sending", "sent", "failed"],"order_channel": ["web", "whatsapp"],"order_status": ["pending_payment", "proof_uploaded", "confirmed", "ready_for_pickup", "shipped", "delivered", "cancelled"]
           }
         }
 } as const
