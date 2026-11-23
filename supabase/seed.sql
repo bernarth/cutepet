@@ -115,3 +115,7 @@ join public.variants v on v.product_id = (select id from public.products where s
 
 -- Fake store number so the WhatsApp order button shows locally.
 update public.settings set store_whatsapp = '59170000000';
+
+-- Local values for the notify Edge Function (not secrets). The QA and production values are set by hand.
+select vault.create_secret('http://api.supabase.internal:8000/functions/v1/notify', 'notify_url');
+select vault.create_secret('http://localhost:4200', 'site_url');

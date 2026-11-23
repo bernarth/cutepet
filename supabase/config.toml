@@ -401,6 +401,10 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+# Called by pg_net from the database. It only sends rows already queued in the outbox.
+[functions.notify]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327

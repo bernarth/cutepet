@@ -525,9 +525,10 @@ Commands and dashboard paths are in `docs/deploy.md`.
 4. Google provider: in Google Cloud, add the redirect URI `https://<new-ref>.supabase.co/auth/v1/callback` to the OAuth client and remove the QA one. Publish the consent screen (Testing mode only lets listed test users sign in). Then enable Google in the Supabase dashboard with the client ID and secret.
 5. Authentication → Hooks: enable the custom access token hook with `public.custom_access_token_hook`.
 6. Turn on anonymous sign-ins together with Turnstile (Authentication → Attack Protection → CAPTCHA), as built in step 6.
-7. The owner signs in with Google once, then add the admin row (`insert into public.user_roles ...`, see "Local admin user") and sign out and in again.
-8. Authentication → URL Configuration: Site URL `https://<domain>`, Redirect URLs `https://<domain>/**` and `https://www.<domain>/**`.
-9. Coolify: set the new `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` (and `SITE_URL` and `NG_ALLOWED_HOSTS` if the domain changes), then redeploy.
-10. Turn noindex off: `NO_INDEX=false`, redeploy, and check that `/robots.txt` allows everything and responses have no `x-robots-tag`.
-11. Point the keep-alive job to the production project.
-12. Upload product photos from the owner's phone (gallery and camera) on the deployed site.
+7. Notifications: set `TELEGRAM_BOT_TOKEN` with `supabase secrets set --env-file <file outside the repo>`, deploy with `supabase functions deploy notify --no-verify-jwt`, and in the SQL Editor create the Vault values `notify_url` (`https://<new-ref>.supabase.co/functions/v1/notify`) and `site_url` (`https://<domain>`). After step 8, add the channels from `/admin/notificaciones` and send a test.
+8. The owner signs in with Google once, then add the admin row (`insert into public.user_roles ...`, see "Local admin user") and sign out and in again.
+9. Authentication → URL Configuration: Site URL `https://<domain>`, Redirect URLs `https://<domain>/**` and `https://www.<domain>/**`.
+10. Coolify: set the new `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` (and `SITE_URL` and `NG_ALLOWED_HOSTS` if the domain changes), then redeploy.
+11. Turn noindex off: `NO_INDEX=false`, redeploy, and check that `/robots.txt` allows everything and responses have no `x-robots-tag`.
+12. Point the keep-alive job to the production project.
+13. Upload product photos from the owner's phone (gallery and camera) on the deployed site.
