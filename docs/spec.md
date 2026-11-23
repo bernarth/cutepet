@@ -111,7 +111,7 @@ QR checkout on/off and alternative message · QR image + expiry date (warning "v
 
 - **Channels table** `notification_channels`: type (`telegram` | `email`), destination (chat ID or address), subscribed events, active. Adding a recipient is adding a row from the panel; no code change.
 - **Events:** proof uploaded, new custom request, QR about to expire.
-- **Flow:** DB trigger/webhook → Edge Function `notify` → each active channel subscribed to the event.
+- **Flow:** the RPC that causes the event writes one row per subscribed channel to the `notifications` outbox → `pg_net` calls the Edge Function `notify` after commit → `notify` sends each row (details in "Step 7" below).
 - **To the customer:** buttons in the panel that open WhatsApp with prefilled messages (confirmed, ready for pickup, shipping receipt, proof rejected).
 - WhatsApp Business API is out of scope (paid).
 
@@ -148,7 +148,7 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
 
 > Updated on 2026-11-21.
 
-- Steps 1 to 6 are done and deployed to QA. Step 7 (notifications) is next.
+- Steps 1 to 6 are done and deployed to QA. Step 7 (notifications) is in progress: Telegram only; the email sender (Resend) is a later step.
 - The QA project has every migration up to `20261121000100_checkout_order_phone`. No migrations are pending.
 - The remote QA setup for step 6 is complete: the Turnstile widget, the Supabase captcha, anonymous sign-ins and the `TURNSTILE_SITE_KEY` variable in Coolify (`docs/deploy.md`).
 
@@ -474,6 +474,46 @@ Apply new migrations with `supabase migration up`, which keeps `auth.users` and 
 - **Coming back:** when a session already exists, the cart asks `my_checkout_order()` and shows "Tienes un pago pendiente: CODE · Continuar" for an order still on time. Pieces held by that order read "Está reservada en tu pago pendiente." instead of the note about someone else. Another device or cleared browser data means contacting the store by WhatsApp; finding orders by link is step 8.
 - **Admins buying in the store** cancel their own order without a reason, like any customer. The admin panel always sends a reason, so it keeps the admin rules.
 - **Anonymous users** have the `authenticated` role. Nothing in step 6 needs to block them; pgTAP tests show they reach only their own orders and proofs. `is_anonymous` restrictions belong to step 8.
+
+### Step 7: notifications
+
+> Recorded on 2026-11-22 while planning step 7.
+
+**Where events come from.** Events are queued by the RPC that causes them, not by a status trigger, because restore and revert also reach `proof_uploaded` and must not alert.
+
+- `submit_payment_proof` queues `proof_uploaded` (on time and late proofs).
+- The daily `close_expired_qr` job (00:05 La Paz) queues `qr_expiry`: a warning when the enabled QR expires in 7, 3 or 1 days, and "El QR venció y se desactivó el pago con QR" when it turns QR checkout off.
+- `send_test_notification` (admin only) queues `channel_test` for one channel, active or not.
+- Step 8 adds `custom_request_created` to the `notification_event` enum and queues it from its RPC. Nothing else changes.
+
+**Outbox.** `notifications` holds one row per event and channel: the final message, status (`pending`, `sending`, `sent`, `failed`), attempts and last error.
+
+- Rows are written in the same transaction as the order. `pg_net` calls `notify` only after commit and never waits for it, so a notification failure never blocks or rolls back an order.
+- `notify` claims rows atomically, sends them and records the result. The table is the log, the duplicate guard and the retry queue. Rows are never deleted.
+- Retries: a failed row is sent again up to 3 attempts in total. A `retry-notifications` pg_cron job every 5 minutes calls `notify` when retryable rows exist. The "Por revisar" order list stays the safety net.
+- Messages are rendered in Postgres when queued (templates, HTML escaping, La Paz dates, Bs format), so pgTAP covers them. `notify` only sends.
+- The outbox holds personal data: only admins can read it; no access for `anon`, customers or anonymous users.
+
+**Configuration.**
+
+- `TELEGRAM_BOT_TOKEN` is the only secret, as an Edge Function secret.
+- Two non-secret values per environment live in Vault: `notify_url` (the function URL) and `site_url` (for links in messages). Without `notify_url` the rows stay `pending` and go out once it is set.
+- `notify` runs with `verify_jwt = false`: it only sends rows already queued, so calling it from outside sends nothing new.
+
+**Channels.** `notification_channels`: required short name (2 to 40 characters), type (`telegram` | `email`), destination, subscribed events, active. Never deleted, only deactivated. Admin-only RLS; audited.
+
+- Telegram only in this step. The `email` type stays in the enum, but the panel does not offer it and queuing skips it until the Resend step.
+- A Telegram destination is a chat ID (`-?` digits; groups are negative). The person must send `/start` to the bot before their chat ID works.
+
+**Messages to the owner** (Spanish, Telegram HTML). Every customer-provided value (name, city, reason) is HTML-escaped. The phone is a `wa.me/591<number>` link. Dates and times use America/La_Paz.
+
+- Proof uploaded: order code, total, customer name, phone, delivery line ("Recojo en La Paz" or "Envío por flota a {ciudad}"), time, and a link to `/admin/pedidos/:code`. No piece list.
+- Late proof with `needs_attention`: a ⚠️ header saying a piece is no longer free and must be resolved by WhatsApp before confirming.
+- Late proof with every piece still free: the normal alert plus "Llegó después de que venció la reserva; las prendas seguían libres."
+- QR alerts link to `/admin/configuracion`.
+- QR alerts are sent silently (Telegram `disable_notification`) because they go out at 00:05. Proof alerts are never silent, at any hour; there is no quiet hours logic.
+
+**Admin page `/admin/notificaciones`.** Mobile first. A list of channels with name, chat ID, event chips, an active toggle, "Editar", "Enviar prueba" and "Último envío falló: …" when the latest delivery failed. Add and edit in a dialog. "Enviar prueba" goes through the real path (outbox row → `notify`), and the chat ID field explains the `/start` requirement.
 
 ### Step 10: launch checklist
 

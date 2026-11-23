@@ -60,14 +60,18 @@ Everything that protects money or stock lives in Postgres, not in Angular:
 ## Notifications and AI (server side)
 
 ```
-orders (status → proof_uploaded) ──trigger/webhook──▶ Edge Function `notify`
-                                                        ├─ (optional, later) OpenRouter vision check
-                                                        └─ for each active row in notification_channels
-                                                             ├─ telegram → chat_id
-                                                             └─ email    → address
+submit_payment_proof ─┐
+close_expired_qr ─────┼─▶ notifications outbox ──pg_net, after commit──▶ Edge Function `notify`
+send_test_notification┘   (one row per active,                            ├─ claim rows
+                           subscribed channel;                            ├─ telegram → chat_id
+                           message rendered in SQL)                       └─ record sent / failed
+                                  ▲
+retry-notifications (pg_cron, every 5 min) ── calls `notify` again while failed rows have attempts left (max 3)
 ```
 
-- Channels are data, not code: adding a recipient is a row in `notification_channels` (type, destination, subscribed events, active).
+- Channels are data, not code: adding a recipient is a row in `notification_channels` (name, type, destination, subscribed events, active).
+- Events are queued by the RPC that causes them, never by a status trigger. A notification failure never blocks or rolls back the order.
+- Email channels and the OpenRouter check are later steps.
 - The AI step is optional and only adds information to the alert; it never confirms a payment.
 - Secrets (Telegram bot token, OpenRouter API key, email provider key) are Edge Function secrets.
 
