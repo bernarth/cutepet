@@ -1,73 +1,147 @@
 {
-  "version": 1,
+  "version": 2,
   "skills": {
+    "PR Review": {
+      "source": "angular/angular",
+      "commit": "8b15295e8c7f1543d41dadb5955279702be52c16",
+      "sourceType": "github",
+      "skillPath": ".agent/skills/pr_review/SKILL.md",
+      "computedHash": "e7f931e12735e1a8735b1f57d6892fdb1bad268e4cb4c5aa9e208d31c421b375",
+      "installMode": "copy"
+    },
     "accessibility": {
       "source": "addyosmani/web-quality-skills",
-      "sourceType": "autoskills-registry",
-      "computedHash": "2174f783a038a7ca4869c4c18e14726ec13b9c6b705d59253f647d0ca37cb78d"
+      "commit": "afa8da942115f2961fdbfa80807ea0b232ff6c00",
+      "sourceType": "github",
+      "skillPath": "skills/accessibility/SKILL.md",
+      "computedHash": "c668809f5df57feb87cc06f1bc37fb340d1d92e26bacb6edbeab9258d22e76a5"
     },
     "adev-writing-guide": {
       "source": "angular/angular",
-      "sourceType": "autoskills-registry",
-      "computedHash": "c7ab4fc48e0edcefb0b8a2ec19ce724fe02c0f068f384fe5c0b9de6b39f6f197"
+      "commit": "8b15295e8c7f1543d41dadb5955279702be52c16",
+      "sourceType": "github",
+      "skillPath": ".agent/skills/adev-writing-guide/SKILL.md",
+      "computedHash": "3bdcc50de384c43183cb70b3d99839cf0f070bd0273ebce9824f1dad259b62b8"
     },
     "angular-developer": {
       "source": "angular/skills",
-      "sourceType": "autoskills-registry",
-      "computedHash": "959729aa281538edc7fdfed3e71250d4eae2b863a08cb89e32fc932ea94ae9cf"
+      "commit": "97c663a02b376a19eccc60f75909f20f15a2c9c1",
+      "sourceType": "github",
+      "skillPath": "angular-developer/SKILL.md",
+      "computedHash": "05d5488f770874f6f12e6d365611a6eae449f29481a52cd8a89929e448426c54"
     },
     "frontend-design": {
       "source": "anthropics/skills",
-      "sourceType": "autoskills-registry",
-      "computedHash": "a4e6516a601f72ffd8bcd0d64609e8ba724d2ce92569a059a6890a5caadf072b"
+      "commit": "e4bb5d960d87126ff3b3a8af1a104b7db67560ba",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "computedHash": "83485963700bcf11d5bf78118facb301676b69d918fee2e45a95e7f1a2840f6c"
     },
     "impeccable": {
       "source": "pbakaus/impeccable",
+      "commit": "b49177d32788f2dc585c42831d845dacf1ebed2c",
       "sourceType": "github",
       "skillPath": ".claude/skills/impeccable/SKILL.md",
-      "computedHash": "e3bb18720f45bb007f97042d0eaf0253531af1f85f9425a89f87bc22708bc3b4"
+      "computedHash": "fb14ee9d909ddbae3c2e865da6462e7cf45ca8560e7008c6d7cc4783972ee412"
     },
     "ponytail": {
-      "source": "dietrichgebert/ponytail",
+      "source": "DietrichGebert/ponytail",
+      "commit": "ebd8654c2c627f721eb8f9c0d1bd4090a29f9e10",
       "sourceType": "github",
-      "skillPath": ".claude/skills/ponytail/SKILL.md",
-      "computedHash": "061f887d9e3e735f85db3be3655a8936a00f24d5fb65ac4ab74a968a770fe342"
+      "skillPath": "skills/ponytail/SKILL.md",
+      "computedHash": "56d72677aca02689ac89bd48734e8c19b40ab86716d1257eaf5f1238b43cda6b",
+      "installMode": "copy"
     },
-    "pr_review": {
-      "source": "angular/angular",
-      "sourceType": "autoskills-registry",
-      "computedHash": "f53bb16d1a293a3440f04a607a78a7c0c908739e712592e39c484259354c889b"
+    "ponytail-audit": {
+      "source": "DietrichGebert/ponytail",
+      "commit": "ebd8654c2c627f721eb8f9c0d1bd4090a29f9e10",
+      "sourceType": "github",
+      "skillPath": "skills/ponytail-audit/SKILL.md",
+      "computedHash": "20dca08a5d047285c61702d496317eb84f501bbd573a45f3c8f93fdb3cecde4c",
+      "installMode": "copy"
+    },
+    "ponytail-debt": {
+      "source": "DietrichGebert/ponytail",
+      "commit": "ebd8654c2c627f721eb8f9c0d1bd4090a29f9e10",
+      "sourceType": "github",
+      "skillPath": "skills/ponytail-debt/SKILL.md",
+      "computedHash": "6bcafbbd5d7ab3c09fbe1b040c2c8f3d0aae3c7e6e24339be253af354ab5cacd",
+      "installMode": "copy"
+    },
+    "ponytail-gain": {
+      "source": "DietrichGebert/ponytail",
+      "commit": "ebd8654c2c627f721eb8f9c0d1bd4090a29f9e10",
+      "sourceType": "github",
+      "skillPath": "skills/ponytail-gain/SKILL.md",
+      "computedHash": "8dc7d5a5314e0720ff2e2b740486314b4607765181ede820f6b7e86a3d5fd814",
+      "installMode": "copy"
+    },
+    "ponytail-help": {
+      "source": "DietrichGebert/ponytail",
+      "commit": "ebd8654c2c627f721eb8f9c0d1bd4090a29f9e10",
+      "sourceType": "github",
+      "skillPath": "skills/ponytail-help/SKILL.md",
+      "computedHash": "decfe28950443ddc04cf06badab1ebe325d149bc7dccdd3ce43ff8be27d92103",
+      "installMode": "copy"
+    },
+    "ponytail-review": {
+      "source": "DietrichGebert/ponytail",
+      "commit": "ebd8654c2c627f721eb8f9c0d1bd4090a29f9e10",
+      "sourceType": "github",
+      "skillPath": "skills/ponytail-review/SKILL.md",
+      "computedHash": "fe7b781db99ce79d931cdc798b3fbccd84b82538de4a3fc5f6d9d466946d1458",
+      "installMode": "copy"
     },
     "reference-compiler-cli": {
       "source": "angular/angular",
-      "sourceType": "autoskills-registry",
-      "computedHash": "03610c5196684d4ba6b6079bc3b2c8d28645ce1bc4443dc62dbc78b444684dad"
+      "commit": "8b15295e8c7f1543d41dadb5955279702be52c16",
+      "sourceType": "github",
+      "skillPath": ".agent/skills/reference-compiler-cli/SKILL.md",
+      "computedHash": "a3ece443e3247fc77a967da9e7edfb04013de4a8f3649b09d276ae12d2b92c4c"
     },
     "reference-core": {
       "source": "angular/angular",
-      "sourceType": "autoskills-registry",
-      "computedHash": "c198e0de139cef99e8dd330132a27981a5e1d298be2ecf485f8af81162ad474a"
+      "commit": "8b15295e8c7f1543d41dadb5955279702be52c16",
+      "sourceType": "github",
+      "skillPath": ".agent/skills/reference-core/SKILL.md",
+      "computedHash": "102342740d6c16935f10b44fe88d7221b7a0785762fddd1a22fddbdf6c436a11"
     },
     "reference-signal-forms": {
       "source": "angular/angular",
-      "sourceType": "autoskills-registry",
-      "computedHash": "96b33fe80f33529bb3050a6c0a81c69cf7f91b80b886e27a3571399fecb2722d"
+      "commit": "8b15295e8c7f1543d41dadb5955279702be52c16",
+      "sourceType": "github",
+      "skillPath": ".agent/skills/reference-signal-forms/SKILL.md",
+      "computedHash": "971e7c0b434b982e1fc5254c6e032d6e412ab69f9460a0d664df5ae8ff3c5063"
+    },
+    "supabase": {
+      "source": "supabase/agent-skills",
+      "commit": "c9be0e931b7930f7d02126d04774d904c381e7d7",
+      "sourceType": "github",
+      "skillPath": "skills/supabase/SKILL.md",
+      "computedHash": "2fbff32fd63b7d31585cacf0ed43e5bf8d05dd20d6c0c751d256cb967a00eec1",
+      "installMode": "copy"
     },
     "supabase-postgres-best-practices": {
       "source": "supabase/agent-skills",
-      "sourceType": "autoskills-registry",
-      "computedHash": "7be4ec62e989dc425e13c0be40951f1aa81f6578483c2d2416e5c6d3c6263d42"
+      "commit": "c9be0e931b7930f7d02126d04774d904c381e7d7",
+      "sourceType": "github",
+      "skillPath": "skills/supabase-postgres-best-practices/SKILL.md",
+      "computedHash": "3eb972c2d7c818e544e35cc33ea8d7147d4d78ae08142ef40037b0fbac7a2505"
     },
     "typescript-advanced-types": {
       "source": "wshobson/agents",
-      "sourceType": "autoskills-registry",
-      "computedHash": "cb5d18bc19191b388cc49c15ff98dcbc714fa343373d078be00833e8a18ef291"
+      "commit": "51b9ae3ac68d9c236549a9b57f5dca7e6c0c168c",
+      "sourceType": "github",
+      "skillPath": "plugins/javascript-typescript/skills/typescript-advanced-types/SKILL.md",
+      "computedHash": "34c5b3863fde1fc85981ac583ecaf0140471b374d0b7002ac5bc0bea2cf38b24"
     },
     "using-superpowers": {
       "source": "obra/superpowers",
+      "commit": "22f0b463e7a5e579904dd6211a520321035526f7",
       "sourceType": "github",
-      "skillPath": ".claude/skills/using-superpowers/SKILL.md",
-      "computedHash": "ef8670c2a2d8e2f6ed52d6f3219759903300ca13afc5ec2e25826a735112562b"
+      "skillPath": "skills/using-superpowers/SKILL.md",
+      "computedHash": "6a9104fac7e16c3cec2bc118943aefd331cac35b4cfabd427cea4dc16337c6a5",
+      "installMode": "copy"
     }
   }
 }
