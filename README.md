@@ -61,11 +61,11 @@ The remote project is never changed without asking the owner first.
 ```bash
 supabase login
 supabase link --project-ref <project-ref>
-supabase db push --dry-run   # list the migrations that would be applied
-supabase db push             # apply them
+supabase db push --remote --dry-run   # list the migrations that would be applied
+supabase db push --remote             # apply them
 ```
 
-`supabase db push` only applies migrations (never `seed.sql`). These settings live in the dashboard and must be set by hand once:
+Without `--remote` the CLI targets the local stack. `supabase db push` only applies migrations (never `seed.sql`). These settings live in the dashboard and must be set by hand once:
 
 1. **Authentication → Sign In / Providers:** enable anonymous sign-ins and manual linking (so a guest's anonymous identity can be linked to Google).
 2. **Authentication → Sign In / Providers → Google:** enable it with the OAuth client ID and secret from Google Cloud. In Google Cloud, add `https://<project-ref>.supabase.co/auth/v1/callback` as an authorized redirect URI.

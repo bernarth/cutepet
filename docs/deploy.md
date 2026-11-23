@@ -88,14 +88,14 @@ Turn on the captcha before anonymous sign-ins, so there is no moment when guests
 
 ## Database migrations
 
-Run them from the repo root, against the project the deployment uses. `db push` never runs `supabase/seed.sql` unless `--include-seed` is passed, so never pass it.
+Run them from the repo root, against the project the deployment uses. Database commands target the local stack unless `--remote` is passed. `db push` never runs `supabase/seed.sql` unless `--include-seed` is passed, so never pass it.
 
 ```bash
 supabase link --project-ref <ref>      # asks for the database password
-supabase migration list --linked       # Local and Remote columns before the push
-supabase db push --linked --dry-run    # prints what would be applied, changes nothing
-supabase db push --linked
-supabase migration list --linked       # every local migration now has a Remote version
+supabase migration list --remote       # Local and Remote columns before the push
+supabase db push --remote --dry-run    # prints what would be applied, changes nothing
+supabase db push --remote
+supabase migration list --remote       # every local migration now has a Remote version
 ```
 
 Before the real push, check the dry-run output:
@@ -106,3 +106,33 @@ Before the real push, check the dry-run output:
 - Read any migration it lists that drops columns, types or policies, and confirm that the data it removes does not matter in that project.
 
 Never run `supabase config push`: it would copy the local `config.toml` auth settings (localhost Site URL, local providers) to the remote project.
+
+## Notifications
+
+Telegram alerts go through the `notify` Edge Function (spec, "Step 7"). Set it up once per Supabase project, after the migrations.
+
+1. Put `TELEGRAM_BOT_TOKEN=<token>` in a file outside the repo, then:
+
+   ```bash
+   supabase secrets set --env-file <file outside the repo>
+   rm <file outside the repo>
+   supabase secrets list                          # shows the name only
+   ```
+
+2. Deploy the function (there is no dry run):
+
+   ```bash
+   supabase functions deploy notify --no-verify-jwt
+   supabase functions list
+   ```
+
+3. Supabase → **SQL Editor**, create the two non-secret Vault values:
+
+   ```sql
+   select vault.create_secret('https://<ref>.supabase.co/functions/v1/notify', 'notify_url');
+   select vault.create_secret('https://<domain>', 'site_url');
+   ```
+
+4. Sign in as admin, open `/admin/notificaciones`, add the channels and press **Enviar prueba** on each one.
+
+Without `notify_url` alerts stay queued and go out once it is set.

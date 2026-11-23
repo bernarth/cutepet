@@ -138,7 +138,7 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
 4. ~~Cart + WhatsApp order~~ (done)
 5. ~~Admin panel: products, quick sale, orders, settings, audit log~~ (done)
 6. ~~Full QR checkout~~ (done)
-7. Notifications: `notify` Edge Function + `notification_channels`
+7. ~~Notifications: `notify` Edge Function + `notification_channels`~~ (done, Telegram only)
 8. Account, my pets, custom requests
 9. Home: featured products and categories
 10. Keep-alive job, domain and launch
@@ -146,11 +146,22 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
 
 ## Current status
 
-> Updated on 2026-11-21.
+> Updated on 2026-11-23.
 
-- Steps 1 to 6 are done and deployed to QA. Step 7 (notifications) is in progress: Telegram only; the email sender (Resend) is a later step.
-- The QA project has every migration up to `20261121000100_checkout_order_phone`. No migrations are pending.
-- The remote QA setup for step 6 is complete: the Turnstile widget, the Supabase captcha, anonymous sign-ins and the `TURNSTILE_SITE_KEY` variable in Coolify (`docs/deploy.md`).
+- Steps 1 to 7 are done and deployed to QA. Step 7 sends Telegram alerts only; email notifications (Resend, sending from an `avisos.<dominio>` subdomain) come later.
+- The QA project has every migration up to `20261122000300_notification_events`. No migrations are pending.
+- The remote QA setup for steps 6 and 7 is complete: the Turnstile widget, the Supabase captcha, anonymous sign-ins and the `TURNSTILE_SITE_KEY` variable in Coolify; the `TELEGRAM_BOT_TOKEN` secret, the `notify` function and the Vault values `notify_url` and `site_url` (`docs/deploy.md`).
+- Step 8 (account, my pets, custom requests) is next.
+
+## Later refinements
+
+Small items that do not block the next steps.
+
+- Remove the duplicate phone hint in the cart form.
+- Test "Descargar QR" on a real Android phone.
+- Extract the dialog opening helper (`DIALOG_CONFIG` and `open()`) repeated in four admin pages.
+- Replace the deprecated `auth.email.enable_signup` and `auth.sms.enable_signup` in `supabase/config.toml` with `auth.*.enabled`, checking that behaviour does not change.
+- Email notifications with Resend from an `avisos.<dominio>` subdomain.
 
 ## QA environment
 
@@ -525,7 +536,7 @@ Commands and dashboard paths are in `docs/deploy.md`.
 4. Google provider: in Google Cloud, add the redirect URI `https://<new-ref>.supabase.co/auth/v1/callback` to the OAuth client and remove the QA one. Publish the consent screen (Testing mode only lets listed test users sign in). Then enable Google in the Supabase dashboard with the client ID and secret.
 5. Authentication → Hooks: enable the custom access token hook with `public.custom_access_token_hook`.
 6. Turn on anonymous sign-ins together with Turnstile (Authentication → Attack Protection → CAPTCHA), as built in step 6.
-7. Notifications: set `TELEGRAM_BOT_TOKEN` with `supabase secrets set --env-file <file outside the repo>`, deploy with `supabase functions deploy notify --no-verify-jwt`, and in the SQL Editor create the Vault values `notify_url` (`https://<new-ref>.supabase.co/functions/v1/notify`) and `site_url` (`https://<domain>`). After step 8, add the channels from `/admin/notificaciones` and send a test.
+7. Notifications: set `TELEGRAM_BOT_TOKEN` with `supabase secrets set --env-file <file outside the repo>`, deploy with `supabase functions deploy notify --no-verify-jwt`, and in the SQL Editor create the Vault values `notify_url` (`https://<new-ref>.supabase.co/functions/v1/notify`) and `site_url` (`https://<domain>`). After item 8 (admin row), add the channels from `/admin/notificaciones` and send a test.
 8. The owner signs in with Google once, then add the admin row (`insert into public.user_roles ...`, see "Local admin user") and sign out and in again.
 9. Authentication → URL Configuration: Site URL `https://<domain>`, Redirect URLs `https://<domain>/**` and `https://www.<domain>/**`.
 10. Coolify: set the new `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` (and `SITE_URL` and `NG_ALLOWED_HOSTS` if the domain changes), then redeploy.
