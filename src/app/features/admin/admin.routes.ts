@@ -58,6 +58,12 @@ export const ADMIN_ROUTES: Routes = [
           import('./pages/admin-catalog-lists-page').then((m) => m.AdminCatalogListsPage),
       },
       {
+        path: 'notificaciones',
+        title: 'Notificaciones - Panel CutePet',
+        loadComponent: () =>
+          import('./pages/admin-notifications-page').then((m) => m.AdminNotificationsPage),
+      },
+      {
         path: 'historial',
         title: 'Historial - Panel CutePet',
         loadComponent: () => import('./pages/admin-audit-page').then((m) => m.AdminAuditPage),

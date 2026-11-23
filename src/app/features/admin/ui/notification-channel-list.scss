@@ -1,0 +1,62 @@
+ul {
+  display: grid;
+  gap: var(--cp-space-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+li {
+  display: grid;
+  gap: var(--cp-space-xs);
+  padding: var(--cp-space-md) var(--cp-space-sm) var(--cp-space-xs) var(--cp-space-md);
+  border: var(--cp-border-soft);
+  border-radius: var(--cp-radius);
+  background: var(--mat-sys-surface-container-lowest);
+}
+p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.title {
+  font: var(--mat-sys-title-small);
+}
+.inactive .title,
+.detail {
+  color: var(--mat-sys-on-surface-variant);
+}
+.detail {
+  font: var(--mat-sys-body-small);
+}
+.events {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cp-space-xs);
+}
+.badge {
+  padding: 0 var(--cp-space-sm);
+  border-radius: var(--cp-radius);
+  font: var(--mat-sys-label-small);
+  color: var(--cp-ink);
+  background: var(--mat-sys-surface-container-highest);
+}
+.title .badge {
+  margin-left: var(--cp-space-xs);
+}
+.error {
+  display: flex;
+  gap: var(--cp-space-xs);
+  align-items: flex-start;
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-error);
+}
+.error mat-icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: calc(-1 * var(--cp-space-sm));
+}

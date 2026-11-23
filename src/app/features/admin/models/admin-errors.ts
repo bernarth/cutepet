@@ -17,6 +17,7 @@ const MESSAGES_BY_CODE: Readonly<Record<string, string>> = {
   INVALID_STATUS: 'El pedido cambió de estado mientras tanto. Recarga la página.',
   PENDING_ORDER_EXISTS: 'Ese cliente ya tiene otro pedido pendiente de pago.',
   ORDER_NOT_FOUND: 'No encontramos ese pedido. Recarga la página.',
+  CHANNEL_NOT_FOUND: 'No encontramos ese canal. Recarga la página.',
   FORBIDDEN: 'Tu cuenta no tiene permiso para hacer esto. Vuelve a ingresar.',
 };
 

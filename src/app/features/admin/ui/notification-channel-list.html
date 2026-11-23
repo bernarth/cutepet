@@ -1,0 +1,55 @@
+<ul>
+  @for (channel of channels(); track channel.id) {
+    <li [class.inactive]="!channel.isActive">
+      <p class="title">
+        {{ channel.name }}
+        @if (!channel.isActive) {
+          <span class="badge">Inactivo</span>
+        }
+      </p>
+      <p class="detail">Telegram · chat ID {{ channel.chatId }}</p>
+      <p class="events">
+        @for (event of channel.events; track event) {
+          <span class="badge">{{ labels[event] }}</span>
+        }
+      </p>
+      @if (channel.lastError; as error) {
+        <p class="error">
+          <mat-icon aria-hidden="true">warning</mat-icon>
+          <span>Último envío falló: {{ error }}</span>
+        </p>
+      }
+      <div class="actions">
+        <button
+          mat-button
+          type="button"
+          [attr.aria-label]="'Editar ' + channel.name"
+          [disabled]="busy()"
+          (click)="edit.emit(channel.id)"
+        >
+          <mat-icon>edit</mat-icon>
+          Editar
+        </button>
+        <button
+          mat-button
+          type="button"
+          [attr.aria-label]="'Enviar prueba a ' + channel.name"
+          [disabled]="busy()"
+          (click)="sendTest.emit(channel.id)"
+        >
+          <mat-icon>send</mat-icon>
+          Enviar prueba
+        </button>
+        <button
+          mat-button
+          type="button"
+          [attr.aria-label]="(channel.isActive ? 'Desactivar ' : 'Activar ') + channel.name"
+          [disabled]="busy()"
+          (click)="toggleActive.emit(channel.id)"
+        >
+          {{ channel.isActive ? 'Desactivar' : 'Activar' }}
+        </button>
+      </div>
+    </li>
+  }
+</ul>

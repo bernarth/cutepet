@@ -513,7 +513,7 @@ Apply new migrations with `supabase migration up`, which keeps `auth.users` and 
 - QR alerts link to `/admin/configuracion`.
 - QR alerts are sent silently (Telegram `disable_notification`) because they go out at 00:05. Proof alerts are never silent, at any hour; there is no quiet hours logic.
 
-**Admin page `/admin/notificaciones`.** Mobile first. A list of channels with name, chat ID, event chips, an active toggle, "Editar", "Enviar prueba" and "Último envío falló: …" when the latest delivery failed. Add and edit in a dialog. "Enviar prueba" goes through the real path (outbox row → `notify`), and the chat ID field explains the `/start` requirement.
+**Admin page `/admin/notificaciones`.** Mobile first. A list of channels with name, chat ID, event badges, "Editar", "Enviar prueba", "Desactivar" or "Activar" (deactivating asks for confirmation; buttons like "Categorías y tallas" instead of a toggle, so a failed save never leaves the switch showing the wrong state) and "Último envío falló: …" when the latest delivery failed. Add and edit in a dialog. "Enviar prueba" goes through the real path (outbox row → `notify`), and the chat ID field explains the `/start` requirement.
 
 ### Step 10: launch checklist
 
