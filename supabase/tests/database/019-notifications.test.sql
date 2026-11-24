@@ -1,6 +1,10 @@
 begin;
 select plan(53);
 
+-- Real local channels must not change the results. The rollback at the end brings them back
+delete from public.notifications;
+delete from public.notification_channels;
+
 delete from vault.secrets where name in ('notify_url', 'site_url');
 select vault.create_secret('https://cutepet.test/', 'site_url');
 

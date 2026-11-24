@@ -1,6 +1,10 @@
 begin;
 select plan(20);
 
+-- Real local channels must not change the results. The rollback at the end brings them back
+delete from public.notifications;
+delete from public.notification_channels;
+
 select tests.create_user('admin@test.bo') as admin_id \gset
 select tests.create_user('customer@test.bo') as customer_id \gset
 select tests.create_guest() as guest_id \gset
