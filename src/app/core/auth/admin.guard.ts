@@ -6,7 +6,7 @@ import {
   ADMIN_SIGN_IN_PATH,
   RETURN_PATH_PARAM,
   adminReturnPath,
-} from './admin-return-path';
+} from './return-path';
 
 /**
  * @description UI convenience only. Real protection is RLS in the database.

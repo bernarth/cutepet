@@ -13,6 +13,7 @@ import { Session } from '@supabase/supabase-js';
 import { SUPABASE } from '@core/supabase/supabase.client';
 import { unwrap } from '@shared/data-access/supabase-result';
 import { accessTokenRole } from './access-token';
+import { RETURN_PATH_PARAM, SIGN_IN_CALLBACK_PATH } from './return-path';
 
 export type AppRole = 'admin' | 'customer';
 
@@ -80,20 +81,32 @@ export class AuthStore {
   }
 
   /**
-   * @description Starts Google sign-in, always showing Google's account picker. Google sends the user back to `returnPath` on the current site
-   * @param returnPath Path to open after sign-in, for example `/admin`
+   * @description Starts Google sign-in, always showing Google's account picker. Google sends the user back to the callback page
+   * @param returnPath Page to open after sign-in, for example `/admin`
    */
   async signInWithGoogle(returnPath: string): Promise<void> {
-    const redirectTo = new URL(returnPath, this.document.location.origin).toString();
+    const callback = new URL(SIGN_IN_CALLBACK_PATH, this.document.location.origin);
+    callback.searchParams.set(RETURN_PATH_PARAM, returnPath);
     unwrap<{ url: string | null }>(
       await this.supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo, queryParams: { prompt: 'select_account' } },
+        options: { redirectTo: callback.toString(), queryParams: { prompt: 'select_account' } },
       }),
     );
   }
 
+  /**
+   * @description Exchanges the code Google sign-in came back with. It only works in the browser that started the sign-in
+   */
+  async completeSignIn(code: string): Promise<void> {
+    const { session } = unwrap<{ session: Session | null }>(
+      await this.supabase.auth.exchangeCodeForSession(code),
+    );
+    this.session.set(session);
+  }
+
+  /** Other devices stay signed in */
   async signOut(): Promise<void> {
-    await this.supabase.auth.signOut();
+    await this.supabase.auth.signOut({ scope: 'local' });
   }
 }

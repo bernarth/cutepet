@@ -3,7 +3,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
-import { RETURN_PATH_PARAM, adminReturnPath } from '@core/auth/admin-return-path';
+import { RETURN_PATH_PARAM, adminReturnPath } from '@core/auth/return-path';
 import { AuthStore } from '@core/auth/auth.store';
 import { LoadingBar } from '@shared/ui/loading-bar';
 

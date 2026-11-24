@@ -1,4 +1,4 @@
-import { adminReturnPath } from './admin-return-path';
+import { adminReturnPath, signInReturnPath } from './return-path';
 
 describe('adminReturnPath', () => {
   it.each(['/admin', '/admin/pedidos', '/admin/pedidos/CP-1234', '/admin/notificaciones'])(
@@ -37,5 +37,31 @@ describe('adminReturnPath', () => {
 
   it('drops the query and the fragment, so sign-in tokens are never carried along', () => {
     expect(adminReturnPath('/admin/pedidos?code=abc#access_token=abc')).toBe('/admin/pedidos');
+  });
+});
+
+describe('signInReturnPath', () => {
+  it.each(['/mi-cuenta', '/mi-cuenta/pedido/abc', '/admin', '/admin/pedidos/CP-1234'])(
+    'keeps %s',
+    (path) => {
+      expect(signInReturnPath(path)).toBe(path);
+    },
+  );
+
+  it.each([
+    null,
+    '',
+    '/',
+    '/carrito',
+    '/mi-cuentas',
+    '/admin/ingresar',
+    '//evil.example/mi-cuenta',
+    '/mi-cuenta/../carrito',
+  ])('falls back to the account for %j', (path) => {
+    expect(signInReturnPath(path)).toBe('/mi-cuenta');
+  });
+
+  it('drops the query and the fragment', () => {
+    expect(signInReturnPath('/mi-cuenta?code=abc#access_token=abc')).toBe('/mi-cuenta');
   });
 });

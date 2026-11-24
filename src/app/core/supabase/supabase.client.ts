@@ -11,6 +11,7 @@ export type CutePetSupabase = SupabaseClient<Database>;
  * Single Supabase client for the whole app.
  * On the server (SSR) there is no session: it only reads public data (catalog, products),
  * which is enough for link previews and SEO. Sessions live only in the browser.
+ * The client never reads the address: only the sign-in callback page exchanges a code.
  */
 export const SUPABASE = new InjectionToken<CutePetSupabase>('SUPABASE', {
   providedIn: 'root',
@@ -22,7 +23,8 @@ export const SUPABASE = new InjectionToken<CutePetSupabase>('SUPABASE', {
       auth: {
         persistSession: isBrowser,
         autoRefreshToken: isBrowser,
-        detectSessionInUrl: isBrowser,
+        flowType: 'pkce',
+        detectSessionInUrl: false,
       },
     });
   },

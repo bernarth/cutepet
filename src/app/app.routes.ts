@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 
+import { signInLandingGuard } from '@core/auth/sign-in-landing.guard';
 import { Shell } from '@core/layout/shell';
 
 export const routes: Routes = [
@@ -10,6 +11,7 @@ export const routes: Routes = [
       {
         path: '',
         title: 'CutePet - Ropa para mascotas',
+        canActivate: [signInLandingGuard],
         loadComponent: () => import('@features/home/pages/home-page').then((m) => m.HomePage),
       },
       {
@@ -47,6 +49,12 @@ export const routes: Routes = [
           import('@features/custom-request/pages/custom-request-page').then(
             (m) => m.CustomRequestPage,
           ),
+      },
+      {
+        path: 'ingresar/google',
+        title: 'Ingresar con Google - CutePet',
+        loadComponent: () =>
+          import('@features/account/pages/google-sign-in-page').then((m) => m.GoogleSignInPage),
       },
       {
         path: 'mi-cuenta',
