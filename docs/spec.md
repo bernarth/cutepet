@@ -166,7 +166,7 @@ Small items that do not block the next steps.
 ## QA environment
 
 - Purpose: try the deployed site on real phones before launch. No real customers, orders or payments.
-- Runs on the owner's VPS with Coolify, behind Cloudflare, on the launch domain (`<domain>` and `www`). How to deploy: `docs/deploy.md`.
+- Runs on the owner's VPS with Coolify, behind Cloudflare, on the launch domain. The only host is `www.<domain>`; Cloudflare redirects `<domain>` to it with a 301. How to deploy: `docs/deploy.md`.
 - Uses its own free Supabase project (the QA project). It is deleted at launch and replaced by a new production project (step 10). The Docker image is the same; only the environment variables change.
 - `NO_INDEX=true` the whole time: `robots.txt` disallows everything and every response carries `noindex`.
 - Only test data. `supabase/seed.sql` is for the local stack and is never pushed. Products are added from the admin panel.
@@ -536,10 +536,10 @@ Commands and dashboard paths are in `docs/deploy.md`.
 4. Google provider: in Google Cloud, add the redirect URI `https://<new-ref>.supabase.co/auth/v1/callback` to the OAuth client and remove the QA one. Publish the consent screen (Testing mode only lets listed test users sign in). Then enable Google in the Supabase dashboard with the client ID and secret.
 5. Authentication → Hooks: enable the custom access token hook with `public.custom_access_token_hook`.
 6. Turn on anonymous sign-ins together with Turnstile (Authentication → Attack Protection → CAPTCHA), as built in step 6.
-7. Notifications: set `TELEGRAM_BOT_TOKEN` with `supabase secrets set --env-file <file outside the repo>`, deploy with `supabase functions deploy notify --no-verify-jwt`, and in the SQL Editor create the Vault values `notify_url` (`https://<new-ref>.supabase.co/functions/v1/notify`) and `site_url` (`https://<domain>`). After item 8 (admin row), add the channels from `/admin/notificaciones` and send a test.
+7. Notifications: set `TELEGRAM_BOT_TOKEN` with `supabase secrets set --env-file <file outside the repo>`, deploy with `supabase functions deploy notify --no-verify-jwt`, and in the SQL Editor create the Vault values `notify_url` (`https://<new-ref>.supabase.co/functions/v1/notify`) and `site_url` (`https://www.<domain>`). After item 8 (admin row), add the channels from `/admin/notificaciones` and send a test.
 8. The owner signs in with Google once, then add the admin row (`insert into public.user_roles ...`, see "Local admin user") and sign out and in again.
-9. Authentication → URL Configuration: Site URL `https://<domain>`, Redirect URLs `https://<domain>/**` and `https://www.<domain>/**`.
-10. Coolify: set the new `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` (and `SITE_URL` and `NG_ALLOWED_HOSTS` if the domain changes), then redeploy.
+9. Authentication → URL Configuration: Site URL `https://www.<domain>`, Redirect URLs `https://www.<domain>/**` only.
+10. Coolify: set the new `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` (and `SITE_URL`, `https://www.<domain>`, and `NG_ALLOWED_HOSTS` if the domain changes), then redeploy. Check that Cloudflare redirects `<domain>` to `www.<domain>` with a 301.
 11. Turn noindex off: `NO_INDEX=false`, redeploy, and check that `/robots.txt` allows everything and responses have no `x-robots-tag`.
 12. Point the keep-alive job to the production project.
 13. Upload product photos from the owner's phone (gallery and camera) on the deployed site.

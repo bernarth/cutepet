@@ -15,7 +15,7 @@ Placeholders: `<domain>` is the site domain, `<ref>` is the Supabase project ref
 
 | Variable                   | QA value                    | Notes                                                                                                                    |
 | -------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `SITE_URL`                 | `https://<domain>`          | Used for Open Graph URLs and the product links in WhatsApp messages                                                      |
+| `SITE_URL`                 | `https://www.<domain>`      | Used for Open Graph URLs and the product links in WhatsApp messages                                                      |
 | `SUPABASE_URL`             | `https://<ref>.supabase.co` |                                                                                                                          |
 | `SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_...`        | Dashboard → Project Settings → API Keys. The server refuses any value that does not start with `sb_publishable_`         |
 | `TURNSTILE_SITE_KEY`       | `0x4AAAAAA...`              | Cloudflare → Turnstile → the widget's **Site Key** (public). Its **Secret Key** goes only in Supabase (see below)        |
@@ -32,7 +32,7 @@ Placeholders: `<domain>` is the site domain, `<ref>` is the Supabase project ref
 2. **Repository:** `https://github.com/<user>/cutepet`, branch `main`.
 3. **Build pack:** **Dockerfile**, base directory `/`, Dockerfile location `/Dockerfile`.
 4. **Port:** Ports Exposes `4000`. Leave Ports Mappings empty, so the proxy is the only way in.
-5. **Domains:** `https://<domain>,https://www.<domain>`. Coolify asks Let's Encrypt for both certificates. Under the redirect option, choose to redirect `www` to the bare domain, so customers always land on one host.
+5. **Domains:** `https://<domain>,https://www.<domain>`. Coolify asks Let's Encrypt for both certificates. Under the redirect option, allow both `www` and the bare domain. Cloudflare does the redirect to `www` (below). Redirecting to the bare domain here would cause a loop.
 6. **Environment variables:** add the table above. Leave them as runtime variables: do not mark any as build variables (Coolify's "build time" option).
 7. **Deploy** and open the Logs. The last line must be `Node Express server listening on http://localhost:4000`.
 
@@ -63,7 +63,14 @@ Start with **DNS only**, so Let's Encrypt can reach the VPS and issue the first 
 4. Turn both records to **Proxied** (orange cloud).
 5. **SSL/TLS** → **Overview** → **Full (strict)**. Never "Flexible": it talks HTTP to the VPS and causes redirect loops.
 6. **SSL/TLS** → **Edge Certificates** → turn on **Always Use HTTPS**.
-7. Check again: site loads, the browser shows the Cloudflare certificate, and `curl -I https://<domain>/robots.txt` shows `x-robots-tag: noindex` during QA.
+7. Check again: site loads, the browser shows the Cloudflare certificate, and `curl -I https://www.<domain>/robots.txt` shows `x-robots-tag: noindex` during QA.
+8. Redirect the bare domain to `www`, the only host of the site: **Rules** → **Overview** → **Create rule** → **Redirect Rule**.
+   - **Rule name:** `Bare domain to www`
+   - **Custom filter expression:** `(http.host eq "<domain>" and not starts_with(http.request.uri.path, "/.well-known/acme-challenge/"))`. The exception leaves the Let's Encrypt renewal of the bare domain alone.
+   - **URL redirect:** type **Dynamic**, expression `concat("https://www.<domain>", http.request.uri.path)`, status code **301**, **Preserve query string** on. **Deploy**.
+   - Check: `curl -sI "https://<domain>/admin?a=1"` shows `301` and `location: https://www.<domain>/admin?a=1`.
+
+The session, the cart and the guest identity live in the browser storage of one host, so serving the site on two hosts splits them.
 
 - Let's Encrypt renewals keep working through the proxy. If one fails, set both records to DNS only, redeploy, and set them back to Proxied.
 - After changing an environment variable and redeploying, purge the Cloudflare cache if the browser still gets the old `/runtime-config.js`. It is sent with `Cache-Control: no-cache`.
@@ -72,8 +79,8 @@ Start with **DNS only**, so Let's Encrypt can reach the VPS and issue the first 
 
 **Authentication** → **URL Configuration** in the project used by this deployment:
 
-- **Site URL:** `https://<domain>`
-- **Redirect URLs:** `https://<domain>/**` and `https://www.<domain>/**`. Sign-in returns to the page where it started, on the same host.
+- **Site URL:** `https://www.<domain>`
+- **Redirect URLs:** `https://www.<domain>/**` only. A sign-in started on any other host is sent to the Site URL.
 
 Google sign-in keeps using the Supabase callback `https://<ref>.supabase.co/auth/v1/callback` as the redirect URI in Google Cloud. The domain does not change it.
 
@@ -130,7 +137,7 @@ Telegram alerts go through the `notify` Edge Function (spec, "Step 7"). Set it u
 
    ```sql
    select vault.create_secret('https://<ref>.supabase.co/functions/v1/notify', 'notify_url');
-   select vault.create_secret('https://<domain>', 'site_url');
+   select vault.create_secret('https://www.<domain>', 'site_url');
    ```
 
 4. Sign in as admin, open `/admin/notificaciones`, add the channels and press **Enviar prueba** on each one.
