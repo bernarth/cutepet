@@ -151,7 +151,7 @@ Payment gateway, invoicing, WhatsApp Business API, AI payment check (until enabl
 - Steps 1 to 7 are done and deployed to QA. Step 7 sends Telegram alerts only; email notifications (Resend, sending from an `avisos.<dominio>` subdomain) come later.
 - The QA project has every migration up to `20261122000300_notification_events`. No migrations are pending.
 - The remote QA setup for steps 6 and 7 is complete: the Turnstile widget, the Supabase captcha, anonymous sign-ins and the `TURNSTILE_SITE_KEY` variable in Coolify; the `TELEGRAM_BOT_TOKEN` secret, the `notify` function and the Vault values `notify_url` and `site_url` (`docs/deploy.md`).
-- Step 8 (account, my pets, custom requests) is next.
+- Step 8 (account, my pets, custom requests) is next. It includes switching Supabase Auth to the PKCE flow (`flowType: 'pkce'`) together with the Google sign-in and `linkIdentity` work. Today's implicit flow returns the session tokens in the address, where they can stay in the browser history and, on pages that do not load the Supabase client, in the address bar. Test on real phones: admin sign-in, guest checkout, linking a guest to Google, and a Google account that already exists.
 
 ## Later refinements
 
@@ -162,7 +162,6 @@ Small items that do not block the next steps.
 - Extract the dialog opening helper (`DIALOG_CONFIG` and `open()`) repeated in four admin pages.
 - Replace the deprecated `auth.email.enable_signup` and `auth.sms.enable_signup` in `supabase/config.toml` with `auth.*.enabled`, checking that behaviour does not change.
 - Email notifications with Resend from an `avisos.<dominio>` subdomain. Its DNS records must work with the SPF and DMARC records of the domain (`docs/deploy.md`).
-- Switch Supabase Auth to the PKCE flow (`flowType: 'pkce'` in `core/supabase`), best together with the Google sign-in work of step 8. Today's implicit flow returns the session tokens in the address, where they stay in the browser history and, on pages that do not load the Supabase client, in the address bar. Test on a real phone: admin sign-in, guest checkout, linking a guest to Google, and a Google account that already exists.
 
 ## QA environment
 
