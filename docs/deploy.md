@@ -68,12 +68,21 @@ Start with **DNS only**, so Let's Encrypt can reach the VPS and issue the first 
    - **Rule name:** `Bare domain to www`
    - **Custom filter expression:** `(http.host eq "<domain>" and not starts_with(http.request.uri.path, "/.well-known/acme-challenge/"))`. The exception leaves the Let's Encrypt renewal of the bare domain alone.
    - **URL redirect:** type **Dynamic**, expression `concat("https://www.<domain>", http.request.uri.path)`, status code **301**, **Preserve query string** on. **Deploy**.
-   - Check: `curl -sI "https://<domain>/admin?a=1"` shows `301` and `location: https://www.<domain>/admin?a=1`.
+   - Check: `curl -sI "https://<domain>/admin?a=1"` shows `301` and `location: https://www.<domain>/admin?a=1`, `curl -sI http://<domain>/` shows `301` to `www`, and `curl -sI https://www.<domain>/` shows `200`.
+9. Block email spoofing, because the domain sends no email yet. Two `TXT` records:
+   - `@` → `v=spf1 -all` (no server may send as `<domain>`)
+   - `_dmarc` → `v=DMARC1; p=reject;` (receivers reject mail that fails; subdomains inherit it)
 
 The session, the cart and the guest identity live in the browser storage of one host, so serving the site on two hosts splits them.
 
 - Let's Encrypt renewals keep working through the proxy. If one fails, set both records to DNS only, redeploy, and set them back to Proxied.
 - After changing an environment variable and redeploying, purge the Cloudflare cache if the browser still gets the old `/runtime-config.js`. It is sent with `Cache-Control: no-cache`.
+
+### When email is added (Resend on `avisos.<domain>`)
+
+- Keep both records above. Add Resend's records only under `avisos.<domain>`, exactly as its dashboard shows them.
+- SPF is not inherited by subdomains, so `v=spf1 -all` on `@` does not block Resend. Never add a second SPF record on `@`.
+- DMARC is inherited, so mail from `avisos.<domain>` is rejected unless SPF or DKIM passes for that domain. Send only from `@avisos.<domain>`, wait until Resend shows the domain as verified, and send a test that shows `dkim=pass` and `dmarc=pass` before turning email on.
 
 ## Supabase
 

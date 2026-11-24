@@ -161,7 +161,8 @@ Small items that do not block the next steps.
 - Test "Descargar QR" on a real Android phone.
 - Extract the dialog opening helper (`DIALOG_CONFIG` and `open()`) repeated in four admin pages.
 - Replace the deprecated `auth.email.enable_signup` and `auth.sms.enable_signup` in `supabase/config.toml` with `auth.*.enabled`, checking that behaviour does not change.
-- Email notifications with Resend from an `avisos.<dominio>` subdomain.
+- Email notifications with Resend from an `avisos.<dominio>` subdomain. Its DNS records must work with the SPF and DMARC records of the domain (`docs/deploy.md`).
+- Switch Supabase Auth to the PKCE flow (`flowType: 'pkce'` in `core/supabase`), best together with the Google sign-in work of step 8. Today's implicit flow returns the session tokens in the address, where they stay in the browser history and, on pages that do not load the Supabase client, in the address bar. Test on a real phone: admin sign-in, guest checkout, linking a guest to Google, and a Google account that already exists.
 
 ## QA environment
 
@@ -532,14 +533,14 @@ Commands and dashboard paths are in `docs/deploy.md`.
 
 1. Delete the QA Supabase project.
 2. Create the production project (free plan, region closest to Bolivia, e.g. São Paulo).
-3. Push the migrations to it (`supabase link`, dry run, `supabase db push`, `supabase migration list`). Never with `--include-seed`.
+3. Push the migrations to it (`supabase link`, then `supabase db push --remote --dry-run`, `supabase db push --remote` and `supabase migration list --remote`). Never with `--include-seed`.
 4. Google provider: in Google Cloud, add the redirect URI `https://<new-ref>.supabase.co/auth/v1/callback` to the OAuth client and remove the QA one. Publish the consent screen (Testing mode only lets listed test users sign in). Then enable Google in the Supabase dashboard with the client ID and secret.
 5. Authentication → Hooks: enable the custom access token hook with `public.custom_access_token_hook`.
 6. Turn on anonymous sign-ins together with Turnstile (Authentication → Attack Protection → CAPTCHA), as built in step 6.
 7. Notifications: set `TELEGRAM_BOT_TOKEN` with `supabase secrets set --env-file <file outside the repo>`, deploy with `supabase functions deploy notify --no-verify-jwt`, and in the SQL Editor create the Vault values `notify_url` (`https://<new-ref>.supabase.co/functions/v1/notify`) and `site_url` (`https://www.<domain>`). After item 8 (admin row), add the channels from `/admin/notificaciones` and send a test.
 8. The owner signs in with Google once, then add the admin row (`insert into public.user_roles ...`, see "Local admin user") and sign out and in again.
 9. Authentication → URL Configuration: Site URL `https://www.<domain>`, Redirect URLs `https://www.<domain>/**` only.
-10. Coolify: set the new `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` (and `SITE_URL`, `https://www.<domain>`, and `NG_ALLOWED_HOSTS` if the domain changes), then redeploy. Check that Cloudflare redirects `<domain>` to `www.<domain>` with a 301.
+10. Coolify: set the new `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` (and `SITE_URL`, `https://www.<domain>`, and `NG_ALLOWED_HOSTS` if the domain changes), then redeploy. Check that the Cloudflare rule "Bare domain to www" still answers 301, and that the SPF (`v=spf1 -all`) and DMARC (`p=reject`) records are still there. If the domain changes, create them again.
 11. Turn noindex off: `NO_INDEX=false`, redeploy, and check that `/robots.txt` allows everything and responses have no `x-robots-tag`.
 12. Point the keep-alive job to the production project.
 13. Upload product photos from the owner's phone (gallery and camera) on the deployed site.
