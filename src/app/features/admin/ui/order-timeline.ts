@@ -1,7 +1,7 @@
 import { Component, input } from '@angular/core';
 
 import { TimelineEvent } from '../models/order-timeline';
-import { DateTimePipe } from './date-time.pipe';
+import { DateTimePipe } from '@core/dates/date-time.pipe';
 
 @Component({
   selector: 'cp-order-timeline',

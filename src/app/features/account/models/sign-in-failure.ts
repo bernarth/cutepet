@@ -1,7 +1,7 @@
 import { AppError } from '@shared/data-access/supabase-result';
 
 export type SignInFailure =
-  'cancelled' | 'other_browser' | 'expired' | 'nothing_in_progress' | 'failed';
+  'cancelled' | 'other_browser' | 'expired' | 'nothing_in_progress' | 'account_exists' | 'failed';
 
 export const SIGN_IN_FAILURE_MESSAGES: Readonly<Record<SignInFailure, string>> = {
   cancelled: 'Cancelaste el ingreso con Google. Puedes intentarlo de nuevo cuando quieras.',
@@ -9,6 +9,8 @@ export const SIGN_IN_FAILURE_MESSAGES: Readonly<Record<SignInFailure, string>> =
     'Este ingreso empezó en otra pestaña o en otro navegador. Vuelve a intentarlo aquí.',
   expired: 'El ingreso con Google venció o ya se usó. Vuelve a intentarlo.',
   nothing_in_progress: 'No hay un ingreso en curso.',
+  account_exists:
+    'Esa cuenta de Google ya existe en CutePet, pero no pudimos ingresar. Inténtalo de nuevo para guardar tus pedidos.',
   failed: 'No pudimos completar el ingreso con Google. Inténtalo de nuevo.',
 };
 
@@ -19,6 +21,8 @@ const FAILURE_BY_CODE: Readonly<Record<string, SignInFailure>> = {
   flow_state_expired: 'expired',
   bad_oauth_state: 'expired',
   bad_oauth_callback: 'expired',
+  identity_already_exists: 'account_exists',
+  email_exists: 'account_exists',
 };
 
 /**

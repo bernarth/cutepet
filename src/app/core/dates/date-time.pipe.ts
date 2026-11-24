@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-import { formatDateTime } from '../models/date-format';
+import { formatDateTime } from './date-format';
 
 @Pipe({ name: 'dateTime' })
 export class DateTimePipe implements PipeTransform {

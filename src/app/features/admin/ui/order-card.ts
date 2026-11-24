@@ -5,8 +5,8 @@ import { RouterLink } from '@angular/router';
 import { PricePipe } from '@shared/pipes/price';
 import { AdminOrderSummary } from '../models/admin-order';
 import { DELIVERY_LABELS } from '@core/orders/customer-details';
-import { DateTimePipe } from './date-time.pipe';
-import { OrderStatusBadge } from './order-status-badge';
+import { DateTimePipe } from '@core/dates/date-time.pipe';
+import { OrderStatusBadge } from '@core/orders/order-status-badge';
 
 @Component({
   selector: 'cp-order-card',

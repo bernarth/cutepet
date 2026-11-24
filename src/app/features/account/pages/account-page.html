@@ -1,0 +1,61 @@
+<cp-page-header title="Mi cuenta" />
+<cp-loading-bar [active]="store.isLoading()" />
+
+<div aria-live="polite">
+  @if (transfer.notice(); as notice) {
+    <cp-transfer-notice-card
+      [notice]="notice"
+      [whatsappUrl]="store.lostOrdersUrl()"
+      (retry)="store.finishTransfer()"
+    />
+  }
+</div>
+
+@if (store.showSignInHelp()) {
+  <cp-sign-in-help
+    [hasOrders]="store.orders().length > 0"
+    [isBusy]="store.isBusy()"
+    (copyLink)="copyLink()"
+    (retry)="signIn()"
+  />
+}
+
+@switch (store.view()) {
+  @case ('visitor') {
+    <cp-visitor-panel
+      [whatsappUrl]="store.otherDeviceUrl()"
+      [isBusy]="store.isBusy()"
+      (signIn)="signIn()"
+    />
+  }
+  @case ('account') {
+    <div class="session">
+      <p class="email">{{ store.email() }}</p>
+      <button mat-stroked-button type="button" [disabled]="store.isBusy()" (click)="signOut()">
+        <mat-icon>logout</mat-icon>
+        Cerrar sesión
+      </button>
+    </div>
+  }
+}
+
+@if (store.hasSession()) {
+  <section aria-labelledby="orders-title">
+    <h2 id="orders-title">Mis pedidos</h2>
+    <cp-account-orders
+      [orders]="store.orders()"
+      [isLoading]="store.isLoading()"
+      [hasError]="store.hasOrdersError()"
+      (retry)="store.reloadOrders()"
+    />
+  </section>
+}
+
+@if (store.canKeepOrders()) {
+  <cp-keep-orders-panel
+    [hasOrders]="store.orders().length > 0"
+    [isBusy]="store.isBusy()"
+    (signIn)="signIn()"
+    (notMine)="signInWithoutOrders()"
+  />
+}

@@ -1,18 +1,17 @@
-import { Component, afterNextRender, computed, inject, signal } from '@angular/core';
+import { Component, afterNextRender, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
-import { AuthStore } from '@core/auth/auth.store';
-import { RETURN_PATH_PARAM, SIGN_IN_CALLBACK_PATH, signInReturnPath } from '@core/auth/return-path';
+import {
+  ACCOUNT_PATH,
+  RETURN_PATH_PARAM,
+  SIGN_IN_CALLBACK_PATH,
+  signInReturnPath,
+} from '@core/auth/return-path';
 import { EmptyState } from '@shared/ui/empty-state';
 import { LoadingBar } from '@shared/ui/loading-bar';
 import { PageHeader } from '@shared/ui/page-header';
-import {
-  SIGN_IN_FAILURE_MESSAGES,
-  SignInFailure,
-  addressFailure,
-  exchangeFailure,
-} from '../models/sign-in-failure';
+import { GoogleSignInStore } from '../data-access/google-sign-in.store';
 
 /**
  * @description Where Google sign-in comes back, for customers and admins. The code leaves the address before it is used
@@ -20,21 +19,29 @@ import {
 @Component({
   selector: 'cp-google-sign-in-page',
   imports: [RouterLink, MatButtonModule, PageHeader, LoadingBar, EmptyState],
+  providers: [GoogleSignInStore],
   template: `
     <cp-page-header title="Ingresar con Google" />
-    <cp-loading-bar [active]="isWorking()" label="Ingresando" />
+    <cp-loading-bar [active]="store.isWorking()" label="Ingresando" />
 
     <div aria-live="polite">
-      @if (message(); as text) {
+      @if (store.message(); as text) {
         <cp-empty-state icon="info" [message]="text">
-          @if (auth.isSignedIn()) {
-            <p class="email">{{ auth.user()?.email }}</p>
+          @if (store.isSignedIn()) {
+            <p class="email">{{ store.email() }}</p>
             <a mat-flat-button [routerLink]="returnPath" [replaceUrl]="true">Continuar</a>
-          } @else {
-            <button mat-flat-button type="button" [disabled]="isWorking()" (click)="signInAgain()">
-              Volver a intentarlo
+          } @else if (store.retryLabel(); as label) {
+            <button
+              mat-flat-button
+              type="button"
+              [disabled]="store.isWorking()"
+              (click)="store.retry(returnPath)"
+            >
+              {{ label }}
             </button>
             <a mat-button routerLink="/">Volver a la tienda</a>
+          } @else {
+            <a mat-flat-button [routerLink]="accountPath">Ir a Mi cuenta</a>
           }
         </cp-empty-state>
       }
@@ -47,49 +54,32 @@ import {
       color: var(--mat-sys-on-surface-variant);
     }
   `,
+  host: { '(window:pageshow)': 'onPageShow($event)' },
 })
 export class GoogleSignInPage {
-  protected readonly auth = inject(AuthStore);
+  protected readonly store = inject(GoogleSignInStore);
   private readonly router = inject(Router);
   private readonly query = inject(ActivatedRoute).snapshot.queryParamMap;
 
+  protected readonly accountPath = ACCOUNT_PATH;
   protected readonly returnPath = signInReturnPath(this.query.get(RETURN_PATH_PARAM));
-  protected readonly isWorking = signal(true);
-  private readonly failure = signal<SignInFailure | null>(null);
-  protected readonly message = computed(() => {
-    const failure = this.failure();
-    if (!failure) {
-      return null;
-    }
-    return this.auth.isSignedIn() ? 'Ya ingresaste con Google.' : SIGN_IN_FAILURE_MESSAGES[failure];
-  });
 
   constructor() {
     afterNextRender(() => void this.finish());
   }
 
-  protected async signInAgain(): Promise<void> {
-    this.isWorking.set(true);
-    try {
-      await this.auth.signInWithGoogle(this.returnPath);
-    } catch {
-      this.failure.set('failed');
-    } finally {
-      this.isWorking.set(false);
+  protected onPageShow(event: PageTransitionEvent): void {
+    if (event.persisted) {
+      this.store.resume(this.returnPath);
     }
   }
 
   private async finish(): Promise<void> {
     await this.cleanAddress();
-    await this.auth.ready;
-    const failure = await this.exchange();
 
-    if (failure === null) {
+    if (await this.store.finish(this.query)) {
       await this.router.navigateByUrl(this.returnPath, { replaceUrl: true });
-      return;
     }
-    this.failure.set(failure);
-    this.isWorking.set(false);
   }
 
   /**
@@ -100,19 +90,5 @@ export class GoogleSignInPage {
       queryParams: { [RETURN_PATH_PARAM]: this.returnPath },
       replaceUrl: true,
     });
-  }
-
-  private async exchange(): Promise<SignInFailure | null> {
-    const code = this.query.get('code');
-    if (!code) {
-      return addressFailure(this.query.get('error'), this.query.get('error_code'));
-    }
-
-    try {
-      await this.auth.completeSignIn(code);
-      return null;
-    } catch (error) {
-      return exchangeFailure(error);
-    }
   }
 }

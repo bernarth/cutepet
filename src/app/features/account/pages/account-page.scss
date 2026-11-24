@@ -1,0 +1,24 @@
+section {
+  margin-bottom: var(--cp-space-lg);
+}
+
+h2 {
+  margin: 0 0 var(--cp-space-sm);
+  font: var(--mat-sys-title-large);
+  font-family: var(--cp-font-display);
+}
+
+.session {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cp-space-sm);
+  margin-bottom: var(--cp-space-lg);
+}
+
+.email {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { FieldTree, form } from '@angular/forms/signals';
 
 import { SettingsFormModel, settingsSchema } from './settings-form';
-import { isoDate } from './date-format';
+import { isoDate } from '@core/dates/date-format';
 import { qrExpiryNotice, toSettingsForm } from './settings';
 
 const TODAY = '2026-11-18';

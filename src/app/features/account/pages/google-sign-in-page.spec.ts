@@ -5,6 +5,7 @@ import { RouterTestingHarness } from '@angular/router/testing';
 
 import { AuthStore } from '@core/auth/auth.store';
 import { AppError } from '@shared/data-access/supabase-result';
+import { AccountOrderRepository } from '../data-access/account-order.repository';
 import { GoogleSignInPage } from './google-sign-in-page';
 
 @Component({ template: 'blank' })
@@ -15,6 +16,7 @@ async function visit(url: string, options: { error?: unknown; signedIn?: boolean
     ready: Promise.resolve(),
     isSignedIn: signal(options.signedIn ?? false),
     user: signal(options.signedIn ? { email: 'ana@test.bo' } : null),
+    isGuest: signal(!options.signedIn),
     signInWithGoogle: vi.fn().mockResolvedValue(undefined),
     completeSignIn: options.error
       ? vi.fn().mockRejectedValue(options.error)
@@ -30,6 +32,7 @@ async function visit(url: string, options: { error?: unknown; signedIn?: boolean
         withComponentInputBinding(),
       ),
       { provide: AuthStore, useValue: auth },
+      { provide: AccountOrderRepository, useValue: {} },
     ],
   });
   const harness = await RouterTestingHarness.create(url);

@@ -12,6 +12,13 @@ describe('addressFailure', () => {
     expect(addressFailure('invalid_request', 'flow_state_expired')).toBe('expired');
   });
 
+  it.each(['identity_already_exists', 'email_exists'])(
+    'knows the account exists for %s',
+    (code) => {
+      expect(addressFailure('server_error', code)).toBe('account_exists');
+    },
+  );
+
   it('says nothing is in progress when the address has no error', () => {
     expect(addressFailure(null, null)).toBe('nothing_in_progress');
   });

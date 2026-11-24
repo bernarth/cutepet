@@ -23,6 +23,7 @@ begin
   perform set_config('request.jwt.claims', json_build_object(
     'sub', user_id,
     'role', 'authenticated',
+    'is_anonymous', false,
     'app_metadata', case when as_admin then json_build_object('role', 'admin') else '{}'::json end
   )::text, true);
   perform set_config('role', 'authenticated', true);

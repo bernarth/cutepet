@@ -67,4 +67,25 @@ describe('toTimeline', () => {
       'Venta rápida registrada',
     ]);
   });
+
+  it('explains that a guest order moved to an account, but not a deleted account', () => {
+    const [moved] = toTimeline([
+      entry({
+        oldData: { status: 'confirmed', customer_id: 'guest' },
+        newData: { status: 'confirmed', customer_id: 'account' },
+        reason: 'guest_orders_transferred',
+      }),
+    ]);
+
+    expect(moved.title).toBe('Pedido pasado a la cuenta del cliente');
+    expect(moved.reason).toBeNull();
+    expect(
+      toTimeline([
+        entry({
+          oldData: { status: 'confirmed', customer_id: 'account' },
+          newData: { status: 'confirmed', customer_id: null },
+        }),
+      ]),
+    ).toEqual([]);
+  });
 });

@@ -1,6 +1,6 @@
 import { Component, computed, input } from '@angular/core';
 
-import { ORDER_STATUS_LABELS, OrderStatus } from '@core/orders/order-status';
+import { ORDER_STATUS_LABELS, OrderStatus } from './order-status';
 
 @Component({
   selector: 'cp-order-status-badge',

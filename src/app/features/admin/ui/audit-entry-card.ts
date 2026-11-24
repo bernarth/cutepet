@@ -2,7 +2,7 @@ import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { AuditRow } from '../models/audit-row';
-import { DateTimePipe } from './date-time.pipe';
+import { DateTimePipe } from '@core/dates/date-time.pipe';
 
 @Component({
   selector: 'cp-audit-entry-card',

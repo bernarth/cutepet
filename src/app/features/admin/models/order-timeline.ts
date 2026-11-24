@@ -22,11 +22,17 @@ export function toTimeline(entries: readonly AuditEntry[]): TimelineEvent[] {
             title,
             actor: entry.actorLabel,
             at: entry.createdAt,
-            reason: entry.reason,
+            reason: isOwnerChange(entry) ? null : entry.reason,
           },
         ]
       : [];
   });
+}
+
+/** A guest's order moved to their Google account. The stored reason is a code the title already explains */
+function isOwnerChange({ action, oldData, newData }: AuditEntry): boolean {
+  const owner = newData?.['customer_id'];
+  return action === 'update' && Boolean(owner) && oldData?.['customer_id'] !== owner;
 }
 
 function eventTitle(entry: AuditEntry): string | null {
@@ -40,6 +46,9 @@ function eventTitle(entry: AuditEntry): string | null {
   }
   if (before['status'] !== after['status']) {
     return statusChangeTitle(before['status'], after['status']);
+  }
+  if (isOwnerChange(entry)) {
+    return 'Pedido pasado a la cuenta del cliente';
   }
   if (before['shipping_receipt_path'] !== after['shipping_receipt_path']) {
     return 'Guía de envío adjuntada';

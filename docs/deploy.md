@@ -99,6 +99,7 @@ Google sign-in keeps using the Supabase callback `https://<ref>.supabase.co/auth
 2. Supabase → **Authentication** → **Attack Protection** → **Enable CAPTCHA protection**: provider **Turnstile**, paste the **Secret Key**, save. The secret never goes in the repo or in Coolify.
 3. Supabase → **Authentication** → **Sign In / Providers** → turn on **Allow anonymous sign-ins**.
 4. Coolify: set `TURNSTILE_SITE_KEY` to the **Site Key** and redeploy.
+5. Supabase → **Authentication** → **Sign In / Providers**: turn on **Allow manual linking**. Without it a guest cannot keep their orders in a Google account.
 
 Turn on the captcha before anonymous sign-ins, so there is no moment when guests can be created without it. Locally, `supabase/config.toml` enables Turnstile and reads `SUPABASE_AUTH_CAPTCHA_SECRET` from `supabase/.env` (gitignored). Use Cloudflare's always-pass test secret there (developers.cloudflare.com/turnstile/troubleshooting/testing). The development build already uses the matching always-pass site key.
 

@@ -3,7 +3,7 @@ import { Service, computed, inject, linkedSignal, resource, signal } from '@angu
 import { AuditEntry } from '../models/audit-entry';
 import { AuditLookups } from '../models/audit-fields';
 import { toAuditRow } from '../models/audit-row';
-import { isoDate } from '../models/date-format';
+import { isoDate } from '@core/dates/date-format';
 import { AdminAuditRepository, AuditQuery } from './admin-audit.repository';
 import { AdminProductRepository } from './admin-product.repository';
 

@@ -576,6 +576,9 @@ isOneToOne: false
 "send_test_notification":
 { Args: { "channel_id": number }; Returns: number
                            },
+"start_guest_transfer":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           },
 "submit_payment_proof":
 { Args: { "order_id": string,"proof_path": string }; Returns: {
               "cancel_reason": string | null,
@@ -605,7 +608,12 @@ isOneToOne: false
         to: "orders"
         isOneToOne: true
         isSetofReturn: false
-      } }
+      } },
+"transfer_guest_orders":
+{ Args: { "transfer_token"?: string }; Returns: {
+              "moved_count": number,"outcome": string
+            }[]
+                           }
           }
           Enums: {
             "app_role": "admin","catalog_status": "available"|"reserved"|"sold_out","delivery_method": "pickup_point"|"bus_parcel","notification_channel_type": "telegram"|"email","notification_event": "proof_uploaded"|"qr_expiry"|"channel_test","notification_status": "pending"|"sending"|"sent"|"failed","order_channel": "web"|"whatsapp","order_status": "pending_payment"|"proof_uploaded"|"confirmed"|"ready_for_pickup"|"shipped"|"delivered"|"cancelled"

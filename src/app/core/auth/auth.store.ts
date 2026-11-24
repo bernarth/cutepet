@@ -8,14 +8,19 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { Session } from '@supabase/supabase-js';
+import { Session, SignInWithOAuthCredentials } from '@supabase/supabase-js';
 
 import { SUPABASE } from '@core/supabase/supabase.client';
 import { unwrap } from '@shared/data-access/supabase-result';
 import { accessTokenRole } from './access-token';
 import { RETURN_PATH_PARAM, SIGN_IN_CALLBACK_PATH } from './return-path';
+import { SignInAttempt, SignInAttemptStorage } from './sign-in-attempt';
 
 export type AppRole = 'admin' | 'customer';
+
+interface OAuthStart {
+  readonly url: string | null;
+}
 
 /**
  * @description Session state for the whole app.
@@ -28,6 +33,7 @@ export class AuthStore {
   private readonly supabase = inject(SUPABASE);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly document = inject(DOCUMENT);
+  private readonly attempt = inject(SignInAttemptStorage);
 
   private readonly session = signal<Session | null>(null);
 
@@ -85,13 +91,31 @@ export class AuthStore {
    * @param returnPath Page to open after sign-in, for example `/admin`
    */
   async signInWithGoogle(returnPath: string): Promise<void> {
-    const callback = new URL(SIGN_IN_CALLBACK_PATH, this.document.location.origin);
-    callback.searchParams.set(RETURN_PATH_PARAM, returnPath);
-    unwrap<{ url: string | null }>(
-      await this.supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: callback.toString(), queryParams: { prompt: 'select_account' } },
-      }),
+    this.attempt.save({ kind: 'signing_in' });
+    unwrap<OAuthStart>(await this.supabase.auth.signInWithOAuth(this.google(returnPath, true)));
+  }
+
+  /**
+   * @description Turns the current guest into a Google account, which keeps the guest's orders
+   */
+  async linkGoogle(returnPath: string): Promise<void> {
+    this.attempt.save({ kind: 'linking' });
+    unwrap<OAuthStart>(await this.supabase.auth.linkIdentity(this.google(returnPath, true)));
+  }
+
+  /**
+   * @description Second trip to Google when the account already exists. Without the picker Google usually passes
+   * straight through
+   * @param transfer What the guest takes to that account
+   */
+  async signInToTransfer(
+    returnPath: string,
+    transfer: Extract<SignInAttempt, { kind: 'transferring' }>,
+    showPicker: boolean,
+  ): Promise<void> {
+    this.attempt.save(transfer);
+    unwrap<OAuthStart>(
+      await this.supabase.auth.signInWithOAuth(this.google(returnPath, showPicker)),
     );
   }
 
@@ -107,6 +131,20 @@ export class AuthStore {
 
   /** Other devices stay signed in */
   async signOut(): Promise<void> {
+    this.attempt.clear();
     await this.supabase.auth.signOut({ scope: 'local' });
+  }
+
+  private google(returnPath: string, showPicker: boolean): SignInWithOAuthCredentials {
+    const callback = new URL(SIGN_IN_CALLBACK_PATH, this.document.location.origin);
+    callback.searchParams.set(RETURN_PATH_PARAM, returnPath);
+
+    return {
+      provider: 'google',
+      options: {
+        redirectTo: callback.toString(),
+        ...(showPicker && { queryParams: { prompt: 'select_account' } }),
+      },
+    };
   }
 }
