@@ -1,8 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
+import { RETURN_PATH_PARAM, adminReturnPath } from '@core/auth/admin-return-path';
 import { AuthStore } from '@core/auth/auth.store';
 import { LoadingBar } from '@shared/ui/loading-bar';
 
@@ -20,7 +21,7 @@ import { LoadingBar } from '@shared/ui/loading-bar';
       @if (isReady()) {
         @if (auth.isAdmin()) {
           <p>Ya ingresaste al panel.</p>
-          <a mat-flat-button routerLink="/admin">Ir al panel</a>
+          <a mat-flat-button [routerLink]="returnPath">Ir al panel</a>
         } @else if (auth.isSignedIn()) {
           <p>Tu cuenta no tiene acceso al panel.</p>
           <p class="email">{{ auth.user()?.email }}</p>
@@ -91,6 +92,9 @@ export class AdminSignInPage {
   protected readonly isReady = signal(false);
   protected readonly isBusy = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+  protected readonly returnPath = adminReturnPath(
+    inject(ActivatedRoute).snapshot.queryParamMap.get(RETURN_PATH_PARAM),
+  );
 
   constructor() {
     void this.auth.ready.then(() => this.isReady.set(true));
@@ -98,7 +102,7 @@ export class AdminSignInPage {
 
   protected async signIn(): Promise<void> {
     await this.run(
-      () => this.auth.signInWithGoogle('/admin'),
+      () => this.auth.signInWithGoogle(this.returnPath),
       'No se pudo abrir el ingreso con Google',
     );
   }
@@ -106,7 +110,7 @@ export class AdminSignInPage {
   protected async useAnotherAccount(): Promise<void> {
     await this.run(async () => {
       await this.auth.signOut();
-      await this.auth.signInWithGoogle('/admin');
+      await this.auth.signInWithGoogle(this.returnPath);
     }, 'No se pudo cambiar de cuenta');
   }
 
